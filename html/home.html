@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><script node>getAsset("title")</script>node>: 404</title>
+		<script node>getAsset("logo")</script>node>
+		<script node>getAsset("meta")</script>node>
+		<script node>getAsset("fonts")</script>node>
+		<script node>getAsset("css-variables")</script>node>
+		<link rel="stylesheet" href="main.css"/>
+		<link rel="stylesheet" href="home.css"/>
+		<script src="home.js" defer></script>
+	</head>
+	<body>
+		<div id="container">
+			<h1 id="heading"><script node>getAsset("title")</script>node></h1>
+			<form id="new-game-form" method="post" action="javascript:;">
+				<button id="new-game-button">new game</button>
+			</form>
+			<form id="join-game-form" method="post" action="javascript:;">
+				<input type="text" placeholder="game id" id="game-id-input" autocomplete="off"/>
+				<input type="text" placeholder="name" id="name-input" autocomplete="off"/>
+				<button id="join-game-button">join</button>
+			</form>
+		</div>
+		<a id="j-logo" href="https://jamesmayr.com" target="_blank"></a>
+		<details id="about">
+			<summary id="about-button">About</summary>
+			<div id="about-overlay">
+				<h2>What is this?</h2>
+				<p></p>
+				<h2>Gameplay</h2>
+				<p></p>
+				<h2>Creators</h2>
+				<p></p>
+			</div>
+		</details>
+	</body>
+</html>

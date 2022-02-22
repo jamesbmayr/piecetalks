@@ -1,0 +1,175 @@
+/*** page ***/
+	/* html */
+		html {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		body {
+			background-color: var(--dark-gray);
+			position: absolute;
+			margin: 0;
+			padding: 0;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			font-family: var(--font-0);
+			font-size: 0;
+		}
+
+		body[grabbing=true] {
+			cursor: grabbing;
+		}
+
+		body[grabbing=true] * {
+			cursor: grabbing;
+		}
+
+/*** elements ***/
+	/* scrollbars */
+		::-webkit-scrollbar {
+			height: 0 !important;
+			width: 0 !important;
+		}
+
+		::-moz-scrollbar {
+			height: 0 !important;
+			width: 0 !important;
+		}
+
+		::-o-scrollbar {
+			height: 0 !important;
+			width: 0 !important;
+		}
+
+		* {
+			scrollbar-width: none;
+			scrollbar-height: none;
+		}
+
+	/* headings & text */
+		h1 {
+
+		}
+
+		h2 {
+
+		}
+
+		h3 {
+
+		}
+
+		h4 {
+
+		}
+
+		p {
+			
+		}
+
+	/* form */
+		form {
+
+		}
+
+	/* inputs */
+		input {
+
+		}
+
+		input:focus {
+
+		}
+
+		input[readonly], buton[disabled], select[readonly] {
+			user-select: none !important;
+			-webkit-user-select: none !important;
+			-moz-user-select: none !important;
+			-ms-user-select: none !important;
+			-o-user-select: none !important;
+			pointer-events: none;
+		}
+
+	/* button */
+		button {
+
+		}
+
+		button:hover, button:focus {
+
+		}
+
+	/* select */
+		select {
+
+		}
+
+		select:hover, select:focus {
+
+		}
+
+	/* link */
+		a, a:visited {
+
+		}
+
+		a:hover, a:focus {
+
+		}
+
+	/* label */
+		label {
+
+		}
+
+	/* other */
+
+/*** error / toast ***/
+	#toast {
+		position: absolute;
+		top: var(--large-gap-size);
+		left: 50%;
+		transform: translateX(-50%);
+		width: auto;
+		text-align: center;
+		font-size: var(--medium-font-size);
+		padding: var(--medium-gap-size);
+		color: var(--light-gray);
+		background-color: var(--medium-blue);
+		border-radius: var(--border-radius);
+		box-shadow: 0 0 var(--shadow-size) var(--light-gray);
+		user-select: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		-o-user-select: none;
+		z-index: 1000;
+		overflow: hidden;
+		transition: var(--transition-time);
+	}
+
+	/* colors */
+		#toast[success=true] {
+			background-color: var(--medium-green);
+		}
+
+		#toast[success=false] {
+			background-color: var(--medium-red);
+		}
+
+/*** status ***/
+	/* visibility */
+		*[visibility=false] {
+			pointer-events: none;
+			opacity: 0 !important;
+			font-size: 0px !important;
+			margin: 0px !important;
+			padding: 0px !important;
+			border: 0px !important;
+		}
