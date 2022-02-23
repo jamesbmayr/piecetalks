@@ -6,7 +6,7 @@
 
 	const CORE    = require("./node/core")
 	const HOME    = require("./node/home")
-	const GAME    = require("./node/game")
+	const ROOM    = require("./node/room")
 	const SESSION = require("./node/session")
 
 /*** constants ***/
@@ -147,11 +147,11 @@
 									catch (error) {_404(REQUEST, RESPONSE, error)}
 								break
 
-							// game
-								case (/^\/game\/[a-zA-Z0-9]{4}$/).test(REQUEST.url):
+							// room
+								case (/^\/room\/[a-zA-Z0-9]{4}$/).test(REQUEST.url):
 									try {
 										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
-										CORE.renderHTML(REQUEST, "./html/game.html", function (html) {
+										CORE.renderHTML(REQUEST, "./html/room.html", function (html) {
 											RESPONSE.end(html)
 										})
 									}
@@ -185,22 +185,22 @@
 					else if (REQUEST.method == "POST" && REQUEST.post.action) {
 						switch (REQUEST.post.action) {
 							// home
-								// createGame
-									case "createGame":
+								// createRoom
+									case "createRoom":
 										try {
 											RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
-											GAME.createOne(REQUEST, function (data) {
+											ROOM.createOne(REQUEST, function (data) {
 												RESPONSE.end(JSON.stringify(data))
 											})
 										}
 										catch (error) {_403(REQUEST, RESPONSE, error)}
 									break
 
-								// joinGame
-									case "joinGame":
+								// joinRoom
+									case "joinRoom":
 										try {
 											RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
-											GAME.joinOne(REQUEST, function (data) {
+											ROOM.joinOne(REQUEST, function (data) {
 												RESPONSE.end(JSON.stringify(data))
 											})
 										}
@@ -298,13 +298,13 @@
 	/* saveSocket */
 		function saveSocket(REQUEST) {
 			try {
-				// on connect - save connection & fetch game
+				// on connect - save connection & fetch room
 					if (!CONNECTIONS[REQUEST.session.id]) {
 						CONNECTIONS[REQUEST.session.id] = {}
 					}
 					CONNECTIONS[REQUEST.session.id][REQUEST.path[REQUEST.path.length - 1]] = REQUEST.connection
-					sendSocketData({gameId: REQUEST.path[REQUEST.path.length - 1], success: true, message: "connected", recipients: [REQUEST.session.id]})
-					GAME.readOne(REQUEST, sendSocketData)
+					sendSocketData({roomId: REQUEST.path[REQUEST.path.length - 1], success: true, message: "connected", recipients: [REQUEST.session.id]})
+					ROOM.readOne(REQUEST, sendSocketData)
 
 				// on close
 					REQUEST.connection.on("close", function (reasonCode, description) {
@@ -341,14 +341,15 @@
 		function routeSocket(REQUEST) {
 			try {
 				switch (REQUEST.post.action) {
-					// game
-						case "updateOption":
-						case "updateObject":
+					// room
+						case "updateRoom":
+						case "updateConfiguration":
 						case "updatePlayer":
+						case "updateObject":
 						case "startGame":
 						case "endGame":
 							try {
-								GAME.updateOne(REQUEST, sendSocketData)
+								ROOM.updateOne(REQUEST, sendSocketData)
 							}
 							catch (error) {_400(REQUEST, "unable to " + REQUEST.post.action)}
 						break
@@ -366,7 +367,7 @@
 		function sendSocketData(data) {
 			try {
 				// hunt down errors
-					if (!data.recipients || !data.gameId) {
+					if (!data.recipients || !data.roomId) {
 						return
 					}
 
@@ -375,14 +376,14 @@
 					delete data.recipients
 
 				// stringify
-					gameId = data.gameId
+					roomId = data.roomId
 					data = JSON.stringify(data)
 
 				// loop through recipients
 					for (let r in recipients) {
 						try {
-							if (CONNECTIONS[recipients[r]] && CONNECTIONS[recipients[r]][gameId]) {
-								CONNECTIONS[recipients[r]][gameId].sendUTF(data)
+							if (CONNECTIONS[recipients[r]] && CONNECTIONS[recipients[r]][roomId]) {
+								CONNECTIONS[recipients[r]][roomId].sendUTF(data)
 							}
 						}
 						catch (error) {CORE.logError(error)}

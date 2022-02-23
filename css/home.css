@@ -9,15 +9,15 @@
 		}
 
 	/* form */
-		#new-game-form, #join-game-form {
+		#new-room-form, #join-room-form {
 
 		}
 
-		#new-game-button {
+		#new-room-button {
 
 		}
 
-		#game-id-input {
+		#room-id-input {
 
 		}
 
@@ -25,7 +25,7 @@
 
 		}
 
-		#join-game-button {
+		#join-room-button {
 			
 		}
 

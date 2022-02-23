@@ -66,7 +66,7 @@
 						debug:  process.env.DEBUG || false,
 						db: {
 							sessions: {},
-							games: {}
+							rooms: {}
 						},
 						ws_config: {
 							autoAcceptConnections: false
@@ -80,7 +80,7 @@
 						debug:  true,
 						db: {
 							sessions: {},
-							games: {}
+							rooms: {}
 						},
 						ws_config: {
 							autoAcceptConnections: false
@@ -207,7 +207,7 @@
 								id: generateRandom(),
 								updated: new Date().getTime(),
 								playerId: null,
-								gameId: null,
+								roomId: null,
 								info: {
 									"ip":         null,
 									"user-agent": null,
@@ -222,41 +222,76 @@
 								id: generateRandom(),
 								sessionId: null,
 								name: null,
-								isAdmin: false,
-								role: null
+								isHost: false,
+								role: "spectator",
+								objects: {}
 							}
 						break
 
-						case "game":
+						case "room":
 							return {
-								id: generateRandom(null, getAsset("constants").gameIdLength).toLowerCase(),
+								id: generateRandom(null, getAsset("constants").roomIdLength).toLowerCase(),
 								created: new Date().getTime(),
 								updated: new Date().getTime(),
 								status: {
+									name: "unnamed room",
 									startTime: null,
 									endTime: null,
 									timeRemaining: null,
 									play: false
 								},
-								settings: {
-									timeLimit: null,
-									x: 0,
-									y: 0,
-									grid: false,
-									gridLabels: false,
-									backgroundImage: null,
-									backgroundMarkers: [],
-									objectCount: 0,
-									objectColors: [],
-									objectBorders: false,
-									objectBorderColors: [],
-									objectShapes: [],
-									objectSizes: [],
-									objectOpacities: []
+								configuration: {
+									preset: "custom",
+									timer: {
+										active: false,
+										seconds: 0
+									},
+									board: {
+										x: 0,
+										y: 0,
+										grid: false,
+										coordinates: false,
+										background: {name: "none", value: "transparent"}
+									},
+									objects: {
+										count: 0,
+										unused: 0,
+										overlap: false,
+										translucent: false,
+										borders: false,
+										labels: false,
+										sizes: [],
+										shapes: [],
+										colors: []
+									}
 								},
-								objects: {},
 								players: {},
 								spectators: {}
+							}
+						break
+
+					// small structures
+						case "object":
+							return {
+								id: generateRandom(),
+								position: {
+									x: null,
+									y: null,
+									z: null
+								},
+								target: {
+									x: null,
+									y: null
+								},
+								size: {
+									x: 0,
+									y: 0
+								},
+								shape: null,
+								color: null,
+								border: null,
+								label: null,
+								translucent: false
 							}
 						break
 
@@ -324,6 +359,7 @@
 								return `<style>:root {` + output = `}</style>`
 						break
 
+					// styling
 						case "colors":
 							return {
 								"light-gray": "#dddddd",
@@ -367,13 +403,7 @@
 							}
 						break
 
-					// gameplay
-						case "shapes":
-							return {
-
-							}
-						break
-
+					// constants
 						case "constants":
 							return {
 								alphabet: "abcdefghijklmnopqrstuvwxyz",
@@ -382,13 +412,198 @@
 								second: 1000,
 								cookieLength: 1000 * 60 * 60 * 24 * 7,
 								minimumPlayers: 2,
-								maximumPlayers: 8,
+								maximumPlayers: 9,
 								minimumNameLength: 3,
 								maximumNameLength: 16,
-								gameIdLength: 4,
+								roomIdLength: 4,
 								rounding: 100,
-								minimumGridSize: 2,
-								maximumGridSize: 10
+								roles: ["informer", "actor", "spectator"]
+							}
+						break
+
+					// play
+						case "configurations":
+							return {
+								board: {
+									x: {
+										minimum: 2,
+										maximum: 10
+									},
+									y: {
+										minimum: 2,
+										maximum: 10
+									}
+								},
+								backgrounds: {
+									"none": "transparent",
+									"horizontal color gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
+									"vertical color gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
+									"radial color gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
+									"horizontal grayscale gradient": "linear-gradient(to right, white, black)",
+									"vertical grayscale gradient": "linear-gradient(white, black)",
+									"radial grayscale gradient": "radial-gradient(white, black)"
+								}
+								count: {
+									minimum: 1,
+									maximum: 100
+								},
+								unused: {
+									minimum: 0,
+									maximum: 100
+								},
+								sizes: {
+									"1x1": {x: 1, y: 1},
+									"2x2": {x: 2, y: 2},
+									"3x3": {x: 3, y: 3}
+								},
+								shapes: {
+									"circle": "circle(50%)",
+									"triangle up": "polygon(50% 0%, 100% 100%, 0% 100%)",
+									"triangle down": "polygon(0% 0%, 100% 0%, 50% 100%)",
+									"triangle left": "polygon(100% 0%, 100% 100%, 0% 50%)",
+									"triangle right": "polygon(0% 0%, 100% 50%, 0% 100%)",
+									"square": "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+									"diamond": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+									"rectangle horizontal": "polygon(0% 20%, 100% 20%, 100% 80%, 0% 80%)",
+									"rectangle vertical": "polygon(20% 0%, 80% 0%, 80% 100%, 20% 100%)",
+									"rhombus positive": "polygon(25% 25%, 100% 0%, 75% 75%, 0% 100%)",
+									"rhombus negative": "polygon(0% 0%, 75% 25%, 100% 100%, 25% 75%)",
+									"chevron up": "polygon(0% 100%, 50% 0%, 100% 100%, 50% 75%)",
+									"chevron down": "polygon(0% 0%, 50% 25%, 100% 0%, 50% 100%)",
+									"chevron left": "polygon(0% 0%, 100% 50%, 0% 100%, 25% 50%)",
+									"chevron right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
+									"hexagon horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
+									"hexagon vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
+									"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+									"octagon diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
+									"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
+									"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
+									"x": "polygon(0% 0%, 20% 0%, 50% 30%, 80% 0%, 100% 0%, 100% 20%, 70% 50%, 100% 80%, 100% 100%, 80% 100%, 50% 70%, 20% 100%, 0% 100%, 0% 80%, 30% 50%, 0% 20%)",
+									"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
+								},
+								colors: getAsset("colors"),
+								presets: {
+									easy: {
+										timer: {
+											active: false,
+											seconds: 0
+										},
+										board: {
+											x: 3,
+											y: 3,
+											grid: true,
+											coordinates: true,
+											background: null
+										},
+										objects: {
+											count: 5,
+											unused: 0,
+											overlap: false,
+											translucent: false,
+											borders: false,
+											labels: true,
+											sizes: ["1x1"],
+											shapes: ["circle", "triangle up", "square", "octagon", "cross", "8-point star"],
+											colors: ["dark-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
+										}
+									},
+									medium: {
+										timer: {
+											active: false,
+											seconds: 0
+										},
+										board: {
+											x: 5,
+											y: 5,
+											grid: true,
+											coordinates: false,
+											background: "horizontal grayscale gradient"
+										},
+										objects: {
+											count: 10,
+											unused: 0,
+											overlap: false,
+											translucent: false,
+											borders: true,
+											labels: false,
+											sizes: ["1x1"],
+											shapes: ["circle", "triangle up", "square", "diamond", "rectangle horizontal", "hexagon horizontal", "octagon", "cross", "8 point star"],
+											colors: ["dark-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
+										}
+									},
+									challenging: {
+										timer: {
+											active: true,
+											seconds: 300
+										},
+										board: {
+											x: 6,
+											y: 6,
+											grid: true,
+											coordinates: false,
+											background: "vertical grayscale gradient"
+										},
+										objects: {
+											count: 15,
+											unused: 5,
+											overlap: false,
+											translucent: false,
+											borders: true,
+											labels: false,
+											sizes: ["1x1", "2x2"],
+											shapes: ["circle", "triangle up", "triangle down", "square", "diamond", "rectangle horizontal", "rectangle vertical", "hexagon horizontal", "hexagon vertical", "octagon", "cross", "x", "8 point star"],
+											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+										}
+									},
+									difficult: {
+										timer: {
+											active: true,
+											seconds: 300
+										},
+										board: {
+											x: 8,
+											y: 8,
+											grid: false,
+											coordinates: false,
+											background: "vertical color gradient"
+										},
+										objects: {
+											count: 20,
+											unused: 10,
+											overlap: true,
+											translucent: false,
+											borders: true,
+											labels: false,
+											sizes: ["1x1", "2x2"],
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "cross", "x", "8 point star"],
+											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+										}
+									},
+									insane: {
+										timer: {
+											active: true,
+											seconds: 300
+										},
+										board: {
+											x: 10,
+											y: 10,
+											grid: false,
+											coordinates: false,
+											background: "radial color gradient"
+										},
+										objects: {
+											count: 25,
+											unused: 25,
+											overlap: true,
+											translucent: true,
+											borders: true,
+											labels: false,
+											sizes: ["1x1", "2x2", "3x3"],
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "8 point star"],
+											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
+										}
+									}
+								}
 							}
 						break
 

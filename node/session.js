@@ -98,8 +98,8 @@
 					if (REQUEST.updateSession && REQUEST.updateSession.playerId) {
 						query.document.playerId = REQUEST.updateSession.playerId
 					}
-					if (REQUEST.updateSession && REQUEST.updateSession.gameId) {
-						query.document.gameId = REQUEST.updateSession.gameId
+					if (REQUEST.updateSession && REQUEST.updateSession.roomId) {
+						query.document.roomId = REQUEST.updateSession.roomId
 					}
 
 				// update

@@ -27,14 +27,14 @@
 						player.sessionId = REQUEST.session.id
 						player.name = REQUEST.post.name.trim()
 
-					let game = CORE.getSchema("game")
-						game.players[player.id] = player
+					let room = CORE.getSchema("room")
+						room.players[player.id] = player
 
 				// query
 					let query = CORE.getSchema("query")
-						query.collection = "games"
+						query.collection = "rooms"
 						query.command = "insert"
-						query.document = game
+						query.document = room
 
 				// insert
 					CORE.accessDatabase(query, function(results) {
@@ -46,11 +46,11 @@
 						// update session
 							REQUEST.updateSession = {
 								playerId: player.id,
-								gameId: game.id
+								roomId: room.id
 							}
 							SESSION.updateOne(REQUEST, null, function() {
 								// redirect
-									callback({success: true, message: "game created", location: "../game/" + game.id})
+									callback({success: true, message: "room created", location: "../room/" + room.id})
 							})
 					})
 			}
@@ -75,32 +75,32 @@
 						return
 					}
 
-				// game id
-					if (!REQUEST.post.gameId || REQUEST.post.gameId.length !== CONSTANTS.gameIdLength || !CORE.isNumLet(REQUEST.post.gameId)) {
-						callback({success: false, message: "gameId must be " + CONSTANTS.gameIdLength + " letters and numbers"})
+				// room id
+					if (!REQUEST.post.roomId || REQUEST.post.roomId.length !== CONSTANTS.roomIdLength || !CORE.isNumLet(REQUEST.post.roomId)) {
+						callback({success: false, message: "roomId must be " + CONSTANTS.roomIdLength + " letters and numbers"})
 						return
 					}
 
 				// query
-					REQUEST.post.gameId = REQUEST.post.gameId.toLowerCase()
+					REQUEST.post.roomId = REQUEST.post.roomId.toLowerCase()
 					let query = CORE.getSchema("query")
-						query.collection = "games"
+						query.collection = "rooms"
 						query.command = "find"
-						query.filters = {id: REQUEST.post.gameId}
+						query.filters = {id: REQUEST.post.roomId}
 
 				// find
 					CORE.accessDatabase(query, function(results) {
 						// not found
 							if (!results.success) {
-								callback({success: false, message: "no game found"})
+								callback({success: false, message: "no room found"})
 								return
 							}
 
 						// already a player
-							let game = results.documents[0]
-							let playerKeys = Object.keys(game.players)
-							if (playerKeys.find(function(p) { return game.players[p].sessionId == REQUEST.session.id })) {
-								callback({success: true, message: "rejoining game", location: "../game/" + game.id})
+							let room = results.documents[0]
+							let playerKeys = Object.keys(room.players)
+							if (playerKeys.find(function(p) { return room.players[p].sessionId == REQUEST.session.id })) {
+								callback({success: true, message: "rejoining room", location: "../room/" + room.id})
 								return
 							}
 
@@ -115,23 +115,23 @@
 								player.sessionId = REQUEST.session.id
 
 						// name taken
-							if (playerKeys.find(function(p) { return game.players[p].name.trim().toLowerCase() == REQUEST.post.name.trim().toLowerCase() })) {
+							if (playerKeys.find(function(p) { return room.players[p].name.trim().toLowerCase() == REQUEST.post.name.trim().toLowerCase() })) {
 								callback({success: false, message: "name already taken"})
 								return
 							}
 							
 							player.name = REQUEST.post.name.trim()
 
-						// add to game
-							game.players[player.id] = player
+						// add to room
+							room.players[player.id] = player
 
 						// query
-							game.updated = new Date().getTime()
+							room.updated = new Date().getTime()
 							let query = CORE.getSchema("query")
-								query.collection = "games"
+								query.collection = "rooms"
 								query.command = "update"
-								query.filters = {id: game.id}
-								query.document = game
+								query.filters = {id: room.id}
+								query.document = room
 
 						// update
 							CORE.accessDatabase(query, function(results) {
@@ -143,11 +143,11 @@
 								// update session
 									REQUEST.updateSession = {
 										playerId: player.id,
-										gameId: game.id
+										roomId: room.id
 									}
 									SESSION.updateOne(REQUEST, null, function() {
 										// redirect
-											callback({success: true, message: "game joined", location: "../game/" + game.id})
+											callback({success: true, message: "room joined", location: "../room/" + room.id})
 									})
 							})
 					})
@@ -163,65 +163,65 @@
 		module.exports.readOne = readOne
 		function readOne(REQUEST, callback) {
 			try {
-				// game id
-					let gameId = REQUEST.path[REQUEST.path.length - 1]
+				// room id
+					let roomId = REQUEST.path[REQUEST.path.length - 1]
 
 				// query
 					let query = CORE.getSchema("query")
-						query.collection = "games"
+						query.collection = "rooms"
 						query.command = "find"
-						query.filters = {id: gameId}
+						query.filters = {id: roomId}
 
 				// find
 					CORE.accessDatabase(query, function(results) {
 						// not found
 							if (!results.success) {
-								callback({gameId: gameId, success: false, message: "no game found", location: "../../../../", recipients: [REQUEST.session.id]})
+								callback({roomId: roomId, success: false, message: "no room found", location: "../../../../", recipients: [REQUEST.session.id]})
 							}
 
 						// get player id
-							let game = results.documents[0]
+							let room = results.documents[0]
 							let playerId = null
-							if (Object.keys(game.players).length) {
-								playerId = Object.keys(game.players).find(function(p) {
-									return game.players[p].sessionId == REQUEST.session.id
+							if (Object.keys(room.players).length) {
+								playerId = Object.keys(room.players).find(function(p) {
+									return room.players[p].sessionId == REQUEST.session.id
 								})
 							}
 
-						// new player --> send full game
+						// new player --> send full room
 							if (playerId) {
-								callback({gameId: game.id, success: true, message: null, playerId: playerId, game: game, recipients: [REQUEST.session.id]})
+								callback({roomId: room.id, success: true, message: null, playerId: playerId, room: room, recipients: [REQUEST.session.id]})
 								return
 							}
 
 						// existing spectator
-							if (game.spectators[REQUEST.session.id]) {
-								callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, game: game, recipients: [REQUEST.session.id]})
+							if (room.spectators[REQUEST.session.id]) {
+								callback({roomId: room.id, success: true, message: "now observing the room", playerId: null, room: room, recipients: [REQUEST.session.id]})
 							}
 
 						// new spectator
-							if (!game.spectators[REQUEST.session.id]) {
+							if (!room.spectators[REQUEST.session.id]) {
 								// add spectator
-									game.spectators[REQUEST.session.id] = true
+									room.spectators[REQUEST.session.id] = true
 
 								// query
-									game.updated = new Date().getTime()
+									room.updated = new Date().getTime()
 									let query = CORE.getSchema("query")
-										query.collection = "games"
+										query.collection = "rooms"
 										query.command = "update"
-										query.filters = {id: game.id}
-										query.document = {updated: game.updated, spectators: game.spectators}
+										query.filters = {id: room.id}
+										query.document = {updated: room.updated, spectators: room.spectators}
 
 								// update
 									CORE.accessDatabase(query, function(results) {
 										if (!results.success) {
-											results.gameId = game.id
+											results.roomId = room.id
 											callback(results)
 											return
 										}
 
 										// for this spectator
-											callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, game: game, recipients: [REQUEST.session.id]})
+											callback({roomId: room.id, success: true, message: "now observing the room", playerId: null, room: room, recipients: [REQUEST.session.id]})
 									})
 							}
 					})
@@ -238,66 +238,70 @@
 		module.exports.updateOne = updateOne
 		function updateOne(REQUEST, callback) {
 			try {
-				// game id
-					let gameId = REQUEST.path[REQUEST.path.length - 1]
-					if (!gameId || gameId.length !== CONSTANTS.gameIdLength) {
-						callback({gameId: gameId, success: false, message: "invalid game id", recipients: [REQUEST.session.id]})
+				// room id
+					let roomId = REQUEST.path[REQUEST.path.length - 1]
+					if (!roomId || roomId.length !== CONSTANTS.roomIdLength) {
+						callback({roomId: roomId, success: false, message: "invalid room id", recipients: [REQUEST.session.id]})
 						return
 					}
 
 				// player id
 					if (!REQUEST.post || !REQUEST.post.playerId) {
-						callback({gameId: gameId, success: false, message: "invalid player id", recipients: [REQUEST.session.id]})
+						callback({roomId: roomId, success: false, message: "invalid player id", recipients: [REQUEST.session.id]})
 						return
 					}
 
 				// action
-					if (!REQUEST.post || !REQUEST.post.action || !["updateOption", "updateObject", "updatePlayer", "startGame", "endGame"].includes(REQUEST.post.action)) {
-						callback({gameId: gameId, success: false, message: "invalid action", recipients: [REQUEST.session.id]})
+					if (!REQUEST.post || !REQUEST.post.action || !["updateRoom", "updateConfiguration", "updatePlayer", "updateObject", "startGame", "endGame"].includes(REQUEST.post.action)) {
+						callback({roomId: roomId, success: false, message: "invalid action", recipients: [REQUEST.session.id]})
 						return
 					}
 
 				// query
 					let query = CORE.getSchema("query")
-						query.collection = "games"
+						query.collection = "rooms"
 						query.command = "find"
-						query.filters = {id: gameId}
+						query.filters = {id: roomId}
 
 				// find
 					CORE.accessDatabase(query, function(results) {
 						if (!results.success) {
-							callback({gameId: gameId, success: false, message: "no game found", recipients: [REQUEST.session.id]})
+							callback({roomId: roomId, success: false, message: "no room found", recipients: [REQUEST.session.id]})
 							return
 						}
 
 						// not a player?
-							let game = results.documents[0]
-							let player = game.players[REQUEST.post.playerId] || null
+							let room = results.documents[0]
+							let player = room.players[REQUEST.post.playerId] || null
 							if (!player) {
-								callback({gameId: gameId, success: false, message: "not a player", recipients: [REQUEST.session.id]})
+								callback({roomId: roomId, success: false, message: "not a player", recipients: [REQUEST.session.id]})
 								return
 							}
 
 						// action
 							switch (REQUEST.post.action) {
-								case "updateOption":
-									updateOption(REQUEST, game, player, callback)
+								case "updateRoom":
+									updateRoom(REQUEST, room, player, callback)
 									return
 								break
-								case "updateObject":
-									updateObject(REQUEST, game, player, callback)
+								case "updateConfiguration":
+									updateConfiguration(REQUEST, room, player, callback)
 									return
 								break
 								case "updatePlayer":
-									updatePlayer(REQUEST, game, player, callback)
+									updatePlayer(REQUEST, room, player, callback)
+									return
+								break
+								case "updateObject":
+									updateObject(REQUEST, room, player, callback)
 									return
 								break
 								case "startGame":
-									startGame(REQUEST, game, player, callback)
+									startGame(REQUEST, room, player, callback)
 									return
 								break
 								case "endGame":
-									endGame(REQUEST, game, player, callback)
+									endGame(REQUEST, room, player, callback)
 									return
 								break
 							}
@@ -314,16 +318,16 @@
 		module.exports.deleteOne = deleteOne
 		function deleteOne(REQUEST, callback) {
 			try {
-				// game id
-					if (!gameId || gameId.length !== CONSTANTS.gameIdLength) {
+				// room id
+					if (!roomId || roomId.length !== CONSTANTS.roomIdLength) {
 						return
 					}
 
 				// query
 					let query = CORE.getSchema("query")
-						query.collection = "games"
+						query.collection = "rooms"
 						query.command = "delete"
-						query.filters = {id: gameId}
+						query.filters = {id: roomId}
 
 				// find
 					CORE.accessDatabase(query, function(results) {
@@ -336,63 +340,75 @@
 		}
 
 /*** actions ***/
-	/* updateOption */
-		module.exports.updateOption = updateOption
-		function updateOption(REQUEST, game, player, callback) {
+	/* updateRoom */
+		module.exports.updateRoom = updateRoom
+		function updateRoom(REQUEST, room, player, callback) {
 			try {
 
 			}
 			catch (error) {
 				CORE.logError(error)
-				callback({gameId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
 			}
 		}
 
-	/* updateObject */
-		module.exports.updateObject = updateObject
-		function updateObject(REQUEST, game, player, callback) {
+	/* updateConfiguration */
+		module.exports.updateConfiguration = updateConfiguration
+		function updateConfiguration(REQUEST, room, player, callback) {
 			try {
 
 			}
 			catch (error) {
 				CORE.logError(error)
-				callback({gameId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
 			}
 		}
 
 	/* updatePlayer */
 		module.exports.updatePlayer = updatePlayer
-		function updatePlayer(REQUEST, game, player, callback) {
+		function updatePlayer(REQUEST, room, player, callback) {
 			try {
 
 			}
 			catch (error) {
 				CORE.logError(error)
-				callback({gameId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+			}
+		}
+
+	/* updateObject */
+		module.exports.updateObject = updateObject
+		function updateObject(REQUEST, room, player, callback) {
+			try {
+
+			}
+			catch (error) {
+				CORE.logError(error)
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
 			}
 		}
 
 	/* startGame */
 		module.exports.startGame = startGame
-		function startGame(REQUEST, game, player, callback) {
+		function startGame(REQUEST, room, player, callback) {
 			try {
 
 			}
 			catch (error) {
 				CORE.logError(error)
-				callback({gameId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
 			}
 		}
 
 	/* endGame */
 		module.exports.endGame = endGame
-		function endGame(REQUEST, game, player, callback) {
+		function endGame(REQUEST, room, player, callback) {
 			try {
 
 			}
 			catch (error) {
 				CORE.logError(error)
-				callback({gameId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
 			}
 		}
 

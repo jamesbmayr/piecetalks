@@ -1,6 +1,6 @@
 /*** globals ***/
 	/* triggers */
-		window.TRIGGERS = {
+		const TRIGGERS = {
 			submit: "submit"
 		}
 
@@ -8,14 +8,14 @@
 		const CONSTANTS = {
 			minimumNameLength: 3,
 			maximumNameLength: 16,
-			gameIdLength: 4,
+			roomIdLength: 4,
 		}
 
 	/* elements */
 		const ELEMENTS = {
-			newGameForm: document.querySelector("#new-game-form"),
-			joinGameForm: document.querySelector("#join-game-form"),
-			gameIdInput: document.querySelector("#game-id-input"),
+			newRoomForm: document.querySelector("#new-room-form"),
+			joinRoomForm: document.querySelector("#join-room-form"),
+			roomIdInput: document.querySelector("#room-id-input"),
 			nameInput: document.querySelector("#name-input")
 		}
 
@@ -94,26 +94,66 @@
 			} catch (error) {console.log(error)}
 		}
 
-/*** submits ***/
-	/* submitNewGame */
-		ELEMENTS.newGameForm.addEventListener(window.TRIGGERS.submit, submitNewGame)
-		function submitNewGame(event) {
+	/* preloadValues */
+		preloadValues()
+		function preloadValues(event) {
+			try {
+				// get
+					let search = window.location.search.slice(1)
+					if (!search || !search.length) {
+						return
+					}
+					
+					let sets = search.split("&") || []
+					if (!sets || !sets.length) {
+						return
+					}
+
+					let get = {}
+					for (let i in sets) {
+						let pair = sets[i].split("=")
+						get[pair[0].toLowerCase().trim()] = pair[1].trim()
+					}
+
+				// room id
+					if (get.roomid) {
+						ELEMENTS.roomIdInput.value = get.roomid
+					}
+
+				// name
+					if (get.name) {
+						ELEMENTS.nameInput.value = get.name
+					}
+
+				// both
+					setTimeout(function() {
+						if (get.roomid && get.name) {
+							submitJoinRoom()
+						}
+					}, 0)
+			} catch (error) {console.log(error)}
+		}
+
+/*** interactive ***/
+	/* createRoom */
+		ELEMENTS.newRoomForm.addEventListener(TRIGGERS.submit, createRoom)
+		function createRoom(event) {
 			try {
 				// post
 					sendPost({
-						action: "createGame"
+						action: "createRoom"
 					}, receivePost)
 			} catch (error) {console.log(error)}
 		}
 
-	/* submitJoinGame */
-		ELEMENTS.joinGameForm.addEventListener(window.TRIGGERS.submit, submitJoinGame)
-		function submitJoinGame(event) {
+	/* joinRoom */
+		ELEMENTS.joinRoomForm.addEventListener(TRIGGERS.submit, joinRoom)
+		function joinRoom(event) {
 			try {
-				// game id
-					let gameId = ELEMENTS.gameIdInput.value || null
-					if (!gameId || gameId.length !== CONSTANTS.gameIdLength || !isNumLet(gameId)) {
-						showToast({success: false, message: "game id must be " + CONSTANTS.gameIdLength + " letters & numbers"})
+				// room id
+					let roomId = ELEMENTS.roomIdInput.value || null
+					if (!roomId || roomId.length !== CONSTANTS.roomIdLength || !isNumLet(roomId)) {
+						showToast({success: false, message: "room id must be " + CONSTANTS.roomIdLength + " letters & numbers"})
 						return
 					}
 
@@ -126,8 +166,8 @@
 
 				// post
 					sendPost({
-						action: "joinGame",
-						gameId: gameId,
+						action: "joinRoom",
+						roomId: roomId,
 						name: name
 					}, receivePost)
 			} catch (error) {console.log(error)}
