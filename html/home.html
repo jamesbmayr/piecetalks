@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><script node>getAsset("title")</script>node>: 404</title>
+		<title><script node>getAsset("title")</script>node></title>
 		<script node>getAsset("logo")</script>node>
 		<script node>getAsset("meta")</script>node>
 		<script node>getAsset("fonts")</script>node>
@@ -13,12 +13,12 @@
 	<body>
 		<div id="container">
 			<h1 id="heading"><script node>getAsset("title")</script>node></h1>
+			<input type="text" placeholder="name" id="name-input" autocomplete="off"/>
 			<form id="new-room-form" method="post" action="javascript:;">
 				<button id="new-room-button">new room</button>
 			</form>
 			<form id="join-room-form" method="post" action="javascript:;">
 				<input type="text" placeholder="room id" id="room-id-input" autocomplete="off"/>
-				<input type="text" placeholder="name" id="name-input" autocomplete="off"/>
 				<button id="join-room-button">join</button>
 			</form>
 		</div>

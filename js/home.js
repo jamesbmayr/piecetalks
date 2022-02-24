@@ -139,9 +139,17 @@
 		ELEMENTS.newRoomForm.addEventListener(TRIGGERS.submit, createRoom)
 		function createRoom(event) {
 			try {
+				// name
+					let name = (ELEMENTS.nameInput.value || "").trim()
+					if (!name || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength || !isNumLet(name)) {
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumNameLength + " to " + CONSTANTS.maximumNameLength + " letters and numbers"})
+						return
+					}
+
 				// post
 					sendPost({
-						action: "createRoom"
+						action: "createRoom",
+						name: name
 					}, receivePost)
 			} catch (error) {console.log(error)}
 		}

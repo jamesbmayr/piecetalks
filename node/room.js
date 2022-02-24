@@ -1,10 +1,11 @@
 /*** modules ***/
-	if (!CORE) { const CORE = require("../node/core") }
-	if (!SESSION) { const SESSION = require("../node/session") }
+	const CORE = require("../node/core")
+	const SESSION = require("../node/session")
 	module.exports = {}
 
 /*** constants ***/
 	const CONSTANTS = CORE.getAsset("constants")
+	const CONFIGURATIONS = CORE.getAsset("configurations")
 
 /*** creates ***/
 	/* createOne */
@@ -13,12 +14,12 @@
 			try {
 				// name
 					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
-						callback({success: false, message: "Name must be letters and numbers only."})
+						callback({success: false, message: "name must be letters and numbers only"})
 						return
 					}
 
 					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
-						callback({success: false, message: "Name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters."})
+						callback({success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters"})
 						return
 					}
 
@@ -26,6 +27,7 @@
 					let player = CORE.getSchema("player")
 						player.sessionId = REQUEST.session.id
 						player.name = REQUEST.post.name.trim()
+						player.isHost = true
 
 					let room = CORE.getSchema("room")
 						room.players[player.id] = player
@@ -66,12 +68,12 @@
 			try {
 				// name
 					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
-						callback({success: false, message: "Name must be letters and numbers only."})
+						callback({success: false, message: "name must be letters and numbers only"})
 						return
 					}
 
 					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
-						callback({success: false, message: "Name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters."})
+						callback({success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters"})
 						return
 					}
 
@@ -177,53 +179,47 @@
 						// not found
 							if (!results.success) {
 								callback({roomId: roomId, success: false, message: "no room found", location: "../../../../", recipients: [REQUEST.session.id]})
+								return
 							}
 
 						// get player id
 							let room = results.documents[0]
-							let playerId = null
-							if (Object.keys(room.players).length) {
-								playerId = Object.keys(room.players).find(function(p) {
-									return room.players[p].sessionId == REQUEST.session.id
-								})
-							}
+							let playerId = Object.keys(room.players).find(function(p) {
+								return room.players[p].sessionId == REQUEST.session.id
+							}) || null
 
-						// new player --> send full room
-							if (playerId) {
-								callback({roomId: room.id, success: true, message: null, playerId: playerId, room: room, recipients: [REQUEST.session.id]})
+						// not a player
+							if (!playerId) {
+								callback({roomId: room.id, success: false, message: "not part of the room", playerId: null, recipients: [REQUEST.session.id], location: "../../../../"})
 								return
 							}
 
-						// existing spectator
-							if (room.spectators[REQUEST.session.id]) {
-								callback({roomId: room.id, success: true, message: "now observing the room", playerId: null, room: room, recipients: [REQUEST.session.id]})
-							}
+						// update player
+							room.players[playerId].connected = true
+							let name = room.players[playerId].name
 
-						// new spectator
-							if (!room.spectators[REQUEST.session.id]) {
-								// add spectator
-									room.spectators[REQUEST.session.id] = true
+						// query
+							let query = CORE.getSchema("query")
+								query.collection = "rooms"
+								query.command = "update"
+								query.filters = {id: room.id}
+								query.document = {players: room.players}
 
-								// query
-									room.updated = new Date().getTime()
-									let query = CORE.getSchema("query")
-										query.collection = "rooms"
-										query.command = "update"
-										query.filters = {id: room.id}
-										query.document = {updated: room.updated, spectators: room.spectators}
+						// update room
+							CORE.accessDatabase(query, function(results) {
+								if (!results.success) {
+									results.roomId = REQUEST.path[REQUEST.path.length - 1]
+									results.recipients = [REQUEST.session.id]
+									callback(results)
+									return
+								}
 
-								// update
-									CORE.accessDatabase(query, function(results) {
-										if (!results.success) {
-											results.roomId = room.id
-											callback(results)
-											return
-										}
-
-										// for this spectator
-											callback({roomId: room.id, success: true, message: "now observing the room", playerId: null, room: room, recipients: [REQUEST.session.id]})
-									})
-							}
+								// updated room
+									let room = results.documents[0]
+									for (let i in room.players) {
+										callback({roomId: room.id, success: true, message: name + " connected", playerId: i, room: room, recipients: [room.players[i].sessionId]})
+									}
+							})
 					})
 			}
 			catch (error) {
@@ -231,7 +227,6 @@
 				callback({success: false, message: "unable to " + arguments.callee.name})
 			}
 		}
-
 
 /*** updates ***/
 	/* updateOne */
@@ -245,15 +240,15 @@
 						return
 					}
 
-				// player id
-					if (!REQUEST.post || !REQUEST.post.playerId) {
-						callback({roomId: roomId, success: false, message: "invalid player id", recipients: [REQUEST.session.id]})
+				// action
+					if (!REQUEST.post || !REQUEST.post.action || !["updateRoom", "updateConfiguration", "updatePlayer", "updateObject", "startGame", "endGame", "leaveRoom", "disconnectPlayer"].includes(REQUEST.post.action)) {
+						callback({roomId: roomId, success: false, message: "invalid action", recipients: [REQUEST.session.id]})
 						return
 					}
 
-				// action
-					if (!REQUEST.post || !REQUEST.post.action || !["updateRoom", "updateConfiguration", "updatePlayer", "updateObject", "startGame", "endGame"].includes(REQUEST.post.action)) {
-						callback({roomId: roomId, success: false, message: "invalid action", recipients: [REQUEST.session.id]})
+				// player id
+					if (REQUEST.post.action !== "disconnectPlayer" && (!REQUEST.post || !REQUEST.post.playerId)) {
+						callback({roomId: roomId, success: false, message: "invalid player id", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -272,7 +267,7 @@
 
 						// not a player?
 							let room = results.documents[0]
-							let player = room.players[REQUEST.post.playerId] || null
+							let player = room.players[REQUEST.post.playerId] || room.players[Object.keys(room.players).find(function(p) { return room.players[p].sessionId == REQUEST.session.id })] || null
 							if (!player) {
 								callback({roomId: roomId, success: false, message: "not a player", recipients: [REQUEST.session.id]})
 								return
@@ -304,6 +299,14 @@
 									endGame(REQUEST, room, player, callback)
 									return
 								break
+								case "leaveRoom":
+									leaveRoom(REQUEST, room, player, callback)
+									return
+								break
+								case "disconnectPlayer":
+									disconnectPlayer(REQUEST, room, player, callback)
+									return
+								break
 							}
 					})
 			}
@@ -319,6 +322,7 @@
 		function deleteOne(REQUEST, callback) {
 			try {
 				// room id
+					let roomId = REQUEST.path[REQUEST.path.length - 1]
 					if (!roomId || roomId.length !== CONSTANTS.roomIdLength) {
 						return
 					}
@@ -344,7 +348,46 @@
 		module.exports.updateRoom = updateRoom
 		function updateRoom(REQUEST, room, player, callback) {
 			try {
+				// permissions
+					if (!player.isHost) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// no name
+					let name = REQUEST.post.name.trim() || null
+					if (!name || !name.length || !CORE.isNumLet(name.replace(/\s/g, "")) || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength) {
+						callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumNameLength + " - " + CONSTANTS.maximumNameLength + " letters, numbers, and spaces only", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// set
+					room.status.name = name
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {status: room.status}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -356,7 +399,168 @@
 		module.exports.updateConfiguration = updateConfiguration
 		function updateConfiguration(REQUEST, room, player, callback) {
 			try {
+				// permissions
+					if (!player.isHost) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// missing fields
+					if (!REQUEST.post.category || !Object.keys(room.configuration).includes(REQUEST.post.category)) {
+						callback({roomId: room.id, success: false, message: "invalid category", recipients: [REQUEST.session.id]})
+						return
+					}
+
+					if (typeof room.configuration[REQUEST.post.category] == "object" && !Object.keys(room.configuration[REQUEST.post.category]).includes(REQUEST.post.configuration)) {
+						callback({roomId: room.id, success: false, message: "invalid configuration", recipients: [REQUEST.session.id]})
+						return
+					}
+
+					if (typeof REQUEST.post.value == "undefined") {
+						callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// get configuration
+					let value
+					switch (REQUEST.post.category + "-" + REQUEST.post.configuration) {
+						// preset
+							case "preset-null":
+							case "preset-":
+								if (!Object.keys(CONFIGURATIONS.presets).includes(REQUEST.post.value)) {
+									return
+								}
+								room.configuration = CORE.duplicateObject(CONFIGURATIONS.presets[REQUEST.post.value])
+							break
+
+						// timer
+							case "timer-active":
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+							break
+							case "timer-seconds":
+								value = Math.round(REQUEST.post.value)
+								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+									return
+								}
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+							break
+
+						// board
+							case "board-x":
+							case "board-y":
+								value = Math.round(REQUEST.post.value)
+								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+									return
+								}
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+							break
+							case "board-grid":
+							case "board-coordinates":
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+							break
+							case "board-background":
+								if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(REQUEST.post.value)) {
+									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+									return
+								}
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = {name: REQUEST.post.value, value: CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration][REQUEST.post.value]}
+							break
+
+						// objects
+							case "objects-count":
+							case "objects-unused":
+								value = Math.round(REQUEST.post.value)
+								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+									return
+								}
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+							break
+							case "objects-overlap":
+							case "objects-translucent":
+							case "objects-borders":
+							case "objects-labels":
+								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+							break
+							case "objects-sizes":
+								value = REQUEST.post.value
+								if (REQUEST.post.include) {
+									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+										return
+									}
+									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
+										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									}
+								}
+								else {
+									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+										return i !== value
+									}) || []
+								}
+							break
+							case "objects-shapes":
+								value = REQUEST.post.value.replace(/_/g, " ")
+								if (REQUEST.post.include) {
+									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+										return
+									}
+									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
+										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									}
+								}
+								else {
+									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+										return i !== value
+									}) || []
+								}
+							break
+							case "objects-colors":
+								value = REQUEST.post.value.replace(/_/g, "-")
+								if (REQUEST.post.include) {
+									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
+										return
+									}
+									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
+										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									}
+								}
+								else {
+									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+										return i !== value
+									}) || []
+								}
+							break
+					}
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {configuration: room.configuration}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -368,7 +572,70 @@
 		module.exports.updatePlayer = updatePlayer
 		function updatePlayer(REQUEST, room, player, callback) {
 			try {
+				// permissions
+					if (!player.isHost && player.id !== REQUEST.post.targetId) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// get target player
+					let targetPlayer = room.players[REQUEST.post.targetId]
+					if (!targetPlayer) {
+						callback({roomId: room.id, success: false, message: "player not found", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// change role
+					if (!player.isHost && targetPlayer.role !== REQUEST.post.role) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// invalid name
+					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
+						callback({roomId: room.id, success: false, message: "name must be letters and numbers only", recipients: [REQUEST.session.id]})
+						return
+					}
+
+					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
+						callback({roomId: room.id, success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// invalid role
+					if (!CONSTANTS.roles.includes(REQUEST.post.role)) {
+						callback({roomId: room.id, success: false, message: "invalid role", recipients: [REQUEST.session.id]})
+						return	
+					}
+
+				// update player
+					room.players[targetPlayer.id].name = REQUEST.post.name
+					room.players[targetPlayer.id].role = REQUEST.post.role
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {players: room.players}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -380,7 +647,75 @@
 		module.exports.updateObject = updateObject
 		function updateObject(REQUEST, room, player, callback) {
 			try {
+				// game over
+					if (!room.status.play || !room.status.timeRemaining || room.status.endTime) {
+						callback({roomId: room.id, success: false, message: "game ended", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// update time
+					let timeUpdated = false
+					if (room.configuration.timer.active) {
+						room.status.timeRemaining = Math.round((room.status.startTime + (room.configuration.timer.seconds * CONSTANTS.second) - new Date().getTime()) / CONSTANTS.second)
+						if (!room.status.timeRemaining) {
+							endGame(REQUEST, room, null, callback)
+							return
+						}
+						timeUpdated = true
+					}
+
+				// permissions
+					if (!player.role == "actor") {
+						callback({roomId: room.id, success: false, message: "not an actor", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// invalid object
+					if (!REQUEST.post.objectId || !player.objects[REQUEST.post.objectId]) {
+						callback({roomId: room.id, success: false, message: "object not found", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// move object
+					player.objects[REQUEST.post.objectId].position.x = REQUEST.post.x == null ? null : Math.round(REQUEST.post.x)
+					player.objects[REQUEST.post.objectId].position.y = REQUEST.post.y == null ? null : Math.round(REQUEST.post.y)
+
+				// check for victory
+					if (isVictory(room, player)) {
+						endGame(REQUEST, room, null, callback)
+						return
+					}
+
+				// update player & time
+					room.players[player.id] = player
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {players: room.players}
+					if (timeUpdated) {
+						query.document.status = room.status
+					}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -392,7 +727,74 @@
 		module.exports.startGame = startGame
 		function startGame(REQUEST, room, player, callback) {
 			try {
+				// permissions
+					if (!player.isHost) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// already started
+					if (room.status.startTime) {
+						callback({roomId: room.id, success: false, message: "game already started", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// no actors
+					let actors = []
+					let informers = []
+					for (let i in room.players) {
+						if (room.players[i].role == "actor") {
+							actors.push(i)
+						}
+						if (room.players[i].role == "informer") {
+							informers.push(i)
+						}
+					}
+
+					if (!actors.length || !informers.length) {
+						callback({roomId: room.id, success: false, message: "at least 1 actor and 1 informer are required", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// generate board
+					room = generateBoard(room) || false
+
+				// unable
+					if (!room) {
+						callback({roomId: room.id, success: false, message: "unable to fit all the objects on the board", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// set status
+					room.status.startTime = new Date().getTime()
+					room.status.endTime = null
+					room.status.timeRemaining = room.configuration.timer.active ? room.configuration.timer.seconds : null
+					room.status.play = true
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = room
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -404,7 +806,161 @@
 		module.exports.endGame = endGame
 		function endGame(REQUEST, room, player, callback) {
 			try {
+				// permissions
+					if (player && !player.isHost) {
+						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
 
+				// set status
+					room.status.endTime = new Date().getTime()
+					room.status.timeRemaining = room.configuration.timer.active ? 0 : null
+					room.status.play = false
+
+				// set roles
+					for (let i in room.players) {
+						room.players[i].role = "spectator"
+					}
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = room
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for all players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
+			}
+			catch (error) {
+				CORE.logError(error)
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+			}
+		}
+
+	/* leaveRoom */
+		module.exports.leaveRoom = leaveRoom
+		function leaveRoom(REQUEST, room, player, callback) {
+			try {
+				// host --> close room
+					if (player.isHost) {
+						// get session ids
+							let sessionIds = []
+							for (let i in room.players) {
+								sessionIds.push(room.players[i].sessionId)
+							}
+
+						// delete room
+							deleteOne(REQUEST, function() {
+								// update sessions
+									for (let i in sessionIds) {
+										// make a pseudoRequest session for clearing it out
+											let pseudoRequest = {
+												session: {
+													id: sessionIds[i]
+												},
+												cookie: {},
+												updateSession: {
+													playerId: null,
+													roomId: null
+												}
+											}
+
+										// update and callback (redirect)
+											SESSION.updateOne(pseudoRequest, null, function(req, res) {
+												callback({success: true, message: "the host closed the room", recipients: [req.session.id], location: "../../../../"})
+											})
+									}
+							})
+
+						return
+					}
+
+				// other --> remove player
+					let name = player.name
+					delete room.players[player.id]
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {players: room.players}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for this player
+							callback({roomId: room.id, success: true, message: "leaving the room", playerId: null, recipients: [REQUEST.session.id], location: "../../../../"})
+
+						// for all other players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, message: name + " left the room", room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
+			}
+			catch (error) {
+				CORE.logError(error)
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+			}
+		}
+
+	/* disconnectPlayer */
+		module.exports.disconnectPlayer = disconnectPlayer
+		function disconnectPlayer(REQUEST, room, player, callback) {
+			try {
+				// update this player
+					room.players[player.id].connected = false
+					let name = room.players[player.id].name
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {players: room.players}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// let players know
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, message: name + " disconnected", room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -413,5 +969,204 @@
 		}
 
 /*** tools ***/
+	/* generateBoard */
+		module.exports.generateBoard = generateBoard
+		function generateBoard(room) {
+			try {
+				// generate objects
+					let objects = []
+					while (objects.length < room.configuration.objects.count + room.configuration.objects.unused) {
+						let attempts = CONSTANTS.attempts
+						let object = null
+						
+						do {
+							object = generateObject(room.configuration)
+							attempts--
+						} while (hasExactCopy(object, objects) && attempts)
 
+						if (!attempts) {
+							return false
+						}
 
+						objects.push(object)
+					}
+
+				// set z
+					let z = 1
+					for (let i in objects) {
+						objects[i].position.z = z
+						z++
+					}
+
+				// target position
+					let positionedCount = 0
+					while (positionedCount < room.configuration.objects.count) {
+						let attempts = CONSTANTS.attempts
+						let object = objects[positionedCount]
+
+						do {
+							object.target.x = Math.floor(Math.random() * room.configuration.board.x)
+							object.target.y = Math.floor(Math.random() * room.configuration.board.y)
+						} while (!room.configuration.objects.overlap && hasOverlap(object, objects) && attempts)
+
+						if (!attempts) {
+							return false
+						}
+
+						positionedCount++
+					}
+
+				// shuffle
+					objects = CORE.sortRandom(objects)
+
+				// copy for each player
+					for (let i in room.players) {
+						if (room.players[i].role == "spectator") {
+							continue
+						}
+						if (room.players[i].role == "actor") {
+							room.players[i].objects = CORE.duplicateObject(objects)
+						}
+						if (room.players[i].role == "informer") {
+							room.players[i].objects = CORE.duplicateObject(objects)
+							for (let j in room.players[i].objects) {
+								room.players[i].objects[j].position.x = room.players[i].objects[j].target.x
+								room.players[i].objects[j].position.y = room.players[i].objects[j].target.y
+							}
+						}
+					}
+
+				// return room
+					return room
+			}
+			catch (error) {
+				CORE.logError(error)
+				return null
+			}
+		}
+
+	/* generateObject */
+		module.exports.generateObject = generateObject
+		function generateObject(configuration) {
+			try {
+				// shell
+					let object = CORE.getSchema("object")
+
+				// size
+					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(configuration.objects.sizes)]
+
+				// shape
+					object.shape = CONFIGURATIONS.objects.shapes[CORE.chooseRandom(configuration.objects.shapes)]
+
+				// color
+					object.color = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
+
+				// border
+					if (configuration.objects.borders) {
+						object.border = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
+					}
+
+				// label
+					if (configuration.objects.labels) {
+						object.label = CORE.generateRandom(null, 1)
+					}
+
+				// translucent
+					if (configuration.objects.translucent) {
+						object.translucent = Boolean(Math.floor(Math.random() * 2))
+					}
+
+				// return
+					return object
+			}
+			catch (error) {
+				CORE.logError(error)
+				return null
+			}
+		}
+
+	/* hasExactCopy */
+		module.exports.hasExactCopy = hasExactCopy
+		function hasExactCopy(object, objects) {
+			try {
+				// loop through objects
+					for (let i in objects) {
+						if (objects[i].size.x      !== object.size.x)      { continue }
+						if (objects[i].size.y      !== object.size.y)      { continue }
+						if (objects[i].shape       !== object.shape)       { continue }
+						if (objects[i].color       !== object.color)       { continue }
+						if (objects[i].border      !== object.border)      { continue }
+						if (objects[i].label       !== object.label)       { continue }
+						if (objects[i].translucent !== object.translucent) { continue }
+
+						return true
+					}
+
+				// still here
+					return false
+			}
+			catch (error) {
+				CORE.logError(error)
+				return false
+			}
+		}
+
+	/* hasOverlap */
+		module.exports.hasOverlap = hasOverlap
+		function hasOverlap(object, objects) {
+			try {
+				// cells
+					let theseCells = []
+					let diffX = Math.floor(object.size.x / 2)
+					let diffY = Math.floor(object.size.y / 2)
+
+					for (let x = 0; x < object.size.x; x++) {
+						for (let y = 0; y < object.size.y; y++) {
+							theseCells.push((object.target.x + x - diffX) + "," + (object.target.y + y - diffY))
+						}
+					}
+
+				// loop through objects
+					for (let i in objects) {
+						let diffX = Math.floor(objects[i].size.x / 2)
+						let diffY = Math.floor(objects[i].size.y / 2)
+
+						for (let x = 0; x < objects[i].size.x; x++) {
+							for (let y = 0; y < objects[i].size.y; y++) {
+								if (theseCells.includes((objects[i].target.x + x - diffX) + "," + (objects[i].target.y + y - diffY))) {
+									return true
+								}
+							}
+						}
+					}
+
+				// still here
+					return false
+			}
+			catch (error) {
+				CORE.logError(error)
+				return false
+			}
+		}
+
+	/* isVictory */
+		module.exports.isVictory = isVictory
+		function isVictory(room, player) {
+			try {
+				// loop through objects
+					for (let i in player.objects) {
+						let object = player.objects[i]
+						if ((object.target.x !== null && object.target.y !== null)
+						 && (object.position.x !== object.target.x || object.position.y !== object.target.y)) {
+							return false
+						}
+					}
+
+				// still here
+					return true
+			}
+			catch (error) {
+				CORE.logError(error)
+				return false
+			}
+		}

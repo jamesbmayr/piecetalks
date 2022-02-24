@@ -1,5 +1,5 @@
 /*** modules ***/
-	if (!CORE) { const CORE = require("../node/core") }
+	const CORE = require("../node/core")
 	module.exports = {}
 
 /*** creates ***/
@@ -95,10 +95,10 @@
 							updated: new Date().getTime()
 						}
 
-					if (REQUEST.updateSession && REQUEST.updateSession.playerId) {
+					if (REQUEST.updateSession && REQUEST.updateSession.playerId !== undefined) {
 						query.document.playerId = REQUEST.updateSession.playerId
 					}
-					if (REQUEST.updateSession && REQUEST.updateSession.roomId) {
+					if (REQUEST.updateSession && REQUEST.updateSession.roomId !== undefined) {
 						query.document.roomId = REQUEST.updateSession.roomId
 					}
 

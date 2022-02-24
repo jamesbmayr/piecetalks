@@ -1,6 +1,6 @@
 /*** modules ***/
-	if (!HTTP) { const HTTP = require("http")}
-	if (!FS)   { const FS   = require("fs")}
+	const HTTP = require("http")
+	const FS   = require("fs")
 	module.exports = {}
 
 /*** environment ***/
@@ -221,6 +221,7 @@
 							return {
 								id: generateRandom(),
 								sessionId: null,
+								connected: false,
 								name: null,
 								isHost: false,
 								role: "spectator",
@@ -265,8 +266,7 @@
 										colors: []
 									}
 								},
-								players: {},
-								spectators: {}
+								players: {}
 							}
 						break
 
@@ -356,7 +356,7 @@
 								}
 
 							// return
-								return `<style>:root {` + output = `}</style>`
+								return `<style>:root {` + output + `}</style>`
 						break
 
 					// styling
@@ -417,13 +417,20 @@
 								maximumNameLength: 16,
 								roomIdLength: 4,
 								rounding: 100,
-								roles: ["informer", "actor", "spectator"]
+								roles: ["informer", "actor", "spectator"],
+								attempts: 10
 							}
 						break
 
 					// play
 						case "configurations":
 							return {
+								timer: {
+									seconds: {
+										minimum: 0,
+										maximum: 60 * 30
+									}
+								},
 								board: {
 									x: {
 										minimum: 2,
@@ -432,58 +439,61 @@
 									y: {
 										minimum: 2,
 										maximum: 10
+									},
+									backgrounds: {
+										"none": "transparent",
+										"horizontal color gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
+										"vertical color gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
+										"radial color gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
+										"horizontal grayscale gradient": "linear-gradient(to right, white, black)",
+										"vertical grayscale gradient": "linear-gradient(white, black)",
+										"radial grayscale gradient": "radial-gradient(white, black)"
 									}
 								},
-								backgrounds: {
-									"none": "transparent",
-									"horizontal color gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
-									"vertical color gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
-									"radial color gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
-									"horizontal grayscale gradient": "linear-gradient(to right, white, black)",
-									"vertical grayscale gradient": "linear-gradient(white, black)",
-									"radial grayscale gradient": "radial-gradient(white, black)"
-								}
-								count: {
-									minimum: 1,
-									maximum: 100
+								objects: {
+									count: {
+										minimum: 1,
+										maximum: 100
+									},
+									unused: {
+										minimum: 0,
+										maximum: 100
+									},
+									sizes: {
+										"1x1": {x: 1, y: 1},
+										"3x3": {x: 3, y: 3},
+										"5x5": {x: 5, y: 5}
+									},
+									shapes: {
+										"circle": "circle(50%)",
+										"triangle up": "polygon(50% 0%, 100% 100%, 0% 100%)",
+										"triangle down": "polygon(0% 0%, 100% 0%, 50% 100%)",
+										"triangle left": "polygon(100% 0%, 100% 100%, 0% 50%)",
+										"triangle right": "polygon(0% 0%, 100% 50%, 0% 100%)",
+										"square": "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+										"diamond": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+										"rectangle horizontal": "polygon(0% 20%, 100% 20%, 100% 80%, 0% 80%)",
+										"rectangle vertical": "polygon(20% 0%, 80% 0%, 80% 100%, 20% 100%)",
+										"rhombus positive": "polygon(25% 25%, 100% 0%, 75% 75%, 0% 100%)",
+										"rhombus negative": "polygon(0% 0%, 75% 25%, 100% 100%, 25% 75%)",
+										"chevron up": "polygon(0% 100%, 50% 0%, 100% 100%, 50% 75%)",
+										"chevron down": "polygon(0% 0%, 50% 25%, 100% 0%, 50% 100%)",
+										"chevron left": "polygon(0% 0%, 100% 50%, 0% 100%, 25% 50%)",
+										"chevron right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
+										"hexagon horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
+										"hexagon vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
+										"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+										"octagon diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
+										"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
+										"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
+										"x": "polygon(0% 0%, 20% 0%, 50% 30%, 80% 0%, 100% 0%, 100% 20%, 70% 50%, 100% 80%, 100% 100%, 80% 100%, 50% 70%, 20% 100%, 0% 100%, 0% 80%, 30% 50%, 0% 20%)",
+										"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
+									},
+									colors: getAsset("colors")
 								},
-								unused: {
-									minimum: 0,
-									maximum: 100
-								},
-								sizes: {
-									"1x1": {x: 1, y: 1},
-									"2x2": {x: 2, y: 2},
-									"3x3": {x: 3, y: 3}
-								},
-								shapes: {
-									"circle": "circle(50%)",
-									"triangle up": "polygon(50% 0%, 100% 100%, 0% 100%)",
-									"triangle down": "polygon(0% 0%, 100% 0%, 50% 100%)",
-									"triangle left": "polygon(100% 0%, 100% 100%, 0% 50%)",
-									"triangle right": "polygon(0% 0%, 100% 50%, 0% 100%)",
-									"square": "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-									"diamond": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-									"rectangle horizontal": "polygon(0% 20%, 100% 20%, 100% 80%, 0% 80%)",
-									"rectangle vertical": "polygon(20% 0%, 80% 0%, 80% 100%, 20% 100%)",
-									"rhombus positive": "polygon(25% 25%, 100% 0%, 75% 75%, 0% 100%)",
-									"rhombus negative": "polygon(0% 0%, 75% 25%, 100% 100%, 25% 75%)",
-									"chevron up": "polygon(0% 100%, 50% 0%, 100% 100%, 50% 75%)",
-									"chevron down": "polygon(0% 0%, 50% 25%, 100% 0%, 50% 100%)",
-									"chevron left": "polygon(0% 0%, 100% 50%, 0% 100%, 25% 50%)",
-									"chevron right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
-									"hexagon horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
-									"hexagon vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
-									"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
-									"octagon diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
-									"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
-									"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
-									"x": "polygon(0% 0%, 20% 0%, 50% 30%, 80% 0%, 100% 0%, 100% 20%, 70% 50%, 100% 80%, 100% 100%, 80% 100%, 50% 70%, 20% 100%, 0% 100%, 0% 80%, 30% 50%, 0% 20%)",
-									"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
-								},
-								colors: getAsset("colors"),
 								presets: {
 									easy: {
+										preset: "easy",
 										timer: {
 											active: false,
 											seconds: 0
@@ -493,7 +503,7 @@
 											y: 3,
 											grid: true,
 											coordinates: true,
-											background: null
+											background: {name: "none", value: "transparent"}
 										},
 										objects: {
 											count: 5,
@@ -508,6 +518,7 @@
 										}
 									},
 									medium: {
+										preset: "medium",
 										timer: {
 											active: false,
 											seconds: 0
@@ -517,7 +528,7 @@
 											y: 5,
 											grid: true,
 											coordinates: false,
-											background: "horizontal grayscale gradient"
+											background: {name: "horizontal grayscale gradient", value: "linear-gradient(to right, white, black)"}
 										},
 										objects: {
 											count: 10,
@@ -532,6 +543,7 @@
 										}
 									},
 									challenging: {
+										preset: "challenging",
 										timer: {
 											active: true,
 											seconds: 300
@@ -541,7 +553,7 @@
 											y: 6,
 											grid: true,
 											coordinates: false,
-											background: "vertical grayscale gradient"
+											background: {name: "vertical grayscale gradient", value: "linear-gradient(white, black)"}
 										},
 										objects: {
 											count: 15,
@@ -550,22 +562,23 @@
 											translucent: false,
 											borders: true,
 											labels: false,
-											sizes: ["1x1", "2x2"],
+											sizes: ["1x1"],
 											shapes: ["circle", "triangle up", "triangle down", "square", "diamond", "rectangle horizontal", "rectangle vertical", "hexagon horizontal", "hexagon vertical", "octagon", "cross", "x", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									difficult: {
+										preset: "difficult",
 										timer: {
 											active: true,
-											seconds: 300
+											seconds: 240
 										},
 										board: {
 											x: 8,
 											y: 8,
 											grid: false,
 											coordinates: false,
-											background: "vertical color gradient"
+											background: {name: "vertical color gradient", value: "vertical color gradient"}
 										},
 										objects: {
 											count: 20,
@@ -574,22 +587,23 @@
 											translucent: false,
 											borders: true,
 											labels: false,
-											sizes: ["1x1", "2x2"],
+											sizes: ["1x1", "3x3"],
 											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "cross", "x", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									insane: {
+										preset: "insane",
 										timer: {
 											active: true,
-											seconds: 300
+											seconds: 180
 										},
 										board: {
 											x: 10,
 											y: 10,
 											grid: false,
 											coordinates: false,
-											background: "radial color gradient"
+											background: {name: "radial color gradient", value: "radial color gradient"}
 										},
 										objects: {
 											count: 25,
@@ -598,7 +612,7 @@
 											translucent: true,
 											borders: true,
 											labels: false,
-											sizes: ["1x1", "2x2", "3x3"],
+											sizes: ["1x1", "3x3", "5x5"],
 											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
 										}
@@ -660,7 +674,7 @@
 					}
 
 					callback(html.array.join(""))
-				}
+				})
 			}
 			catch (error) {
 				logError(error)
@@ -732,7 +746,7 @@
 		}
 
 	/* chooseRandom */
-		module.exprots.chooseRandom = chooseRandom
+		module.exports.chooseRandom = chooseRandom
 		function chooseRandom(options) {
 			try {
 				if (!Array.isArray(options)) {

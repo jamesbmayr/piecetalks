@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><script node>getAsset("title")</script>node>: 404</title>
+		<title><script node>getAsset("title")</script>node>: <script node>REQUEST.path[REQUEST.path.length - 1]</script>node></title>
 		<script node>getAsset("logo")</script>node>
 		<script node>getAsset("meta")</script>node>
 		<script node>getAsset("fonts")</script>node>
@@ -10,7 +10,7 @@
 		<link rel="stylesheet" href="room.css"/>
 		<script src="room.js" defer></script>
 		<script>window.roomId = "<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"</script>
-		<script node>let configurations = getAsset("configurations")</script>node>
+		<script node>var CONFIGURATIONS = getAsset("configurations")</script>node>
 	</head>
 	<body>
 		<details id="configuration">
@@ -20,6 +20,7 @@
 					<h2>
 						<span>room:</span>
 						<output id="configuration-room-id" value="<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"></output>
+						<button id="configuration-room-leave">&#x1f6aa;</button>
 					</h2>
 					<label>
 						<span>name:</span>
@@ -51,7 +52,7 @@
 							<option value="custom">custom</option>
 							<script node>
 								let presets = ""
-								for (let i in configurations.presets) {
+								for (let i in CONFIGURATIONS.presets) {
 									presets += "<option value=" + i + ">" + i + "></option>"
 								}
 								presets
@@ -64,8 +65,8 @@
 					</label>
 					<label>
 						<h3>board</h3>
-						<label>x <input type="number" id="configuration-game-board-x" step="1" min="<script node>configurations.board.x.minimum</script>node>" max="<script node>configurations.board.x.maximum</script>node>" placeholder="x" configuration="true"></label>
-						<label>y <input type="number" id="configuration-game-board-y" step="1" min="<script node>configurations.board.y.minimum</script>node>" max="<script node>configurations.board.y.maximum</script>node>" placeholder="y" configuration="true"></label>
+						<label>x <input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true"></label>
+						<label>y <input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true"></label>
 						<label>show cells <input type="checkbox" id="configuration-game-board-grid" configuration="true"></label>
 						<label>show coordinates <input type="checkbox" id="configuration-game-board-coordinates" configuration="true"></label>
 					</label>
@@ -74,7 +75,7 @@
 						<select id="configuration-game-board-background" configuration="true">
 							<script node>
 								let backgrounds = ""
-								for (let i in configurations.backgrounds) {
+								for (let i in CONFIGURATIONS.backgrounds) {
 									backgrounds += "<option value=" + i.replace(/\s/g, "-") + ">" + i + "></option>"
 								}
 								backgrounds
@@ -83,8 +84,8 @@
 					</label>
 					<label>
 						<h3>objects</h3>
-						<label># used<input type="number" id="configuration-game-objects-count" step="1" min="<script node>configurations.count.minimum</script>node>" max="<script node>configurations.count.maximum</script>node>" placeholder="count" configuration="true"></label>
-						<label># unused<input type="number" id="configuration-game-objects-unused" step="1" min="<script node>configurations.unused.minimum</script>node>" max="<script node>configurations.unused.maximum</script>node>" placeholder="unused" configuration="true"></label>
+						<label># used<input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true"></label>
+						<label># unused<input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="unused" configuration="true"></label>
 						<label>allow overlap <input type="checkbox" id="configuration-game-objects-overlap" configuration="true"></label>
 						<label>allow translucent <input type="checkbox" id="configuration-game-objects-translucent" configuration="true"></label>
 						<label>borders <input type="checkbox" id="configuration-game-objects-borders" configuration="true"></label>
@@ -94,7 +95,7 @@
 						<h3>sizes</h3>
 						<script node>
 							let sizes = ""
-							for (let i in configurations.sizes) {
+							for (let i in CONFIGURATIONS.sizes) {
 								sizes += "<label>" + i + "<input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true'></label>"
 							}
 							sizes
@@ -104,7 +105,7 @@
 						<h3>shapes</h3>
 						<script node>
 							let shapes = ""
-							for (let i in configurations.shapes) {
+							for (let i in CONFIGURATIONS.shapes) {
 								shapes += "<label>" + i + "<input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true'></label>"
 							}
 							shapes
@@ -114,7 +115,7 @@
 						<h3>colors</h3>
 						<script node>
 							let colors = ""
-							for (let i in configurations.colors) {
+							for (let i in CONFIGURATIONS.colors) {
 								colors += "<label>" + i.replace(/-/g, " ") + "<input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true'></label>"
 							}
 							colors

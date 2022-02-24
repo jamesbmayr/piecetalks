@@ -18,10 +18,11 @@
 
 	/* constants */
 		const CONSTANTS = {
-			alphabet = "abcdefghijklmnopqrstuvwxyz",
+			alphabet: "abcdefghijklmnopqrstuvwxyz",
 			translucentOpacity: 0.5,
 			minimumNameLength: 3,
 			maximumNameLength: 16,
+			second: 1000,
 			roles: ["informer", "actor", "spectator"]
 		}
 
@@ -38,6 +39,7 @@
 				y: null
 			},
 			grabbed: null,
+			timerLoop: null,
 			room: null
 		}
 
@@ -48,7 +50,8 @@
 				overlay: document.querySelector("#configuration-overlay"),
 				room: {
 					id: document.querySelector("#configuration-room-id"),
-					name: document.querySelector("#configuration-room-name")
+					name: document.querySelector("#configuration-room-name"),
+					leave: document.querySelector("#configuration-room-leave")
 				},
 				players: {
 					list: document.querySelector("#configuration-players-list"),
@@ -215,20 +218,16 @@
 							STATE.playerId = data.playerId
 						}
 
-					// isHost
-						if (data.isHost !== undefined) {
-							STATE.isHost = data.isHost
-						}
-
 					// room id
 						if (data.roomId !== undefined) {
 							STATE.roomId = data.roomId
-							ELEMENTS.room.id.value = STATE.roomId
+							ELEMENTS.configuration.room.id.value = STATE.roomId
 						}
 
 					// room data
 						if (data.room) {
-							STATE.role = data.room.players[STATE.playerId] ? data.room.players[STATE.playerId].role || "spectator"
+							STATE.isHost = data.room.players[STATE.playerId].isHost
+							STATE.role = data.room.players[STATE.playerId].role
 							receiveRoom(data.room)
 						}
 			} catch (error) {console.log(error)}
@@ -262,7 +261,8 @@
 		function displayRoomName(name) {
 			try {
 				// update name
-					ELEMENTS.room.name.value = name
+					ELEMENTS.configuration.room.name.value = name
+					ELEMENTS.configuration.room.name.readonly = STATE.isHost ? false : true
 			} catch (error) {console.log(error)}
 		}
 
@@ -293,6 +293,27 @@
 			} catch (error) {console.log(error)}
 		}
 
+	/* leaveRoom */
+		ELEMENTS.configuration.room.leave.addEventListener(TRIGGERS.click, leaveRoom)
+		function leaveRoom(event) {
+			try {
+				// prompt
+					let confirmed = window.prompt(STATE.isHost ? "Are you sure you want to close the room?" : "Are you sure you want to leave?")
+
+				// cancel
+					if (!confirmed) {
+						return
+					}
+
+				// send command to server
+					STATE.socket.send({
+						action: "leaveRoom",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId
+					})
+			} catch (error) {console.log(error)}
+		}
+
 /*** players ***/
 	/* displayPlayers */
 		function displayPlayers(players) {
@@ -315,7 +336,7 @@
 
 				// remaining ids
 					for (let i in ids) {
-						createPlayer(players[i])
+						createPlayer(players[ids[i]])
 					}
 			} catch (error) {console.log(error)}
 		}
@@ -561,26 +582,36 @@
 					let category = null
 					let configuration = null
 					let value = null
-					let toggle = null
-					
+					let include = null
+				
+				// array fields
 					if (property) {
 						category = property.split("-")[0]
 						configuration = property.split("-")[1]
 						value = id[id.length - 1]
-						toggle = event.target.checked || false
+						include = event.target.checked || false
 					}
+
+				// all others
 					else {
 						category = id[2]
 						configuration = id[3]
 						
 						if (event.target.type == "checkbox") {
-							toggle = event.target.checked || false
+							value = event.target.checked || false
 						}
 						else if (event.target.type == "number") {
 							value = Number(event.target.value)
 						}
 						else {
 							value = event.target.value
+						}
+					}
+
+				// preset
+					if (category == "preset") {
+						if (value == "custom") {
+							return
 						}
 					}
 
@@ -592,7 +623,7 @@
 						category: category,
 						configuration: configuration,
 						value: value,
-						toggle: toggle
+						include: include
 					})
 			} catch (error) {console.log(error)}
 		}
@@ -614,12 +645,38 @@
 
 				// timer
 					if (status.timeRemaining !== null) {
-						ELEMENTS.container.timer = Math.floor(status.timeRemaining / 60) + ":" + ("0" + String(status.timeRemaining % 60)).slice(-2)
+						clearInterval(STATE.timerLoop)
+						ELEMENTS.container.timer.innerText = Math.floor(status.timeRemaining / 60) + ":" + ("0" + String(status.timeRemaining % 60)).slice(-2)
 						ELEMENTS.container.timer.setAttribute("visibility", true)
+						STATE.timerLoop = setInterval(updateTimer, CONSTANTS.second)
 					}
 					else {
 						ELEMENTS.container.timer.setAttribute("visibility", false)
+						clearInterval(STATE.timerLoop)
 					}
+			} catch (error) {console.log(error)}
+		}
+
+	/* updateTimer */
+		function updateTimer() {
+			try {
+				// no timer?
+					if (!STATE.room || !STATE.room.status.play || !STATE.room.status.timeRemaining || !STATE.room.configuration.timer.active) {
+						ELEMENTS.container.timer.setAttribute("visibility", false)
+						clearInterval(STATE.timerLoop)
+						return
+					}
+
+				// get time
+					let time = ELEMENTS.container.timer.innerText || ""
+						time = time.split(":")
+					let minutes = Number(time[0])
+					let seconds = Number(time[1])
+					let totalTime = minutes * 60 + seconds
+						totalTime = Math.ceil(0, totalTime - 1)
+
+				// set time
+					ELEMENTS.container.timer.innerText = Math.floor(totalTime / 60) + ":" + ("0" + String(totalTime % 60)).slice(-2)
 			} catch (error) {console.log(error)}
 		}
 
@@ -667,24 +724,24 @@
 			try {
 				// spectator
 					if (STATE.role == "spectator") {
-						for (let i in ELEMENTS.screens) {
+						for (let i in ELEMENTS.container.screens) {
 							if (!STATE.room.players[i]) {
-								ELEMENTS.screens[i].remove()
-								delete ELEMENTS.screens[i]
+								ELEMENTS.container.screens[i].remove()
+								delete ELEMENTS.container.screens[i]
 							}
 						}
 
 						for (let i in STATE.room.players) {
-							displayScreen(STATE.room.configuration, STATE.room.players)
+							displayScreen(STATE.room.configuration, STATE.room.players[i])
 						}
 					}
 
 				// informer / actor
 					else {
-						for (let i in ELEMENTS.screens) {
+						for (let i in ELEMENTS.container.screens) {
 							if (i !== STATE.playerId) {
-								ELEMENTS.screens[i].remove()
-								delete ELEMENTS.screens[i]
+								ELEMENTS.container.screens[i].remove()
+								delete ELEMENTS.container.screens[i]
 							}
 						}
 
@@ -696,8 +753,18 @@
 	/* displayScreen */
 		function displayScreen(configuration, player) {
 			try {
+				// spectator --> no screen
+					if (player.role == "spectator") {
+						return
+					}
+
 				// no screen yet
-					let screen = ELEMENTS.screens[player.id] || createScreen(player.id)
+					let screen = ELEMENTS.container.screens[player.id] || createScreen(player.id)
+
+				// name + role + active
+					screen.querySelector(".screen-name").value = player.name || ""
+					screen.querySelector(".screen-role").value = player.role || ""
+					screen.querySelector(".screen-connected").checked = player.connected || false
 
 				// background
 					screen.querySelector(".board").style.background = configuration.grid.background.value
@@ -736,13 +803,30 @@
 					let screen = document.createElement("div")
 						screen.id = "screen-" + playerId
 						screen.className = "screen"
-					ELEMENTS.screensContainer.appendChild(screen)
-					ELEMENTS.screens[playerId] = screen
+					ELEMENTS.container.screensContainer.appendChild(screen)
+					ELEMENTS.container.screens[playerId] = screen
 
 				// board
 					let board = document.createElement("div")
 						board.className = "board"
 					screen.appendChild(board)
+
+				// name
+					let name = document.createElement("output")
+						name.className = "screen-name"
+					board.appendChild(name)
+
+				// role
+					let role = document.createElement("output")
+						role.className = "screen-role"
+					board.appendChild(role)
+
+				// connected
+					let connected = document.createElement("input")
+						connected.type = "checkbox"
+						connected.readonly = true
+						connected.className = "screen-connected"
+					board.appendChild(connected)
 
 				// grid
 					let grid = document.createElement("div")
@@ -826,7 +910,8 @@
 
 				// remaining ids
 					for (let i in ids) {
-						createObject(screen, objects[i])
+						let element = createObject(screen, objects[i])
+						displayObject(screen, element, objects[i])
 					}
 			} catch (error) {console.log(error)}
 		}
@@ -835,7 +920,7 @@
 		function displayObject(screen, element, object) {
 			try {
 				// active
-					if (STATE.grabbed && STATE.grabbed.id == "object-" + object.id) {
+					if (STATE.grabbed && STATE.grabbed.id == screen.id + "-object-" + object.id) {
 						return
 					}
 
@@ -858,11 +943,11 @@
 				// create
 					let element = document.createElement("div")
 						element.className = "object"
-						element.id = "object-" + object.id
+						element.id = screen.id + "-object-" + object.id
 						element.style.width  = "calc(var(--cell-size) * " + object.size.x + ")"
 						element.style.height = "calc(var(--cell-size) * " + object.size.y + ")"
-						element.style.clipPath = object.shape.path
-						element.style.background = object.border ? object.border.hex : object.color.hex
+						element.style.clipPath = object.shape
+						element.style.background = object.border ? object.border : object.color
 						element.style.zIndex = object.position.z
 						element.addEventListener(TRIGGERS.mousedown, grabObject)
 					screen.objectElements[object.id] = object
@@ -878,8 +963,8 @@
 					if (object.border) {
 						inner = document.createElement("div")
 						inner.className = "object-inner"
-						inner.style.clipPath = object.shape.path
-						inner.style.background = object.color.hex
+						inner.style.clipPath = object.shape
+						inner.style.background = object.color
 						element.appendChild(inner)
 					}
 
@@ -895,6 +980,9 @@
 							element.appendChild(label)
 						}
 					}
+
+				// return element
+					return element
 			} catch (error) {console.log(error)}
 		}
 
@@ -935,19 +1023,25 @@
 			try {
 				// not a player
 					if (STATE.role !== "actor") {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 
 				// not in play
 					if (!STATE.room.status.play) {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 
 				// nothing grabbed
 					if (!STATE.grabbed) {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 
@@ -974,19 +1068,25 @@
 			try {
 				// not an actor
 					if (STATE.role !== "actor") {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 
 				// not in play
 					if (!STATE.room.status.play) {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 
 				// nothing grabbed
 					if (!STATE.grabbed) {
-						ELEMENTS.screens[STATE.playerId].removeAttribute("grabbing")
+						if (ELEMENTS.container.screens[STATE.playerId]) {
+							ELEMENTS.container.screens[STATE.playerId].removeAttribute("grabbing")
+						}
 						return
 					}
 

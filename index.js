@@ -5,7 +5,6 @@
 	const WS      = require("websocket").server
 
 	const CORE    = require("./node/core")
-	const HOME    = require("./node/home")
 	const ROOM    = require("./node/room")
 	const SESSION = require("./node/session")
 
@@ -89,6 +88,7 @@
 											RESPONSE.end(file, "binary")
 										})
 									}
+									catch (error) {_404(REQUEST, RESPONSE, error)}
 								break
 
 							// css
@@ -109,7 +109,7 @@
 							// js
 								case (REQUEST.fileType == "js"):
 									try {
-										REQUEST.writeHead(200, CORE.constructHeaders(REQUEST))
+										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
 										FS.readFile("./js/" + REQUEST.path[REQUEST.path.length - 1], function (error, file) {
 											if (error) {
 												_404(REQUEST, RESPONSE, error)
@@ -155,6 +155,7 @@
 											RESPONSE.end(html)
 										})
 									}
+									catch (error) {_404(REQUEST, RESPONSE, error)}
 								break
 
 							// data
@@ -231,7 +232,7 @@
 		function _403(REQUEST, RESPONSE, data) {
 			CORE.logError(data)
 			REQUEST.contentType = "application/json"
-			REQUEST.writeHead(403, CORE.constructHeaders(REQUEST))
+			RESPONSE.writeHead(403, CORE.constructHeaders(REQUEST))
 			RESPONSE.end( JSON.stringify({success: false, error: data}) )
 		}
 
@@ -308,12 +309,17 @@
 
 				// on close
 					REQUEST.connection.on("close", function (reasonCode, description) {
-						if (CONNECTIONS[REQUEST.session.id]) {
-							delete CONNECTIONS[REQUEST.session.id][REQUEST.path[REQUEST.path.length - 1]]
-						}
-						if (!Object.keys(CONNECTIONS[REQUEST.session.id])) {
-							delete CONNECTIONS[REQUEST.session.id]
-						}
+						// remove from connections pool
+							if (CONNECTIONS[REQUEST.session.id]) {
+								delete CONNECTIONS[REQUEST.session.id][REQUEST.path[REQUEST.path.length - 1]]
+							}
+							if (!Object.keys(CONNECTIONS[REQUEST.session.id])) {
+								delete CONNECTIONS[REQUEST.session.id]
+							}
+
+						// update room
+							REQUEST.post = {action: "disconnectPlayer"}
+							ROOM.updateOne(REQUEST, sendSocketData)
 					})
 
 				// on message
@@ -348,6 +354,7 @@
 						case "updateObject":
 						case "startGame":
 						case "endGame":
+						case "leaveRoom":
 							try {
 								ROOM.updateOne(REQUEST, sendSocketData)
 							}
