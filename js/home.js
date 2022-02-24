@@ -1,6 +1,7 @@
 /*** globals ***/
 	/* triggers */
 		const TRIGGERS = {
+			click: "click",
 			submit: "submit"
 		}
 
@@ -16,7 +17,9 @@
 			newRoomForm: document.querySelector("#new-room-form"),
 			joinRoomForm: document.querySelector("#join-room-form"),
 			roomIdInput: document.querySelector("#room-id-input"),
-			nameInput: document.querySelector("#name-input")
+			nameInput: document.querySelector("#name-input"),
+			about: document.querySelector("#about"),
+			aboutClose: document.querySelector("#about-close")
 		}
 
 /*** tools ***/
@@ -178,5 +181,13 @@
 						roomId: roomId,
 						name: name
 					}, receivePost)
+			} catch (error) {console.log(error)}
+		}
+
+	/* closeAbout */
+		ELEMENTS.aboutClose.addEventListener(TRIGGERS.click, closeAbout)
+		function closeAbout(event) {
+			try {
+				ELEMENTS.about.open = false
 			} catch (error) {console.log(error)}
 		}

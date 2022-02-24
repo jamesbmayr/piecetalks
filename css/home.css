@@ -1,49 +1,90 @@
 /*** container ***/
 	#container {
-
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-50%);
+		padding: var(--medium-gap-size);
+		border-radius: var(--border-radius);
+		background: var(--medium-gray);
+		text-align: center;
 	}
 
 	/* heading */
 		#heading {
-
+			text-transform: uppercase;
 		}
 
 	/* form */
-		#new-room-form, #join-room-form {
+		#name-input {
+			text-align: center;
+			width: 100%;
+			margin-bottom: var(--medium-gap-size);
+			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+		}
 
+		#new-room-form, #join-room-form {
+			float: left;
+			width: calc(50% - var(--medium-gap-size) / 2);
+		}
+
+		#new-room-form {
+			margin-right: var(--medium-gap-size);
 		}
 
 		#new-room-button {
-
+			width: 100%;
+			height: calc(var(--medium-font-size) * 2 + 5 * var(--medium-gap-size));
+			background: var(--dark-green);
 		}
 
 		#room-id-input {
-
-		}
-
-		#name-input {
-
+			text-align: center;
+			width: 100%;
+			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			margin-bottom: var(--medium-gap-size);
 		}
 
 		#join-room-button {
-			
+			width: 100%;
+			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			background: var(--dark-blue);
 		}
 
 	/* about */
 		#about {
-
+			width: auto;
 		}
 
 		#about-button {
-
-		}
-
-		#about-button:focus, #about-button:hover {
-
+			position: absolute;
+			top: var(--medium-gap-size);
+			left: var(--medium-gap-size);
+			background: var(--dark-orange);
 		}
 
 		#about-overlay {
+			z-index: 1001;
+			position: absolute;
+			top: var(--medium-gap-size);
+			left: var(--medium-gap-size);
+			overflow-x: hidden;
+			overflow-y: scroll;
+			background: var(--light-gray);
+			color: var(--dark-gray);
+			font-size: var(--medium-font-size);
+			font-family: var(--font-0);
+			height: calc(100vh - 4 * var(--medium-gap-size));
+			width: calc(100vw - 4 * var(--medium-gap-size));
+			padding: var(--medium-gap-size);
+			border: none;
+			border-radius: var(--border-radius);
+			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+		}
 
+		#about-close {
+			float: right;
+			width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 		}
 
 /*** j-logo ***/

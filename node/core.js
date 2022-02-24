@@ -388,7 +388,7 @@
 
 						case "sizes":
 							return {
-								"shadow-size": "5px",
+								"shadow-size": "10px",
 								"border-radius": "20px",
 								"blur-size": "5px",
 								"border-size": "2px",
@@ -399,7 +399,8 @@
 								"medium-font-size": "20px",
 								"large-font-size": "35px",
 								"huge-font-size": "50px",
-								"transition-time": "1s"
+								"transition-time": "1s",
+								"hover-brightness": "0.75"
 							}
 						break
 
