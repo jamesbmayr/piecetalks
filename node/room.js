@@ -803,7 +803,7 @@
 
 						// for all players
 							for (let i in room.players) {
-								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+								callback({roomId: room.id, success: true, message: "game started! your role: " + room.players[i].role, room: room, recipients: [room.players[i].sessionId]})
 							}
 					})
 			}

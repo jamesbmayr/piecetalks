@@ -18,6 +18,7 @@
 
 	/* constants */
 		const CONSTANTS = {
+			boardSize: 500,
 			alphabet: "abcdefghijklmnopqrstuvwxyz",
 			translucentOpacity: 0.5,
 			minimumNameLength: 3,
@@ -45,6 +46,10 @@
 
 	/* elements */
 		const ELEMENTS = {
+			cssVariables: {
+				screens: document.querySelector("#css-variables-screens"),
+				cellSize: document.querySelector("#css-variables-cell-size")
+			},
 			configuration: {
 				element: document.querySelector("#configuration"),
 				button: document.querySelector("#configuration-button"),
@@ -584,6 +589,9 @@
 							value = value[value.length - 1].replace(/_/g, "-")
 						element.checked = configuration.objects.colors.includes(value) || false
 					}
+
+				// cell-size
+					ELEMENTS.cssVariables.cellSize.innerText = ":root {--cell-size: " + (CONSTANTS.boardSize / Math.max(configuration.board.x, configuration.board.y)) + "px}"
 			} catch (error) {console.log(error)}
 		}
 
@@ -756,6 +764,9 @@
 	/* displayScreens */
 		function displayScreens(players) {
 			try {
+				// count
+					let activeScreens = 0
+
 				// spectator
 					if (STATE.role == "spectator") {
 						for (let i in ELEMENTS.container.screens) {
@@ -766,12 +777,18 @@
 						}
 
 						for (let i in STATE.room.players) {
+							if (STATE.room.players[i].role == "spectator") {
+								continue
+							}
+							activeScreens++
 							displayScreen(STATE.room.configuration, STATE.room.players[i])
 						}
 					}
 
 				// informer / actor
 					else {
+						activeScreens = 1
+
 						for (let i in ELEMENTS.container.screens) {
 							if (i !== STATE.playerId) {
 								ELEMENTS.container.screens[i].remove()
@@ -781,17 +798,15 @@
 
 						displayScreen(STATE.room.configuration, STATE.room.players[STATE.playerId])
 					}
+
+				// css variable
+					ELEMENTS.cssVariables.screens.innerText = ":root {--screens: " + activeScreens + "}"
 			} catch (error) {console.log(error)}
 		}
 
 	/* displayScreen */
 		function displayScreen(configuration, player) {
 			try {
-				// spectator --> no screen
-					if (player.role == "spectator") {
-						return
-					}
-
 				// no screen yet
 					let screen = ELEMENTS.container.screens[player.id] || createScreen(player.id)
 
@@ -806,7 +821,7 @@
 				// grid
 					if (configuration.board.grid) {
 						let count = configuration.board.x * configuration.board.y
-						if (Array.from(screen.querySelector(".grid-cell")).length !== count) {
+						if (Array.from(screen.querySelectorAll(".grid-cell")).length !== count) {
 							displayGrid(screen.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
 						}
 					}
@@ -816,8 +831,8 @@
 
 				// coordinates
 					if (configuration.board.coordinates) {
-						let count = configuration.coordinates.x + configuration.coordinates.y
-						if (Array.from(screen.querySelector(".coordinate")).length !== count) {
+						let count = configuration.board.x + configuration.board.y
+						if (Array.from(screen.querySelectorAll(".coordinate")).length !== count) {
 							displayCoordinates(screen.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
 						}
 					}
@@ -840,27 +855,27 @@
 					ELEMENTS.container.screensContainer.appendChild(screen)
 					ELEMENTS.container.screens[playerId] = screen
 
-				// board
-					let board = document.createElement("div")
-						board.className = "board"
-					screen.appendChild(board)
-
 				// name
 					let name = document.createElement("output")
 						name.className = "screen-name"
-					board.appendChild(name)
+					screen.appendChild(name)
 
 				// role
 					let role = document.createElement("output")
 						role.className = "screen-role"
-					board.appendChild(role)
+					screen.appendChild(role)
 
 				// connected
 					let connected = document.createElement("input")
 						connected.type = "checkbox"
 						connected.readonly = true
 						connected.className = "screen-connected"
-					board.appendChild(connected)
+					screen.appendChild(connected)
+
+				// board
+					let board = document.createElement("div")
+						board.className = "board"
+					screen.appendChild(board)
 
 				// grid
 					let grid = document.createElement("div")
@@ -871,6 +886,11 @@
 					let coordinates = document.createElement("div")
 						coordinates.className = "board-coordinates"
 					board.appendChild(coordinates)
+
+				// drawer
+					let drawer = document.createElement("div")
+						drawer.className = "drawer"
+					screen.appendChild(drawer)
 
 				// objects
 					screen.objectElements = {}
@@ -891,7 +911,7 @@
 						for (let row = 0; row < y; row++) {
 							let element = document.createElement("div")
 								element.className = "grid-cell"
-								element.id = "grid-cell-" + x + "," + y
+								element.id = "grid-cell-" + column + "," + row
 							container.appendChild(element)
 						}
 					}

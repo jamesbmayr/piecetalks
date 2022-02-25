@@ -11,8 +11,15 @@
 		<script src="room.js" defer></script>
 		<script>window.roomId = "<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"</script>
 		<script node>var CONFIGURATIONS = getAsset("configurations")</script>node>
+		<style id="css-variables-screens">:root {--screens: 1}</style>
+		<style id="css-variables-cell-size">:root {--cell-size: 1px}</style>
 	</head>
 	<body>
+		<div id="container">
+			<h1 id="room-name"></h1>
+			<div id="timer" visibility="false"></div>
+			<div id="screens"></div>
+		</div>
 		<details id="configuration">
 			<summary id="configuration-button" class="pseudo-button">&#x2699;</summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
@@ -162,10 +169,5 @@
 				</section>
 			</div>
 		</details>
-		<div id="container">
-			<div id="room-name"></div>
-			<div id="timer" visibility="false"></div>
-			<div id="screens"></div>
-		</div>
 	</body>
 </html>
