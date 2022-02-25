@@ -6,13 +6,15 @@
 		transform: translateX(-50%) translateY(-50%);
 		padding: var(--medium-gap-size);
 		border-radius: var(--border-radius);
-		background: var(--medium-gray);
+		background: var(--dark-gray);
 		text-align: center;
+		width: calc((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size));
 	}
 
 	/* heading */
 		#heading {
 			text-transform: uppercase;
+			color: var(--medium-gray);
 		}
 
 	/* form */
@@ -35,7 +37,7 @@
 		#new-room-button {
 			width: 100%;
 			height: calc(var(--medium-font-size) * 2 + 5 * var(--medium-gap-size));
-			background: var(--dark-green);
+			background: var(--medium-green);
 		}
 
 		#room-id-input {
@@ -48,7 +50,7 @@
 		#join-room-button {
 			width: 100%;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
-			background: var(--dark-blue);
+			background: var(--medium-blue);
 		}
 
 	/* about */

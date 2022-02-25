@@ -131,7 +131,7 @@
 				// both
 					setTimeout(function() {
 						if (get.roomid && get.name) {
-							submitJoinRoom()
+							joinRoom()
 						}
 					}, 0)
 			} catch (error) {console.log(error)}

@@ -9,7 +9,7 @@
 		}
 
 		body {
-			background-color: var(--dark-gray);
+			background-color: var(--medium-gray);
 			position: absolute;
 			margin: 0;
 			padding: 0;
@@ -65,6 +65,10 @@
 		}
 
 		h2 {
+			font-size: var(--medium-font-size);
+			font-family: var(--font-0);
+			margin: var(--small-gap-size) 0;
+			text-transform: uppercase;
 			user-select: none !important;
 			-webkit-user-select: none !important;
 			-moz-user-select: none !important;
@@ -73,6 +77,10 @@
 		}
 
 		h3 {
+			font-size: var(--small-font-size);
+			font-family: var(--font-0);
+			margin: var(--large-gap-size) 0 0 0;
+			text-transform: uppercase;
 			user-select: none !important;
 			-webkit-user-select: none !important;
 			-moz-user-select: none !important;
@@ -97,6 +105,12 @@
 
 		}
 
+		.form-row {
+			float: left;
+			width: 100%;
+			margin-bottom: var(--small-gap-size);
+		}
+
 	/* inputs */
 		input {
 			box-sizing: border-box;
@@ -108,7 +122,10 @@
 			font-family: var(--font-0);
 			outline: none;
 			padding: var(--medium-gap-size);
-			line-height: 1.1;
+			line-height: 1;
+			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			vertical-align: top;
+			min-width: calc(var(--medium-font-size) * 10 + 2 * var(--medium-gap-size));
 		}
 
 		input:focus {
@@ -124,6 +141,19 @@
 			pointer-events: none;
 		}
 
+		input[type="checkbox"] {
+			cursor: pointer;
+			zoom: 2;
+			margin: 0;
+			min-width: auto;
+			height: calc((var(--medium-font-size) + 2 * var(--medium-gap-size)) / 2);
+		}
+
+		input[type="checkbox"]:focus, input[type="checkbox"]:hover {
+			box-shadow: none;
+			filter: brightness(var(--hover-brightness));
+		}
+
 	/* button */
 		button, .pseudo-button {
 			box-sizing: border-box;
@@ -132,6 +162,8 @@
 			background: var(--dark-gray);
 			font-size: var(--medium-font-size);
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			text-align: center;
 			color: var(--light-gray);
 			font-family: var(--font-0);
 			outline: none;
@@ -145,6 +177,8 @@
 			-moz-user-select: none !important;
 			-ms-user-select: none !important;
 			-o-user-select: none !important;
+			display: inline-block;
+			vertical-align: bottom;
 		}
 
 		button:hover, button:focus, .pseudo-button:hover, .pseudo-button:focus {
@@ -154,25 +188,58 @@
 
 	/* select */
 		select {
-
+			border: none;
+			border-radius: var(--border-radius);
+			background: var(--light-gray);
+			font-size: var(--medium-font-size);
+			color: var(--dark-gray);
+			font-family: var(--font-0);
+			outline: none;
+			padding: var(--medium-gap-size);
+			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			cursor: pointer;
+			line-height: 1;
+			vertical-align: top;
+			text-transform: uppercase;
 		}
 
 		select:hover, select:focus {
-
+			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
 		}
 
 	/* link */
 		a, a:visited {
-
+			font-family: var(--font-family);
+			color: var(--light-blue);
+			font-weight: bold;
+			font-size: var(--medium-font-size);
+			text-decoration: none;
+			cursor: pointer;
+			vertical-align: bottom;
 		}
 
 		a:hover, a:focus {
-
+			color: var(--medium-blue);
+			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
 		}
 
 	/* label */
 		label {
+			margin: 0 var(--medium-gap-size);
+			width: auto;
+			display: inline-block;
+		}
 
+		label span {
+			box-sizing: border-box;
+			text-transform: uppercase;
+			font-size: var(--small-font-size);
+			font-weight: bold;
+			vertical-align: top;
+			display: inline-block;
+			height: var(--medium-font-size);
+			line-height: 1.5;
+			margin: calc(var(--medium-gap-size)) var(--small-gap-size);
 		}
 
 	/* details */
@@ -186,6 +253,19 @@
 
 		details summary::-webkit-details-marker {
 			display: none;
+		}
+
+	/* section */
+		section {
+			width: 100%;
+			float: left;
+			padding-bottom: var(--large-gap-size);
+			border-bottom: var(--border-size) solid var(--medium-gray);
+			margin-bottom: var(--large-gap-size);
+		}
+
+		section:last-child {
+			margin-bottom: none;
 		}
 
 /*** error / toast ***/
@@ -207,7 +287,7 @@
 		-moz-user-select: none;
 		-ms-user-select: none;
 		-o-user-select: none;
-		z-index: 1000;
+		z-index: 10000;
 		overflow: hidden;
 		transition: var(--transition-time);
 	}
@@ -230,5 +310,7 @@
 			margin: 0px !important;
 			padding: 0px !important;
 			border: 0px !important;
+			height: 0px !important;
+			width: 0px !important;
 		}
 		

@@ -46,8 +46,10 @@
 	/* elements */
 		const ELEMENTS = {
 			configuration: {
+				element: document.querySelector("#configuration"),
 				button: document.querySelector("#configuration-button"),
 				overlay: document.querySelector("#configuration-overlay"),
+				close: document.querySelector("#configuration-close"),
 				room: {
 					id: document.querySelector("#configuration-room-id"),
 					name: document.querySelector("#configuration-room-name"),
@@ -83,9 +85,9 @@
 						translucent: document.querySelector("#configuration-game-objects-translucent"),
 						borders: document.querySelector("#configuration-game-objects-borders"),
 						labels: document.querySelector("#configuration-game-objects-labels"),
-						sizes: Array.from(document.querySelectorAll("input[property='configuration-game-objects-sizes']")),
-						shapes: Array.from(document.querySelectorAll("input[property='configuration-game-objects-shapes']")),
-						colors: Array.from(document.querySelectorAll("input[property='configuration-game-objects-colors']"))
+						sizes: Array.from(document.querySelectorAll("input[property='objects-sizes']")),
+						shapes: Array.from(document.querySelectorAll("input[property='objects-shapes']")),
+						colors: Array.from(document.querySelectorAll("input[property='objects-colors']"))
 					},
 					status: {
 						current: document.querySelector("#configuration-game-status-current"),
@@ -95,6 +97,7 @@
 				}
 			},
 			container: {
+				roomName: document.querySelector("#room-name"),
 				timer: document.querySelector("#timer"),
 				screensContainer: document.querySelector("#screens"),
 				screens: {}
@@ -284,12 +287,12 @@
 					}
 
 				// update
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "updateRoom",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId,
 						name: name
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
@@ -298,7 +301,7 @@
 		function leaveRoom(event) {
 			try {
 				// prompt
-					let confirmed = window.prompt(STATE.isHost ? "Are you sure you want to close the room?" : "Are you sure you want to leave?")
+					let confirmed = window.confirm(STATE.isHost ? "Are you sure you want to close the room?" : "Are you sure you want to leave?")
 
 				// cancel
 					if (!confirmed) {
@@ -306,11 +309,11 @@
 					}
 
 				// send command to server
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "leaveRoom",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
@@ -331,7 +334,7 @@
 
 						// update
 							displayPlayer(ELEMENTS.configuration.players.rows[i], players[i])
-							ids = ids.splice(ids.indexOf(i), 1)
+							ids = ids.filter(function(j) { return j !== i })
 					}
 
 				// remaining ids
@@ -366,9 +369,17 @@
 				// element
 					let element = document.createElement("div")
 						element.id = "player-" + player.id
-						element.className = "player-row"
+						element.className = "player-row form-row"
 					ELEMENTS.configuration.players.rows[player.id] = element
 					ELEMENTS.configuration.players.list.appendChild(element)
+
+				// label
+					let label = document.createElement("label")
+					element.appendChild(label)
+
+					let span = document.createElement("span")
+						span.innerText = "name"
+					label.appendChild(span)
 
 				// name
 					let nameInput = document.createElement("input")
@@ -376,14 +387,16 @@
 						nameInput.type = "text"
 						nameInput.value = player.name
 						nameInput.placeholder = "name"
+						nameInput.autocomplete = "off"
+						nameInput.spellcheck = false
 						nameInput.addEventListener(TRIGGERS.change, updatePlayer)
-					element.appendChild(nameInput)
+					label.appendChild(nameInput)
 
 				// role
 					let roleSelect = document.createElement("select")
 						roleSelect.className = "player-role"
 						roleSelect.addEventListener(TRIGGERS.change, updatePlayer)
-					element.appendChild(roleSelect)
+					label.appendChild(roleSelect)
 
 						for (let i in CONSTANTS.roles) {
 							let option = document.createElement("option")
@@ -432,14 +445,14 @@
 					}
 
 				// send command to server
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "updatePlayer",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId,
 						targetId: id,
 						name: name,
 						role: role
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
@@ -469,7 +482,7 @@
 
 				// update invite mailto
 					let url = window.location.protocol + "//" + window.location.host + "?roomid=" + STATE.roomId + "&name=" + name
-					ELEMENTS.configuration.players.invite.mailto.href = "mailto:" + email + "&subject=Invite&body=Join the Game!" + encodeURIComponent(url)
+					ELEMENTS.configuration.players.invite.mailto.href = "mailto:" + email + "?subject=Invite&body=Join the Game!" + encodeURIComponent(url)
 					ELEMENTS.configuration.players.invite.mailto.removeAttribute("disabled")
 			} catch (error) {console.log(error)}
 		}
@@ -499,18 +512,30 @@
 		ELEMENTS.configuration.players.invite.mailto.addEventListener(TRIGGERS.click, clickInviteEmail)
 		function clickInviteEmail(event) {
 			try {
-				// disable
-					ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
-					ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
+				// regular link click first
+					setTimeout(function() {
+						// disable
+							ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
+							ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
 
-				// clear
-					ELEMENTS.configuration.players.invite.name.value = ""
-					ELEMENTS.configuration.players.invite.email.value = ""
-					ELEMENTS.configuration.players.invite.mailto.href = "#"
+						// clear
+							ELEMENTS.configuration.players.invite.name.value = ""
+							ELEMENTS.configuration.players.invite.email.value = ""
+							ELEMENTS.configuration.players.invite.mailto.href = "#"
+					}, 0)
 			} catch (error) {console.log(error)}
 		}
 
 /*** configuration ***/
+	/* closeConfiguration */
+		ELEMENTS.configuration.close.addEventListener(TRIGGERS.click, closeConfiguration)
+		function closeConfiguration(event) {
+			try {
+				// close
+					ELEMENTS.configuration.element.open = false
+			} catch (error) {console.log(error)}
+		}
+
 	/* displayConfiguration */
 		function displayConfiguration(configuration) {
 			try {
@@ -529,8 +554,8 @@
 					ELEMENTS.configuration.game.board.background.value = configuration.board.background.name || "none"
 
 				// objects
-					ELEMENTS.configuration.game.objects.count = Number(configuration.objects.count) || 1
-					ELEMENTS.configuration.game.objects.unused = Number(configuration.objects.unused) || 0
+					ELEMENTS.configuration.game.objects.count.value = Number(configuration.objects.count) || 1
+					ELEMENTS.configuration.game.objects.unused.value = Number(configuration.objects.unused) || 0
 					ELEMENTS.configuration.game.objects.overlap.checked = configuration.objects.overlap || false
 					ELEMENTS.configuration.game.objects.translucent.checked = configuration.objects.translucent || false
 					ELEMENTS.configuration.game.objects.borders.checked = configuration.objects.borders || false
@@ -610,13 +635,14 @@
 
 				// preset
 					if (category == "preset") {
+						configuration = null
 						if (value == "custom") {
 							return
 						}
 					}
 
 				// send configuration
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "updateConfiguration",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId,
@@ -624,13 +650,21 @@
 						configuration: configuration,
 						value: value,
 						include: include
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
 	/* displayStatus */
 		function displayStatus(status) {
 			try {
+				// not in play
+					if (!status.play) {
+						ELEMENTS.configuration.element.open = true
+					}
+
+				// name
+					ELEMENTS.container.roomName.innerText = status.name
+
 				// status
 					if (status.play) {
 						ELEMENTS.configuration.game.status.current.value = "in play"
@@ -638,7 +672,7 @@
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", true)
 					}
 					else {
-						ELEMENTS.configuration.game.status.current.value = "..."
+						ELEMENTS.configuration.game.status.current.value = "setup"
 						ELEMENTS.configuration.game.status.start.setAttribute("visibility", true)
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
 					}
@@ -691,11 +725,11 @@
 					}
 
 				// send command to server
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "startGame",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
@@ -710,11 +744,11 @@
 					}
 
 				// send command to server
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "endGame",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId
-					})
+					}))
 			} catch (error) {console.log(error)}
 		}
 
@@ -725,7 +759,7 @@
 				// spectator
 					if (STATE.role == "spectator") {
 						for (let i in ELEMENTS.container.screens) {
-							if (!STATE.room.players[i]) {
+							if (!STATE.room.players[i] || STATE.room.players[i].role == "spectator") {
 								ELEMENTS.container.screens[i].remove()
 								delete ELEMENTS.container.screens[i]
 							}
@@ -767,7 +801,7 @@
 					screen.querySelector(".screen-connected").checked = player.connected || false
 
 				// background
-					screen.querySelector(".board").style.background = configuration.grid.background.value
+					screen.querySelector(".board").style.background = configuration.board.background ? configuration.board.background.value : "transparent"
 
 				// grid
 					if (configuration.board.grid) {
@@ -1122,14 +1156,14 @@
 					}
 
 				// send to server
-					STATE.socket.send({
+					STATE.socket.send(JSON.stringify({
 						action: "updateObject",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId,
 						objectId: STATE.grabbed.id,
 						x: CURSOR.x,
 						y: CURSOR.y
-					})
+					}))
 
 				// ungrab
 					STATE.grabbed = null

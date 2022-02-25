@@ -12,7 +12,7 @@
 	</head>
 	<body>
 		<details id="about">
-			<summary id="about-button" class="pseudo-button">About</summary>
+			<summary id="about-button" class="pseudo-button">?</summary>
 			<div id="about-overlay">
 				<button id="about-close" class="pseudo-button">&#x2715;</button>
 				<h2>What is this?</h2>
@@ -26,12 +26,12 @@
 		<a id="j-logo" href="https://jamesmayr.com" target="_blank"></a>
 		<div id="container">
 			<h1 id="heading"><script node>getAsset("title")</script>node></h1>
-			<input type="text" placeholder="your name" id="name-input" autocomplete="off" spellcheck="off"/>
+			<input type="text" placeholder="your name" id="name-input" autocomplete="off" spellcheck="false"/>
 			<form id="new-room-form" method="post" action="javascript:;">
 				<button id="new-room-button">new room</button>
 			</form>
 			<form id="join-room-form" method="post" action="javascript:;">
-				<input type="text" placeholder="room id" id="room-id-input" autocomplete="off" spellcheck="off"/>
+				<input type="text" placeholder="room id" id="room-id-input" autocomplete="off" spellcheck="false"/>
 				<button id="join-room-button">join room</button>
 			</form>
 		</div>		

@@ -31,6 +31,7 @@
 
 					let room = CORE.getSchema("room")
 						room.players[player.id] = player
+						room.configuration = CORE.duplicateObject(CONFIGURATIONS.presets.easy)
 
 				// query
 					let query = CORE.getSchema("query")
@@ -334,9 +335,7 @@
 						query.filters = {id: roomId}
 
 				// find
-					CORE.accessDatabase(query, function(results) {
-						return
-					})
+					CORE.accessDatabase(query, callback)
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -435,68 +434,69 @@
 
 						// timer
 							case "timer-active":
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+								room.configuration.timer.active = Boolean(REQUEST.post.value)
 							break
 							case "timer-seconds":
 								value = Math.round(REQUEST.post.value)
-								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+								if (isNaN(value) || CONFIGURATIONS.timer.seconds.minimum > value || value > CONFIGURATIONS.timer.seconds.maximum) {
 									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 									return
 								}
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+								room.configuration.timer.seconds = value
 							break
 
 						// board
 							case "board-x":
 							case "board-y":
 								value = Math.round(REQUEST.post.value)
-								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+								if (isNaN(value) || CONFIGURATIONS.board[REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS.board[REQUEST.post.configuration].maximum) {
 									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 									return
 								}
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+								room.configuration.board[REQUEST.post.configuration] = value
 							break
 							case "board-grid":
 							case "board-coordinates":
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+								room.configuration.board[REQUEST.post.configuration] = Boolean(REQUEST.post.value)
 							break
 							case "board-background":
-								if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(REQUEST.post.value)) {
+								value = REQUEST.post.value
+								if (!Object.keys(CONFIGURATIONS.board.backgrounds).includes(value)) {
 									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 									return
 								}
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = {name: REQUEST.post.value, value: CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration][REQUEST.post.value]}
+								room.configuration.board.background = {name: value, value: CONFIGURATIONS.board.backgrounds[value]}
 							break
 
 						// objects
 							case "objects-count":
 							case "objects-unused":
 								value = Math.round(REQUEST.post.value)
-								if (isNaN(value) || CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration].maximum) {
+								if (isNaN(value) || CONFIGURATIONS.objects[REQUEST.post.configuration].minimum > value || value > CONFIGURATIONS.objects[REQUEST.post.configuration].maximum) {
 									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 									return
 								}
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = value
+								room.configuration.objects[REQUEST.post.configuration] = value
 							break
 							case "objects-overlap":
 							case "objects-translucent":
 							case "objects-borders":
 							case "objects-labels":
-								room.configuration[REQUEST.post.category][REQUEST.post.configuration] = Boolean(REQUEST.post.value)
+								room.configuration.objects[REQUEST.post.configuration] = Boolean(REQUEST.post.value)
 							break
 							case "objects-sizes":
 								value = REQUEST.post.value
 								if (REQUEST.post.include) {
-									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+									if (!Object.keys(CONFIGURATIONS.objects.sizes).includes(value)) {
 										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 										return
 									}
-									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
-										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									if (!room.configuration.objects.sizes.includes(value)) {
+										room.configuration.objects.sizes.push(value)
 									}
 								}
 								else {
-									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+									room.configuration.objects.sizes = room.configuration.objects.sizes.filter(function(i) {
 										return i !== value
 									}) || []
 								}
@@ -504,16 +504,16 @@
 							case "objects-shapes":
 								value = REQUEST.post.value.replace(/_/g, " ")
 								if (REQUEST.post.include) {
-									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+									if (!Object.keys(CONFIGURATIONS.objects.shapes).includes(value)) {
 										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 										return
 									}
-									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
-										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									if (!room.configuration.objects.shapes.includes(value)) {
+										room.configuration.objects.shapes.push(value)
 									}
 								}
 								else {
-									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+									room.configuration.objects.shapes = room.configuration.objects.shapes.filter(function(i) {
 										return i !== value
 									}) || []
 								}
@@ -521,20 +521,25 @@
 							case "objects-colors":
 								value = REQUEST.post.value.replace(/_/g, "-")
 								if (REQUEST.post.include) {
-									if (!Object.keys(CONFIGURATIONS[REQUEST.post.category][REQUEST.post.configuration]).includes(value)) {
+									if (!Object.keys(CONFIGURATIONS.objects.colors).includes(value)) {
 										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 										return
 									}
-									if (!room.configuration[REQUEST.post.category][REQUEST.post.configuration].includes(value)) {
-										room.configuration[REQUEST.post.category][REQUEST.post.configuration].push(value)
+									if (!room.configuration.objects.colors.includes(value)) {
+										room.configuration.objects.colors.push(value)
 									}
 								}
 								else {
-									room.configuration[REQUEST.post.category][REQUEST.post.configuration] = room.configuration[REQUEST.post.category][REQUEST.post.configuration].filter(function(i) {
+									room.configuration.objects.colors = room.configuration.objects.colors.filter(function(i) {
 										return i !== value
 									}) || []
 								}
 							break
+					}
+
+				// change from preset
+					if (REQUEST.post.category !== "preset") {
+						room.configuration.preset = "custom"
 					}
 
 				// query
@@ -658,7 +663,10 @@
 					if (room.configuration.timer.active) {
 						room.status.timeRemaining = Math.round((room.status.startTime + (room.configuration.timer.seconds * CONSTANTS.second) - new Date().getTime()) / CONSTANTS.second)
 						if (!room.status.timeRemaining) {
-							endGame(REQUEST, room, null, callback)
+							endGame(REQUEST, room, null, function(data) {
+								data.message = "time's up!"
+								callback(data)
+							})
 							return
 						}
 						timeUpdated = true
@@ -682,7 +690,10 @@
 
 				// check for victory
 					if (isVictory(room, player)) {
-						endGame(REQUEST, room, null, callback)
+						endGame(REQUEST, room, null, function(data) {
+							data.message = player.name + " successfully arranged the objects"
+							callback(data)
+						})
 						return
 					}
 
@@ -843,7 +854,7 @@
 
 						// for all players
 							for (let i in room.players) {
-								callback({roomId: room.id, success: true, room: room, recipients: [room.players[i].sessionId]})
+								callback({roomId: room.id, success: true, message: "the game has ended", room: room, recipients: [room.players[i].sessionId]})
 							}
 					})
 			}
@@ -865,30 +876,32 @@
 								sessionIds.push(room.players[i].sessionId)
 							}
 
-						// delete room
-							deleteOne(REQUEST, function() {
-								// update sessions
-									for (let i in sessionIds) {
-										// make a pseudoRequest session for clearing it out
-											let pseudoRequest = {
-												session: {
-													id: sessionIds[i]
-												},
-												cookie: {},
-												updateSession: {
-													playerId: null,
-													roomId: null
-												}
-											}
+						// update sessions
+							for (let i in sessionIds) {
+								// that id
+									let thatSessionId = sessionIds[i]
 
-										// update and callback (redirect)
-											SESSION.updateOne(pseudoRequest, null, function(req, res) {
-												callback({success: true, message: "the host closed the room", recipients: [req.session.id], location: "../../../../"})
-											})
+								// make a pseudoRequest session for clearing it out
+									let pseudoRequest = {
+										session: {
+											id: thatSessionId
+										},
+										cookie: {},
+										updateSession: {
+											playerId: null,
+											roomId: null
+										}
 									}
-							})
 
-						return
+								// update and callback (redirect)
+									SESSION.updateOne(pseudoRequest, null, function() {
+										callback({success: true, roomId: room.id, message: "the host closed the room", recipients: [thatSessionId], location: "../../../../"})
+									})
+							}
+
+						// delete room
+							deleteOne(REQUEST, function(results) {})
+							return
 					}
 
 				// other --> remove player

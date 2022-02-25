@@ -14,124 +14,156 @@
 	</head>
 	<body>
 		<details id="configuration">
-			<summary id="configuration-button">&#x2699;</summary>
+			<summary id="configuration-button" class="pseudo-button">&#x2699;</summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
+				<button id="configuration-close" class="pseudo-button">&#x2715;</button>
 				<section id="configuration-room">
 					<h2>
-						<span>room:</span>
+						<span>room id:</span>
 						<output id="configuration-room-id" value="<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"></output>
-						<button id="configuration-room-leave">&#x1f6aa;</button>
 					</h2>
-					<label>
-						<span>name:</span>
-						<input id="configuration-room-name" type="text" placeholder="room name">
-					</label>
+					<div class="form-row">
+						<label>
+							<span>name</span>
+							<input id="configuration-room-name" type="text" placeholder="room name" autocomplete="off" spellcheck="false">
+						</label>
+						<button id="configuration-room-leave">leave &#x1f6aa;</button>
+					</div>
 				</section>
 				<section id="configuration-players">
 					<h2>players</h2>
 					<div id="configuration-players-list"></div>
-					<div id="configuration-players-invite">
+					<div id="configuration-players-invite" class="form-row">
 						<h3>invite</h3>
 						<button id="configuration-players-invite-link">&#x1f517;</button>
 						<label>
 							<span>name</span>
-							<input type="text" id="configuration-players-invite-name" placeholder="name">
+							<input type="text" id="configuration-players-invite-name" placeholder="name" autocomplete="off" spellcheck="false">
 						</label>
 						<label>
 							<span>email</span>
-							<input type="email" id="configuration-players-invite-email" placeholder="email">
+							<input type="email" id="configuration-players-invite-email" placeholder="email" autocomplete="off" spellcheck="false">
 						</label>
-						<a href="#" id="configuration-players-invite-mailto" target="_blank">&#x2709;</a>
+						<a href="#" id="configuration-players-invite-mailto" target="_blank" class="pseudo-button">&#x1f4e7;</a>
 					</div>
 				</section>
 				<section id="configuration-game">
-					<h2>game play options</h2>
-					<label>
-						<span>preset</span>
-						<select id="configuration-game-preset" configuration="true">
-							<option value="custom">custom</option>
-							<script node>
-								let presets = ""
-								for (let i in CONFIGURATIONS.presets) {
-									presets += "<option value=" + i + ">" + i + "></option>"
-								}
-								presets
-							</script>node>
-						</select>
-					<label>
+					<h2>game play</h2>
+					<div class="form-row">
+						<h3>preset</h3>
+					</div>
+					<div class="form-row">
+						<label>
+							<select id="configuration-game-preset" configuration="true">
+								<option value="custom">custom</option>
+								<script node>
+									let presets = ""
+									for (let i in CONFIGURATIONS.presets) {
+										presets += "<option value='" + i + "'>" + i + "</option>"
+									}
+									presets
+								</script>node>
+							</select>
+						</label>
+					</div>
+					<div class="form-row">
 						<h3>timer</h3>
-						<label>active <input type="checkbox" id="configuration-game-timer-active" configuration="true"></label>
-						<label>seconds <input type="number" id="configuration-game-timer-seconds" step="1" min="0" placeholder="seconds" configuration="true"></label>
-					</label>
-					<label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-timer-active" configuration="true"><span>active</span></label>
+						<label><input type="number" id="configuration-game-timer-seconds" step="1" min="0" placeholder="seconds" configuration="true"><span>seconds</span></label>
+					</div>
+					<div class="form-row">
 						<h3>board</h3>
-						<label>x <input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true"></label>
-						<label>y <input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true"></label>
-						<label>show cells <input type="checkbox" id="configuration-game-board-grid" configuration="true"></label>
-						<label>show coordinates <input type="checkbox" id="configuration-game-board-coordinates" configuration="true"></label>
-					</label>
-					<label>
-						<h3>background</h3>
-						<select id="configuration-game-board-background" configuration="true">
-							<script node>
-								let backgrounds = ""
-								for (let i in CONFIGURATIONS.backgrounds) {
-									backgrounds += "<option value=" + i.replace(/\s/g, "-") + ">" + i + "></option>"
-								}
-								backgrounds
-							</script>node>
-						</select>
-					</label>
-					<label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-board-grid" configuration="true"><span>show cells</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-board-coordinates" configuration="true"><span>show coordinates</span></label>
+					</div>
+					<div class="form-row">
+						<label><span>x</span><input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true" autocomplete="off"></label>
+						<label><span>y</span><input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true" autocomplete="off"></label>
+					</div>
+					<div class="form-row">
+						<label>
+							<span>background</span>
+							<select id="configuration-game-board-background" configuration="true">
+								<script node>
+									let backgrounds = ""
+									for (let i in CONFIGURATIONS.board.backgrounds) {
+										backgrounds += "<option value='" + i + "'>" + i + "</option>"
+									}
+									backgrounds
+								</script>node>
+							</select>
+						</label>
+					</div>
+					<div class="form-row">
 						<h3>objects</h3>
-						<label># used<input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true"></label>
-						<label># unused<input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="unused" configuration="true"></label>
-						<label>allow overlap <input type="checkbox" id="configuration-game-objects-overlap" configuration="true"></label>
-						<label>allow translucent <input type="checkbox" id="configuration-game-objects-translucent" configuration="true"></label>
-						<label>borders <input type="checkbox" id="configuration-game-objects-borders" configuration="true"></label>
-						<label>labels <input type="checkbox" id="configuration-game-objects-labels" configuration="true"></label>
-					</label>
-					<label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-objects-overlap" configuration="true"><span>allow overlap</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-objects-translucent" configuration="true"><span>allow translucent</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-objects-borders" configuration="true"><span>borders</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="checkbox" id="configuration-game-objects-labels" configuration="true"><span>labels</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off"><span>used</span></label>
+					</div>
+					<div class="form-row">
+						<label><input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off"><span>unused</span></label>
+					</div>
+					<div class="form-row">
 						<h3>sizes</h3>
 						<script node>
 							let sizes = ""
-							for (let i in CONFIGURATIONS.sizes) {
-								sizes += "<label>" + i + "<input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true'></label>"
+							for (let i in CONFIGURATIONS.objects.sizes) {
+								sizes += "<label><input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true'><span>" + i + "</span></label>"
 							}
 							sizes
 						</script>node>
-					</label>
-					<label>
+					</div>
+					<div class="form-row">
 						<h3>shapes</h3>
 						<script node>
 							let shapes = ""
-							for (let i in CONFIGURATIONS.shapes) {
-								shapes += "<label>" + i + "<input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true'></label>"
+							for (let i in CONFIGURATIONS.objects.shapes) {
+								shapes += "<label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true'><span>" + i + "</span></label>"
 							}
 							shapes
 						</script>node>
-					</label>
-					<label>
+					</div>
+					<div class="form-row">
 						<h3>colors</h3>
 						<script node>
 							let colors = ""
-							for (let i in CONFIGURATIONS.colors) {
-								colors += "<label>" + i.replace(/-/g, " ") + "<input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true'></label>"
+							for (let i in CONFIGURATIONS.objects.colors) {
+								colors += "<label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true'><span>" + i.replace(/-/g, " ") + "</span></label>"
 							}
 							colors
 						</script>node>
-					</label>
+					</div>
 				</section>
 				<section>
-					<h2>game status: <output id="configuration-game-status-current"></output></h2>
-					<label>
-						<button id="configuration-game-status-start">start</button>
-						<button id="configuration-game-status-end">end</button>
-					</label>
+					<h2>
+						<span>status: </span>
+						<output id="configuration-game-status-current"></output>
+					</h2>
+					<button id="configuration-game-status-start">start</button>
+					<button id="configuration-game-status-end">end</button>
 				</section>
 			</div>
 		</details>
 		<div id="container">
+			<div id="room-name"></div>
 			<div id="timer" visibility="false"></div>
 			<div id="screens"></div>
 		</div>

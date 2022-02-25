@@ -317,7 +317,7 @@
 							return "Barrier Task Game"
 						break
 						case "logo":
-							return `<link rel="shortcut icon" href="logo.png/>`
+							return `<link rel="shortcut icon" href="logo.png"/>`
 						break
 						case "meta":
 							return `<meta charset="UTF-8"/>
@@ -483,11 +483,13 @@
 										"chevron right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
 										"hexagon horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
 										"hexagon vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
+										"hourglass horizontal": "polygon(0% 0%, 50% 30%, 100% 0%, 100% 100%, 50% 70%, 0% 100%)",
+										"hourglass vertical": "polygon(0% 0%, 100% 0%, 70% 50%, 100% 100%, 0% 100%, 30% 50%)",
 										"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
 										"octagon diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
 										"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
 										"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
-										"x": "polygon(0% 0%, 20% 0%, 50% 30%, 80% 0%, 100% 0%, 100% 20%, 70% 50%, 100% 80%, 100% 100%, 80% 100%, 50% 70%, 20% 100%, 0% 100%, 0% 80%, 30% 50%, 0% 20%)",
+										"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
 										"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
 									},
 									colors: getAsset("colors")
@@ -589,7 +591,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "cross", "x", "8 point star"],
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "hourglass vertical", "octagon", "octagon diagonal", "cross", "x", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
@@ -614,7 +616,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3", "5x5"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "8 point star"],
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "hourglass horizontal", "hourglass vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
 										}
 									}
