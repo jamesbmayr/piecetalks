@@ -278,7 +278,7 @@
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
 			}
-			
+
 			#screens .board-grid, #screens .board-coordinates {
 				position: absolute;
 				top: 50%;
@@ -325,8 +325,8 @@
 				width: var(--medium-font-size);
 				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
 				writing-mode: vertical-rl;
-				text-orientation: mixed;
-				transform: translateY(calc(-1 * var(--medium-font-size))) rotate(180deg) translateX(calc(1 * (var(--medium-font-size) + var(--small-gap-size))));
+				text-orientation: upright;
+				transform: translateY(calc(-1 * var(--medium-font-size))) translateX(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
 			}
 
 			#screens:not([count='1']) .screen .board-coordinate-x {
@@ -343,8 +343,8 @@
 				width: var(--small-font-size);
 				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
 				writing-mode: vertical-rl;
-				text-orientation: mixed;
-				transform: translateY(calc(-1 * var(--small-font-size))) rotate(180deg) translateX(calc(1 * (var(--small-font-size) + var(--small-gap-size))));
+				text-orientation: upright;
+				transform: translateY(calc(-1 * var(--small-font-size))) translateX(calc(-1 * (var(--small-font-size) + var(--small-gap-size))));
 			}
 
 			#screens .board .object {
@@ -425,6 +425,6 @@
 
 		/* grabbing */
 			#screens .board .object[grabbing], #screens .drawer .object[grabbing] {
-				cursor: grabbing;
+				cursor: grabbing !important;
 				filter: drop-shadow(0 0 var(--shadow-size) var(--medium-gray));
 			}

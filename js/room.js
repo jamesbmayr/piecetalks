@@ -505,7 +505,7 @@
 
 				// update invite mailto
 					let url = window.location.protocol + "//" + window.location.host + "?roomid=" + STATE.roomId + "&name=" + name
-					ELEMENTS.configuration.players.invite.mailto.href = "mailto:" + email + "?subject=Invite&body=Join the Game!" + encodeURIComponent(url)
+					ELEMENTS.configuration.players.invite.mailto.href = "mailto:" + email + "?subject=Invite&body=Join the Game! " + encodeURIComponent(url)
 					ELEMENTS.configuration.players.invite.mailto.removeAttribute("disabled")
 			} catch (error) {console.log(error)}
 		}
