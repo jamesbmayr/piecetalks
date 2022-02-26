@@ -314,22 +314,23 @@
 				switch (index) {
 					// web
 						case "title":
-							return "Barrier Task Game"
+							return "Taking Shape"
 						break
 						case "logo":
 							return `<link rel="shortcut icon" href="logo.png"/>`
 						break
 						case "meta":
+							let title = getAsset("title")
 							return `<meta charset="UTF-8"/>
-									<meta name="description" content="TBD"/>
-									<meta name="author" content="James Mayr:/>
-									<meta property="og:title" content="TBD"/>
-									<meta property="og:description" content="TBD"/>
-									<meta property="og:image" content="https://tbd.herokuapp.com/banner.png"/>
+									<meta name="description" content="` + title + `"/>
+									<meta name="author" content="James Mayr & Ayelet Kershenbaum"/>
+									<meta property="og:title" content="` + title + `"/>
+									<meta property="og:description" content="` + title + `"/>
+									<meta property="og:image" content="https://"` + ENVIRONMENT.domain + `"/banner.png"/>
 									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
 						case "fonts":
-							return `<link href="https://fonts.googleapis.com/css?family=TBD&display=swap" rel="stylesheet">`
+							return `<link href="https://fonts.googleapis.com/css?family=Roboto:wght@400;700&display=swap" rel="stylesheet">`
 						break
 						case "css-variables":
 							// output

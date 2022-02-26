@@ -1,4 +1,11 @@
 /*** container ***/
+	body {
+		background-image: url(banner.png);
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+
 	#container {
 		position: absolute;
 		top: 50%;
@@ -9,6 +16,7 @@
 		background: var(--dark-gray);
 		text-align: center;
 		width: calc(((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size)) * var(--multiplier));
+		box-shadow: 0 0 var(--shadow-size) var(--dark-gray);
 	}
 
 	/* heading */
@@ -108,5 +116,6 @@
 	}
 
 	#j-logo:hover, #j-logo:focus {
-		filter: drop-shadow(0px 0px var(--shadow-size) var(--light-gray));
+		box-shadow: none;
+		filter: drop-shadow(0px 0px var(--shadow-size) var(--dark-gray));
 	}

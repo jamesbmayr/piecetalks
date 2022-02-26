@@ -34,6 +34,24 @@
 			background: var(--medium-gray);
 			float: right;
 			width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			margin-bottom: calc(-100%);
+			z-index: 999;
+		}
+
+		#configuration-room h2 {
+			width: calc(100% - (var(--medium-font-size) + 3 * var(--medium-gap-size)));
+			font-size: var(--large-font-size);
+			margin-top: 0;
+		}
+
+		#configuration-room-id {
+			font-weight: bold;
+			pointer-events: all;
+			user-select: all;
+			-webkit-user-select: all;
+			-moz-user-select: all;
+			-ms-user-select: all;
+			-o-user-select: all;
 		}
 
 		#configuration-room-leave {

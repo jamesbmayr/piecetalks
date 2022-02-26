@@ -125,6 +125,7 @@
 								case (/[.]([a-zA-Z0-9])+$/).test(REQUEST.url):
 									try {
 										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
+										console.log(REQUEST.path[REQUEST.path.length - 1])
 										FS.readFile("./assets/" + REQUEST.path[REQUEST.path.length - 1], function (error, file) {
 											if (error) {
 												_404(REQUEST, RESPONSE, error)
@@ -134,6 +135,7 @@
 										})
 									}
 									catch (error) {_404(REQUEST, RESPONSE, error)}
+								break
 
 							// home
 								case (/^\/?$/).test(REQUEST.url):
