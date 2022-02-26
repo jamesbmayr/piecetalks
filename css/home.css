@@ -8,7 +8,7 @@
 		border-radius: var(--border-radius);
 		background: var(--dark-gray);
 		text-align: center;
-		width: calc((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size));
+		width: calc(((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size)) * var(--multiplier));
 	}
 
 	/* heading */

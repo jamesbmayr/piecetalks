@@ -322,11 +322,11 @@
 						case "meta":
 							return `<meta charset="UTF-8"/>
 									<meta name="description" content="TBD"/>
-									<meta name="author content="James Mayr/>
+									<meta name="author" content="James Mayr:/>
 									<meta property="og:title" content="TBD"/>
 									<meta property="og:description" content="TBD"/>
-									<meta property="og:image" content="https://tbd.herokuapp.com/banner.png/>
-									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0/>`
+									<meta property="og:image" content="https://tbd.herokuapp.com/banner.png"/>
+									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
 						case "fonts":
 							return `<link href="https://fonts.googleapis.com/css?family=TBD&display=swap" rel="stylesheet">`
@@ -400,7 +400,10 @@
 								"large-font-size": "35px",
 								"huge-font-size": "50px",
 								"transition-time": "1s",
-								"hover-brightness": "0.75"
+								"hover-brightness": "0.75",
+								"drawer-opacity": "0.5",
+								"object-opacity": "0.95",
+								"object-border": "80%"
 							}
 						break
 
@@ -413,13 +416,16 @@
 								second: 1000,
 								cookieLength: 1000 * 60 * 60 * 24 * 7,
 								minimumPlayers: 2,
-								maximumPlayers: 9,
+								maximumPlayers: 10,
 								minimumNameLength: 3,
 								maximumNameLength: 16,
 								roomIdLength: 4,
 								rounding: 100,
 								roles: ["informer", "actor", "spectator"],
-								attempts: 10
+								attempts: 10,
+								borderProbability: 0.5,
+								labelProbability: 1,
+								translucentProbability: 0.5
 							}
 						break
 
@@ -516,7 +522,7 @@
 											borders: false,
 											labels: true,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "square", "octagon", "cross", "8-point star"],
+											shapes: ["circle", "triangle up", "square", "octagon", "cross", "8 point star"],
 											colors: ["dark-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
 										}
 									},
@@ -559,7 +565,7 @@
 											background: {name: "vertical grayscale gradient", value: "linear-gradient(white, black)"}
 										},
 										objects: {
-											count: 15,
+											count: 10,
 											unused: 5,
 											overlap: false,
 											translucent: false,
@@ -584,7 +590,7 @@
 											background: {name: "vertical color gradient", value: "vertical color gradient"}
 										},
 										objects: {
-											count: 20,
+											count: 10,
 											unused: 10,
 											overlap: true,
 											translucent: false,
@@ -606,11 +612,11 @@
 											y: 10,
 											grid: false,
 											coordinates: false,
-											background: {name: "radial color gradient", value: "radial color gradient"}
+											background: {name: "radial color gradient", value: "radial-gradient(red, yellow, green, cyan, blue, magenta)"}
 										},
 										objects: {
-											count: 25,
-											unused: 25,
+											count: 15,
+											unused: 20,
 											overlap: true,
 											translucent: true,
 											borders: true,

@@ -1,3 +1,14 @@
+/*** mobile ***/
+	:root {
+		--multiplier: 1;
+	}
+	
+	@media screen and (max-width: 800px) {
+		:root {
+			--multiplier: 0.5;
+		}
+	}
+
 /*** page ***/
 	/* html */
 		html {
@@ -31,27 +42,6 @@
 		}
 
 /*** elements ***/
-	/* scrollbars */
-		::-webkit-scrollbar {
-			height: 0 !important;
-			width: 0 !important;
-		}
-
-		::-moz-scrollbar {
-			height: 0 !important;
-			width: 0 !important;
-		}
-
-		::-o-scrollbar {
-			height: 0 !important;
-			width: 0 !important;
-		}
-
-		* {
-			scrollbar-width: none;
-			scrollbar-height: none;
-		}
-
 	/* headings & text */
 		h1 {
 			font-size: var(--large-font-size);
@@ -101,10 +91,6 @@
 		}
 
 	/* form */
-		form {
-
-		}
-
 		.form-row {
 			float: left;
 			width: 100%;
@@ -125,20 +111,21 @@
 			line-height: 1;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 			vertical-align: top;
-			min-width: calc(var(--medium-font-size) * 10 + 2 * var(--medium-gap-size));
+			min-width: calc((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * var(--multiplier));
 		}
 
 		input:focus {
 			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
 		}
 
-		input[readonly], button[disabled], a[disabled], select[readonly] {
+		input[readonly], input[disabled], button[disabled], a[disabled], select[disabled] {
+			filter: brightness(var(--hover-brightness));
 			user-select: none !important;
 			-webkit-user-select: none !important;
 			-moz-user-select: none !important;
 			-ms-user-select: none !important;
 			-o-user-select: none !important;
-			pointer-events: none;
+			pointer-events: none !important;
 		}
 
 		input[type="checkbox"] {
@@ -240,6 +227,12 @@
 			height: var(--medium-font-size);
 			line-height: 1.5;
 			margin: calc(var(--medium-gap-size)) var(--small-gap-size);
+			user-select: none !important;
+			-webkit-user-select: none !important;
+			-moz-user-select: none !important;
+			-ms-user-select: none !important;
+			-o-user-select: none !important;
+			display: inline-block;
 		}
 
 	/* details */
@@ -265,7 +258,9 @@
 		}
 
 		section:last-child {
-			margin-bottom: none;
+			margin-bottom: 0;
+			padding-bottom: 0;
+			border-bottom: none;
 		}
 
 /*** error / toast ***/

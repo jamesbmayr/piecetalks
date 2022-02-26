@@ -218,7 +218,7 @@
 								// updated room
 									let room = results.documents[0]
 									for (let i in room.players) {
-										callback({roomId: room.id, success: true, message: name + " connected", playerId: i, room: room, recipients: [room.players[i].sessionId]})
+										callback({roomId: room.id, success: true, message: name + " connected", playerId: i, room: room, launch: room.status.play, recipients: [room.players[i].sessionId]})
 									}
 							})
 					})
@@ -583,6 +583,12 @@
 						return
 					}
 
+				// in progress
+					if (room.status.play) {
+						callback({roomId: room.id, success: false, message: "cannot change roles during a game", recipients: [REQUEST.session.id]})
+						return
+					}
+
 				// get target player
 					let targetPlayer = room.players[REQUEST.post.targetId]
 					if (!targetPlayer) {
@@ -653,7 +659,7 @@
 		function updateObject(REQUEST, room, player, callback) {
 			try {
 				// game over
-					if (!room.status.play || !room.status.timeRemaining || room.status.endTime) {
+					if (!room.status.play || (room.configuration.timer.active && !room.status.timeRemaining) || room.status.endTime) {
 						callback({roomId: room.id, success: false, message: "game ended", recipients: [REQUEST.session.id]})
 						return
 					}
@@ -662,11 +668,8 @@
 					let timeUpdated = false
 					if (room.configuration.timer.active) {
 						room.status.timeRemaining = Math.round((room.status.startTime + (room.configuration.timer.seconds * CONSTANTS.second) - new Date().getTime()) / CONSTANTS.second)
-						if (!room.status.timeRemaining) {
-							endGame(REQUEST, room, null, function(data) {
-								data.message = "time's up!"
-								callback(data)
-							})
+						if (room.status.timeRemaining <= 0) {
+							endGame(REQUEST, room, null, callback)
 							return
 						}
 						timeUpdated = true
@@ -768,15 +771,16 @@
 					}
 
 				// generate board
-					room = generateBoard(room) || false
+					let generatedRoom = generateBoard(room) || false
 
 				// unable
-					if (!room) {
+					if (!generatedRoom) {
 						callback({roomId: room.id, success: false, message: "unable to fit all the objects on the board", recipients: [REQUEST.session.id]})
 						return
 					}
 
 				// set status
+					room = generatedRoom
 					room.status.startTime = new Date().getTime()
 					room.status.endTime = null
 					room.status.timeRemaining = room.configuration.timer.active ? room.configuration.timer.seconds : null
@@ -803,7 +807,7 @@
 
 						// for all players
 							for (let i in room.players) {
-								callback({roomId: room.id, success: true, message: "game started! your role: " + room.players[i].role, room: room, recipients: [room.players[i].sessionId]})
+								callback({roomId: room.id, success: true, message: "game started! your role: " + room.players[i].role, room: room, launch: true, recipients: [room.players[i].sessionId]})
 							}
 					})
 			}
@@ -823,10 +827,24 @@
 						return
 					}
 
+				// timeout?
+					let message = "the game has ended"
+					if (room.configuration.timer.active) {
+						room.status.timeRemaining = Math.round((room.status.startTime + (room.configuration.timer.seconds * CONSTANTS.second) - new Date().getTime()) / CONSTANTS.second)
+						if (room.status.timeRemaining <= 0) {
+							room.status.timeRemaining = 0
+							message = "time's up!"
+						}
+					}
+
 				// set status
+					room.status.startTime = null
 					room.status.endTime = new Date().getTime()
-					room.status.timeRemaining = room.configuration.timer.active ? 0 : null
 					room.status.play = false
+
+				// activate grid
+					room.configuration.board.grid = true
+					room.configuration.board.coordinates = true
 
 				// set roles
 					for (let i in room.players) {
@@ -854,7 +872,7 @@
 
 						// for all players
 							for (let i in room.players) {
-								callback({roomId: room.id, success: true, message: "the game has ended", room: room, recipients: [room.players[i].sessionId]})
+								callback({roomId: room.id, success: true, message: message, room: room, recipients: [room.players[i].sessionId]})
 							}
 					})
 			}
@@ -1004,6 +1022,7 @@
 						objects.push(object)
 					}
 
+
 				// set z
 					let z = 1
 					for (let i in objects) {
@@ -1020,6 +1039,7 @@
 						do {
 							object.target.x = Math.floor(Math.random() * room.configuration.board.x)
 							object.target.y = Math.floor(Math.random() * room.configuration.board.y)
+							attempts--
 						} while (!room.configuration.objects.overlap && hasOverlap(object, objects) && attempts)
 
 						if (!attempts) {
@@ -1029,8 +1049,15 @@
 						positionedCount++
 					}
 
+
 				// shuffle
 					objects = CORE.sortRandom(objects)
+
+				// turn into an object
+					let objectObjects = {}
+					for (let i in objects) {
+						objectObjects[objects[i].id] = objects[i]
+					}
 
 				// copy for each player
 					for (let i in room.players) {
@@ -1038,16 +1065,17 @@
 							continue
 						}
 						if (room.players[i].role == "actor") {
-							room.players[i].objects = CORE.duplicateObject(objects)
+							room.players[i].objects = CORE.duplicateObject(objectObjects)
 						}
 						if (room.players[i].role == "informer") {
-							room.players[i].objects = CORE.duplicateObject(objects)
+							room.players[i].objects = CORE.duplicateObject(objectObjects)
 							for (let j in room.players[i].objects) {
 								room.players[i].objects[j].position.x = room.players[i].objects[j].target.x
 								room.players[i].objects[j].position.y = room.players[i].objects[j].target.y
 							}
 						}
 					}
+
 
 				// return room
 					return room
@@ -1075,18 +1103,18 @@
 					object.color = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
 
 				// border
-					if (configuration.objects.borders) {
+					if (configuration.objects.borders && Math.random() < CONSTANTS.borderProbability) {
 						object.border = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
 					}
 
 				// label
-					if (configuration.objects.labels) {
+					if (configuration.objects.labels && Math.random() < CONSTANTS.labelProbability) {
 						object.label = CORE.generateRandom(null, 1)
 					}
 
 				// translucent
 					if (configuration.objects.translucent) {
-						object.translucent = Boolean(Math.floor(Math.random() * 2))
+						object.translucent = Boolean(Math.random() < CONSTANTS.translucentProbability)
 					}
 
 				// return
@@ -1141,16 +1169,22 @@
 
 				// loop through objects
 					for (let i in objects) {
-						let diffX = Math.floor(objects[i].size.x / 2)
-						let diffY = Math.floor(objects[i].size.y / 2)
+						// skip self
+							if (objects[i].id == object.id) {
+								continue
+							}
 
-						for (let x = 0; x < objects[i].size.x; x++) {
-							for (let y = 0; y < objects[i].size.y; y++) {
-								if (theseCells.includes((objects[i].target.x + x - diffX) + "," + (objects[i].target.y + y - diffY))) {
-									return true
+						// check for overlapping cells
+							let diffX = Math.floor(objects[i].size.x / 2)
+							let diffY = Math.floor(objects[i].size.y / 2)
+
+							for (let x = 0; x < objects[i].size.x; x++) {
+								for (let y = 0; y < objects[i].size.y; y++) {
+									if (theseCells.includes((objects[i].target.x + x - diffX) + "," + (objects[i].target.y + y - diffY))) {
+										return true
+									}
 								}
 							}
-						}
 					}
 
 				// still here
@@ -1169,6 +1203,11 @@
 				// loop through objects
 					for (let i in player.objects) {
 						let object = player.objects[i]
+						if ((object.target.x == null && object.target.y == null)
+						 && (object.position.x !== null || object.position.y !== null)) {
+							return false
+						}
+
 						if ((object.target.x !== null && object.target.y !== null)
 						 && (object.position.x !== object.target.x || object.position.y !== object.target.y)) {
 							return false

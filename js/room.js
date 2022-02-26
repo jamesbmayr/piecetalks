@@ -24,7 +24,8 @@
 			minimumNameLength: 3,
 			maximumNameLength: 16,
 			second: 1000,
-			roles: ["informer", "actor", "spectator"]
+			roles: ["informer", "actor", "spectator"],
+			objectOffset: 0.5
 		}
 
 	/* state */
@@ -36,6 +37,8 @@
 			isHost: false,
 			role: "spectator",
 			cursor: {
+				actualX: null,
+				actualY: null,
 				x: null,
 				y: null
 			},
@@ -47,8 +50,8 @@
 	/* elements */
 		const ELEMENTS = {
 			cssVariables: {
-				screens: document.querySelector("#css-variables-screens"),
-				cellSize: document.querySelector("#css-variables-cell-size")
+				cells: document.querySelector("#css-variables-cells"),
+				screens: document.querySelector("#css-variables-screens")
 			},
 			configuration: {
 				element: document.querySelector("#configuration"),
@@ -232,6 +235,11 @@
 							ELEMENTS.configuration.room.id.value = STATE.roomId
 						}
 
+					// launch
+						if (data.launch) {
+							closeConfiguration()
+						}
+
 					// room data
 						if (data.room) {
 							STATE.isHost = data.room.players[STATE.playerId].isHost
@@ -252,10 +260,10 @@
 					displayRoomName(STATE.room.status.name)
 
 				// players
-					displayPlayers(STATE.room.players)
+					displayPlayers(STATE.room.status, STATE.room.players)
 
 				// game configurations
-					displayConfiguration(STATE.room.configuration)
+					displayConfiguration(STATE.room.status, STATE.room.configuration)
 
 				// game status
 					displayStatus(STATE.room.status)
@@ -270,7 +278,14 @@
 			try {
 				// update name
 					ELEMENTS.configuration.room.name.value = name
-					ELEMENTS.configuration.room.name.readonly = STATE.isHost ? false : true
+
+				// update permissions
+					if (STATE.isHost) {
+						ELEMENTS.configuration.room.name.removeAttribute("readonly")
+					}
+					else {
+						ELEMENTS.configuration.room.name.setAttribute("readonly", true)
+					}
 			} catch (error) {console.log(error)}
 		}
 
@@ -324,7 +339,7 @@
 
 /*** players ***/
 	/* displayPlayers */
-		function displayPlayers(players) {
+		function displayPlayers(status, players) {
 			try {
 				// get ids
 					let ids = Object.keys(players)
@@ -338,19 +353,20 @@
 							}
 
 						// update
-							displayPlayer(ELEMENTS.configuration.players.rows[i], players[i])
+							displayPlayer(status, ELEMENTS.configuration.players.rows[i], players[i])
 							ids = ids.filter(function(j) { return j !== i })
 					}
 
 				// remaining ids
 					for (let i in ids) {
-						createPlayer(players[ids[i]])
+						let playerElement = createPlayer(players[ids[i]])
+						displayPlayer(status, playerElement, players[ids[i]])
 					}
 			} catch (error) {console.log(error)}
 		}
 
 	/* displayPlayer */
-		function displayPlayer(element, player) {
+		function displayPlayer(status, element, player) {
 			try {
 				// name
 					let nameInput = element.querySelector(".player-name")
@@ -359,12 +375,21 @@
 				// role
 					let roleSelect = element.querySelector(".player-role")
 						roleSelect.value = player.role
-						if (!STATE.isHost) {
-							roleSelect.setAttribute("readonly", true)
-						}
-						else {
-							roleSelect.removeAttribute("readonly")
-						}
+
+				// permissions
+					if (STATE.isHost || player.id == STATE.playerId) {
+						nameInput.removeAttribute("disabled")
+					}
+					else {
+						nameInput.setAttribute("disabled", true)
+					}
+
+					if (STATE.isHost && !status.play) {
+						roleSelect.removeAttribute("disabled")
+					}
+					else {
+						roleSelect.setAttribute("disabled", true)
+					}
 			} catch (error) {console.log(error)}
 		}
 
@@ -390,7 +415,6 @@
 					let nameInput = document.createElement("input")
 						nameInput.className = "player-name"
 						nameInput.type = "text"
-						nameInput.value = player.name
 						nameInput.placeholder = "name"
 						nameInput.autocomplete = "off"
 						nameInput.spellcheck = false
@@ -403,20 +427,14 @@
 						roleSelect.addEventListener(TRIGGERS.change, updatePlayer)
 					label.appendChild(roleSelect)
 
-						for (let i in CONSTANTS.roles) {
-							let option = document.createElement("option")
-								option.value = option.innerText = CONSTANTS.roles[i]
-							roleSelect.appendChild(option)
-						}
-
-					roleSelect.value = player.role
-
-					if (!STATE.isHost) {
-						roleSelect.setAttribute("readonly", true)
+					for (let i in CONSTANTS.roles) {
+						let option = document.createElement("option")
+							option.value = option.innerText = CONSTANTS.roles[i]
+						roleSelect.appendChild(option)
 					}
-					else {
-						roleSelect.removeAttribute("readonly")
-					}
+
+				// return
+					return element
 			} catch (error) {console.log(error)}
 		}
 
@@ -542,8 +560,23 @@
 		}
 
 	/* displayConfiguration */
-		function displayConfiguration(configuration) {
+		function displayConfiguration(status, configuration) {
 			try {
+				// host
+					let configurationInputs = Array.from(document.querySelectorAll("[configuration='true']"))
+					if (STATE.isHost && !status.play) {
+						configurationInputs.forEach(function(element) {
+							element.removeAttribute("readonly")
+							element.removeAttribute("disabled")
+						})
+					}
+					else {
+						configurationInputs.forEach(function(element) {
+							element.setAttribute("readonly", true)
+							element.setAttribute("disabled", true)
+						})
+					}
+
 				// preset
 					ELEMENTS.configuration.game.preset.value = configuration.preset || "custom"
 
@@ -591,7 +624,11 @@
 					}
 
 				// cell-size
-					ELEMENTS.cssVariables.cellSize.innerText = ":root {--cell-size: " + (CONSTANTS.boardSize / Math.max(configuration.board.x, configuration.board.y)) + "px}"
+					ELEMENTS.cssVariables.cells.innerText = ":root {" +
+						"--cell-size: " + (CONSTANTS.boardSize / Math.max(configuration.board.x, configuration.board.y)) + "px; " +
+						"--board-size-x: " + configuration.board.x + "; " +
+						"--board-size-y: " + configuration.board.y + "; " +
+					"}"
 			} catch (error) {console.log(error)}
 		}
 
@@ -665,11 +702,6 @@
 	/* displayStatus */
 		function displayStatus(status) {
 			try {
-				// not in play
-					if (!status.play) {
-						ELEMENTS.configuration.element.open = true
-					}
-
 				// name
 					ELEMENTS.container.roomName.innerText = status.name
 
@@ -685,10 +717,21 @@
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
 					}
 
+				// host
+					if (STATE.isHost) {
+						ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
+						ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
+					}
+					else {
+						ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
+						ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
+					}
+
 				// timer
-					if (status.timeRemaining !== null) {
+					if (status.play && status.timeRemaining !== null) {
 						clearInterval(STATE.timerLoop)
-						ELEMENTS.container.timer.innerText = Math.floor(status.timeRemaining / 60) + ":" + ("0" + String(status.timeRemaining % 60)).slice(-2)
+						let timeRemaining = Math.max(0, status.timeRemaining)
+						ELEMENTS.container.timer.innerText = Math.floor(timeRemaining / 60) + ":" + ("0" + String(timeRemaining % 60)).slice(-2)
 						ELEMENTS.container.timer.setAttribute("visibility", true)
 						STATE.timerLoop = setInterval(updateTimer, CONSTANTS.second)
 					}
@@ -715,9 +758,19 @@
 					let minutes = Number(time[0])
 					let seconds = Number(time[1])
 					let totalTime = minutes * 60 + seconds
-						totalTime = Math.ceil(0, totalTime - 1)
+
+				// over
+					if (totalTime <= 0 && STATE.isHost) {
+						STATE.socket.send(JSON.stringify({
+							action: "endGame",
+							playerId: STATE.playerId,
+							roomId: STATE.roomId
+						}))
+						return
+					}
 
 				// set time
+					totalTime = Math.max(0, totalTime - 1)
 					ELEMENTS.container.timer.innerText = Math.floor(totalTime / 60) + ":" + ("0" + String(totalTime % 60)).slice(-2)
 			} catch (error) {console.log(error)}
 		}
@@ -770,14 +823,14 @@
 				// spectator
 					if (STATE.role == "spectator") {
 						for (let i in ELEMENTS.container.screens) {
-							if (!STATE.room.players[i] || STATE.room.players[i].role == "spectator") {
+							if (!STATE.room.players[i] || !Object.keys(STATE.room.players[i].objects).length) {
 								ELEMENTS.container.screens[i].remove()
 								delete ELEMENTS.container.screens[i]
 							}
 						}
 
 						for (let i in STATE.room.players) {
-							if (STATE.room.players[i].role == "spectator") {
+							if (!Object.keys(STATE.room.players[i].objects).length) {
 								continue
 							}
 							activeScreens++
@@ -800,7 +853,10 @@
 					}
 
 				// css variable
-					ELEMENTS.cssVariables.screens.innerText = ":root {--screens: " + activeScreens + "}"
+					ELEMENTS.container.screensContainer.setAttribute("count", activeScreens)
+					ELEMENTS.cssVariables.screens.innerText = ":root {" +
+						"--screen-count: " + (activeScreens == 1 ? 1 : activeScreens <= 4 ? 2 : 3) + "; " +
+					"}"
 			} catch (error) {console.log(error)}
 		}
 
@@ -809,6 +865,7 @@
 			try {
 				// no screen yet
 					let screen = ELEMENTS.container.screens[player.id] || createScreen(player.id)
+						screen.setAttribute("role", player.role)
 
 				// name + role + active
 					screen.querySelector(".screen-name").value = player.name || ""
@@ -821,7 +878,7 @@
 				// grid
 					if (configuration.board.grid) {
 						let count = configuration.board.x * configuration.board.y
-						if (Array.from(screen.querySelectorAll(".grid-cell")).length !== count) {
+						if (Array.from(screen.querySelectorAll(".board-grid-cell")).length !== count) {
 							displayGrid(screen.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
 						}
 					}
@@ -832,7 +889,7 @@
 				// coordinates
 					if (configuration.board.coordinates) {
 						let count = configuration.board.x + configuration.board.y
-						if (Array.from(screen.querySelectorAll(".coordinate")).length !== count) {
+						if (Array.from(screen.querySelectorAll(".board-coordinate")).length !== count) {
 							displayCoordinates(screen.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
 						}
 					}
@@ -910,8 +967,7 @@
 					for (let column = 0; column < x; column++) {
 						for (let row = 0; row < y; row++) {
 							let element = document.createElement("div")
-								element.className = "grid-cell"
-								element.id = "grid-cell-" + column + "," + row
+								element.className = "board-grid-cell"
 							container.appendChild(element)
 						}
 					}
@@ -927,7 +983,7 @@
 				// across the top
 					for (let column = 0; column < x; column++) {
 						let element = document.createElement("div")
-							element.className = "coordinate coordinate-x"
+							element.className = "board-coordinate board-coordinate-x"
 							element.innerText = column + 1
 						container.appendChild(element)
 					}
@@ -935,7 +991,7 @@
 				// down the side
 					for (let row = 0; row < y; row++) {
 						let element = document.createElement("div")
-							element.className = "coordinate coordinate-y"
+							element.className = "board-coordinate board-coordinate-y"
 							element.innerText = CONSTANTS.alphabet[row]
 						container.appendChild(element)
 					}
@@ -955,17 +1011,18 @@
 							if (!ids.includes(i)) {
 								screen.objectElements[i].remove()
 								delete screen.objectElements[i]
+								continue
 							}
 
 						// update
 							displayObject(screen, screen.objectElements[i], objects[i])
-							ids = ids.splice(ids.indexOf(i), 1)
+							ids = ids.filter(function(j) { return j !== i }) || []
 					}
 
 				// remaining ids
 					for (let i in ids) {
-						let element = createObject(screen, objects[i])
-						displayObject(screen, element, objects[i])
+						let element = createObject(screen, objects[ids[i]])
+						displayObject(screen, element, objects[ids[i]])
 					}
 			} catch (error) {console.log(error)}
 		}
@@ -980,14 +1037,14 @@
 
 				// in drawer
 					if (object.position.x === null || object.position.y === null) {
-						screen.querySelector(".drawer").appendChild(element)
+						let drawer = screen.querySelector(".drawer").appendChild(element)
 						return
 					}
 
 				// not in drawer
 					screen.querySelector(".board").appendChild(element)
-					element.style.left = "calc(var(--cell-size) * " + object.position.x + ")"
-					element.style.top  = "calc(var(--cell-size) * " + object.position.y + ")"
+					element.style.left = "calc(var(--cell-size) * " + (object.position.x + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
+					element.style.top  = "calc(var(--cell-size) * " + (object.position.y + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
 			} catch (error) {console.log(error)}
 		}
 
@@ -998,13 +1055,13 @@
 					let element = document.createElement("div")
 						element.className = "object"
 						element.id = screen.id + "-object-" + object.id
-						element.style.width  = "calc(var(--cell-size) * " + object.size.x + ")"
-						element.style.height = "calc(var(--cell-size) * " + object.size.y + ")"
+						element.style.width  = "calc(var(--cell-size) * " + object.size.x + " / var(--screen-count) * var(--multiplier))"
+						element.style.height = "calc(var(--cell-size) * " + object.size.y + " / var(--screen-count) * var(--multiplier))"
 						element.style.clipPath = object.shape
 						element.style.background = object.border ? object.border : object.color
 						element.style.zIndex = object.position.z
 						element.addEventListener(TRIGGERS.mousedown, grabObject)
-					screen.objectElements[object.id] = object
+					screen.objectElements[object.id] = element
 					screen.querySelector(".drawer").appendChild(element)
 
 				// translucent
@@ -1049,7 +1106,6 @@
 				// not an actor
 					if (STATE.role !== "actor") {
 						screen.removeAttribute("grabbing")
-						showToast({success: false, message: "not an actor"})
 						return
 					}
 
@@ -1061,6 +1117,7 @@
 
 				// grab
 					STATE.grabbed = event.target.closest(".object")
+					STATE.grabbed.setAttribute("grabbing", true)
 					screen.setAttribute("grabbing", true)
 
 				// move to board
@@ -1103,16 +1160,16 @@
 					let screen = STATE.grabbed.closest(".screen")
 
 				// cursor
-					let x = event.touches ? event.touches[0].clientX : event.clientX
-					let y = event.touches ? event.touches[0].clientY : event.clientY
+					STATE.cursor.actualX = event.touches && event.touches.length ? event.touches[0].clientX : event.clientX
+					STATE.cursor.actualY = event.touches && event.touches.length ? event.touches[0].clientY : event.clientY
 
 					let boardRect = screen.querySelector(".board").getBoundingClientRect()
-					CURSOR.x = (x - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x
-					CURSOR.y = (y - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y
+					STATE.cursor.x = (STATE.cursor.actualX - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x
+					STATE.cursor.y = (STATE.cursor.actualY - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y
 
 				// move element
-					STATE.grabbed.style.left = "calc(var(--cell-size) * " + CURSOR.x + ")"
-					STATE.grabbed.style.top  = "calc(var(--cell-size) * " + CURSOR.y + ")"
+					STATE.grabbed.style.left = "calc(var(--cell-size) * " + STATE.cursor.x + " / var(--screen-count) * var(--multiplier))"
+					STATE.grabbed.style.top  = "calc(var(--cell-size) * " + STATE.cursor.y + " / var(--screen-count) * var(--multiplier))"
 			} catch (error) {console.log(error)}
 		}
 
@@ -1148,17 +1205,22 @@
 					let screen = STATE.grabbed.closest(".screen")
 
 				// get position
-					let x = event.touches ? event.touches[0].clientX : event.clientX
-					let y = event.touches ? event.touches[0].clientY : event.clientY
+					let x = event.touches && event.touches.length ? event.touches[0].clientX : event.clientX
+					let y = event.touches && event.touches.length ? event.touches[0].clientY : event.clientY
+
+					if (x !== undefined && y !== undefined) {
+						STATE.cursor.actualX = x
+						STATE.cursor.actualY = y
+					}
 
 				// in drawer
 					let drawer = screen.querySelector(".drawer")
 					let drawerRect = drawer.getBoundingClientRect()
 
-					if ((drawerRect.left <= x && x <= drawerRect.right)
-					 && (drawerRect.top  <= y && y <= drawerRect.bottom)) {
-						CURSOR.x = null
-						CURSOR.y = null
+					if ((drawerRect.left <= STATE.cursor.actualX && STATE.cursor.actualX <= drawerRect.right)
+					 && (drawerRect.top  <= STATE.cursor.actualY && STATE.cursor.actualY <= drawerRect.bottom)) {
+						STATE.cursor.x = null
+						STATE.cursor.y = null
 
 						drawer.appendChild(STATE.grabbed)
 						STATE.grabbed.style.left = "0"
@@ -1168,24 +1230,28 @@
 				// snap to grid
 					else {
 						let boardRect = screen.querySelector(".board").getBoundingClientRect()
-						CURSOR.x = Math.round((x - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x)
-						CURSOR.y = Math.round((y - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y)
+						STATE.cursor.x = Math.floor((STATE.cursor.actualX - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x)
+						STATE.cursor.y = Math.floor((STATE.cursor.actualY - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y)
 
-						STATE.grabbed.style.left = "calc(var(--cell-size) * " + CURSOR.x + ")"
-						STATE.grabbed.style.top  = "calc(var(--cell-size) * " + CURSOR.y + ")"
+						STATE.grabbed.style.left = "calc(var(--cell-size) * " + (STATE.cursor.x + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
+						STATE.grabbed.style.top  = "calc(var(--cell-size) * " + (STATE.cursor.y + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
 					}
 
 				// send to server
+					let objectId = STATE.grabbed.id.split("-")
+						objectId = objectId[objectId.length - 1]
+
 					STATE.socket.send(JSON.stringify({
 						action: "updateObject",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId,
-						objectId: STATE.grabbed.id,
-						x: CURSOR.x,
-						y: CURSOR.y
+						objectId: objectId,
+						x: STATE.cursor.x,
+						y: STATE.cursor.y
 					}))
 
 				// ungrab
+					STATE.grabbed.removeAttribute("grabbing")
 					STATE.grabbed = null
 					screen.removeAttribute("grabbing")
 			} catch (error) {console.log(error)}

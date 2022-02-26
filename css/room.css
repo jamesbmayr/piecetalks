@@ -58,6 +58,10 @@
 			border-bottom-left-radius: 0;
 		}
 
+		#configuration-game-board-background {
+			max-width: calc(100vw - 5 * var(--medium-gap-size));
+		}
+
 		#configuration-game-status-start {
 			width: 100%;
 			background: var(--medium-green);
@@ -66,6 +70,45 @@
 		#configuration-game-status-end {
 			width: 100%;
 			background: var(--medium-orange);
+		}
+
+		#configuration-game-status-start:disabled, #configuration-game-status-end:disabled {
+			display: none;
+		}
+
+	/* mobile */
+		@media screen and (max-width: 800px) {
+			#configuration-room-leave {
+				margin-top: var(--medium-gap-size);
+				width: 100%;
+			}
+
+			.player-row span {
+				display: none;
+			}
+
+			.player-name {
+				width: 100%;
+				border-radius: var(--border-radius) var(--border-radius) 0 0;
+			}
+
+			.player-role {
+				width: 100%;
+				border-radius: 0 0 var(--border-radius) var(--border-radius);
+				border: 0;
+			}
+
+			#configuration-players-invite span {
+				display: none;
+			}
+
+			#configuration-players-invite-name {
+				margin-bottom: var(--medium-gap-size);
+			}
+
+			#configuration-players-invite-link, #configuration-players-invite-mailto {
+				float: right;
+			}
 		}
 
 /*** container ***/
@@ -107,10 +150,19 @@
 			-o-user-select: none;
 			color: var(--light-gray);
 			font-weight: bold;
+			z-index: 999;
 		}
 
 	/* screens */
-		#screens {
+		#screens[count='1'] {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		#screens:not([count='1']) {
 			position: absolute;
 			top: calc(4 * var(--medium-gap-size) + var(--medium-font-size));
 			left: 0;
@@ -118,30 +170,261 @@
 			height: 100%;
 		}
 
-		/* spectator */
-			.screen {
-				float: left;
-				
-			}
-
 		/* actor / informer */
-			.screen:first-child:last-child {
+			#screens[count='1'] .screen, .screen:first-child:last-child {
 				position: absolute;
 				top: 0;
 				left: 0;
 				width: 100vw;
-				height: calc(100vh - (4 * var(--medium-gap-size) + var(--medium-font-size)));
+				height: 100vh;
 				overflow: hidden;
 			}
 
-			.screen:first-child:last-child .screen-name {
+			#screens[count='1'] .screen-name, .screen:first-child:last-child .screen-name {
 				display: none;
 			}
 
-			.screen:first-child:last-child .screen-role {
+			#screens[count='1'] .screen-role, .screen:first-child:last-child .screen-role {
 				display: none;
 			}
 
-			.screen:first-child:last-child .screen-connected {
+			#screens[count='1'] .screen-connected, .screen:first-child:last-child .screen-connected {
 				display: none;
+			}
+
+		/* spectator */
+			#screens:not([count='1']) .screen {
+				position: relative;
+				float: left;
+				width: calc(100vw / var(--screen-count));
+				height: calc((100vh - (4 * var(--medium-gap-size) + var(--medium-font-size))) / var(--screen-count));
+			}
+
+			#screens:not([count='1']) .screen-name {
+				position: absolute;
+				top: var(--small-gap-size);
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: var(--medium-font-size);
+				font-family: var(--font-0);
+				color: var(--light-gray);
+				pointer-events: none;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+				z-index: 998;
+			}
+
+			#screens:not([count='1']) .screen-role {
+				position: absolute;
+				top: calc(var(--small-gap-size) + var(--medium-font-size));
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: calc(var(--small-font-size) / 2);
+				font-family: var(--font-0);
+				color: var(--light-gray);
+				pointer-events: none;
+				text-transform: uppercase;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+				z-index: 998;
+			}
+
+			#screens:not([count='1']) .screen-connected {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				display: none;
+				zoom: 1;
+			}
+
+			#screens:not([count='1']) .screen-connected:not(:checked) {
+				display: block;
+				height: 0;
+				width: 0;
+				border: 0;
+				padding: 0;
+				pointer-events: none;
+				z-index: 999;
+			}
+
+			#screens:not([count='1']) .screen-connected:not(:checked):before {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				content: 'disconnected';
+				background-color: var(--dark-red);
+				font-family: var(--font-family);
+				font-size: var(--medium-font-size);
+				padding: var(--medium-gap-size);
+				border-radius: var(--border-radius);
+				color: var(--light-gray);
+				opacity: var(--drawer-opacity);
+			}
+
+		/* board */
+			#screens .board {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
+				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
+			}
+			
+			#screens .board-grid, #screens .board-coordinates {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				border-radius: var(--border-radius);
+				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
+				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
+				pointer-events: none;
+			}
+
+			#screens .board-grid-cell {
+				float: left;
+				box-sizing: border-box;
+				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				border: var(--border-size) solid var(--dark-gray);
+			}
+
+			#screens .board-coordinate {
+				text-align: center;
+				vertical-align: bottom;
+				color: var(--dark-gray);
+				font-family: var(--font-0);
+				text-transform: uppercase;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+			}
+
+			#screens[count='1'] .screen .board-coordinate-x, .screen:first-child:last-child .board-coordinate-x {
+				font-size: var(--medium-font-size);
+				display: inline-block;
+				height: var(--medium-font-size);
+				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				transform: translateY(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
+			}
+
+			#screens[count='1'] .screen .board-coordinate-y, .screen:first-child:last-child .board-coordinate-y {
+				font-size: var(--medium-font-size);
+				display: block;
+				width: var(--medium-font-size);
+				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				writing-mode: vertical-rl;
+				text-orientation: mixed;
+				transform: translateY(calc(-1 * var(--medium-font-size))) rotate(180deg) translateX(calc(1 * (var(--medium-font-size) + var(--small-gap-size))));
+			}
+
+			#screens:not([count='1']) .screen .board-coordinate-x {
+				font-size: var(--small-font-size);
+				display: inline-block;
+				height: var(--small-font-size);
+				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				transform: translateY(calc(-1 * (var(--small-font-size) + var(--small-gap-size))));
+			}
+
+			#screens:not([count='1']) .screen .board-coordinate-y {
+				font-size: var(--small-font-size);
+				display: block;
+				width: var(--small-font-size);
+				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
+				writing-mode: vertical-rl;
+				text-orientation: mixed;
+				transform: translateY(calc(-1 * var(--small-font-size))) rotate(180deg) translateX(calc(1 * (var(--small-font-size) + var(--small-gap-size))));
+			}
+
+			#screens .board .object {
+				position: absolute;
+				cursor: default;
+				transform: translateX(-50%) translateY(-50%);
+				opacity: var(--object-opacity);
+			}
+
+			#screens .screen[role='actor'] .board .object {
+				cursor: grab;
+			}
+
+		/* drawer */
+			#screens:not([count='1']) .drawer, #screens .screen[role='informer'] .drawer {
+				display: none;
+			}
+
+			#screens[count='1'] .drawer, .screen:first-child:last-child .drawer {
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				box-sizing: border-box;
+				height: calc(var(--cell-size) / 2 + 2 * var(--medium-gap-size));
+				width: calc(100%);
+				border-top-left-radius: var(--border-radius);
+				border-top-right-radius: var(--border-radius);
+				overflow-x: scroll;
+				overflow-y: hidden;
+				display: flex;
+				flex-direction: row;
+				background-color: var(--medium-gray);
+				box-shadow: 0 0 var(--shadow-size) var(--dark-gray);
+				opacity: var(--drawer-opacity);
+				z-index: 999;
+			}
+
+			#screens .drawer .object {
+				float: left;
+				cursor: default;
+				flex-shrink: 0;
+				height: calc(var(--cell-size) / 2) !important;
+				width: calc(var(--cell-size) / 2) !important;
+				margin: var(--medium-gap-size);
+			}
+
+			#screens .screen[role='actor'] .drawer .object {
+				cursor: grab;
+			}
+
+		/* border & label */
+			.object-inner {
+				position: relative;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				height: var(--object-border);
+				width: var(--object-border);
+			}
+
+			.object-label {
+				position: relative;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				font-family: var(--font-0);
+				font-size: var(--medium-font-size);
+				color: var(--light-gray);
+				text-shadow: 0 0 var(--shadow-size) var(--dark-gray);
+				text-transform: uppercase;
+				text-align: center;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+			}
+
+		/* grabbing */
+			#screens .board .object[grabbing], #screens .drawer .object[grabbing] {
+				cursor: grabbing;
+				filter: drop-shadow(0 0 var(--shadow-size) var(--medium-gray));
 			}
