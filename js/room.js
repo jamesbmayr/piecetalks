@@ -20,11 +20,12 @@
 		const CONSTANTS = {
 			boardSize: 500,
 			alphabet: "abcdefghijklmnopqrstuvwxyz",
-			translucentOpacity: 0.5,
-			minimumNameLength: 3,
-			maximumNameLength: 16,
+			minimumPlayerNameLength: 3,
+			maximumPlayerNameLength: 20,
+			minimumRoomNameLength: 3,
+			maximumRoomNameLength: 40,
 			second: 1000,
-			roles: ["informer", "actor", "spectator"],
+			roles: ["speaker", "actor", "spectator"],
 			objectOffset: 0.5
 		}
 
@@ -79,6 +80,7 @@
 						active: document.querySelector("#configuration-game-timer-active"),
 						seconds: document.querySelector("#configuration-game-timer-seconds")
 					},
+					advanced: document.querySelector("#configuration-game-advanced"),
 					board: {
 						x: document.querySelector("#configuration-game-board-x"),
 						y: document.querySelector("#configuration-game-board-y"),
@@ -90,7 +92,6 @@
 						count: document.querySelector("#configuration-game-objects-count"),
 						unused: document.querySelector("#configuration-game-objects-unused"),
 						overlap: document.querySelector("#configuration-game-objects-overlap"),
-						translucent: document.querySelector("#configuration-game-objects-translucent"),
 						borders: document.querySelector("#configuration-game-objects-borders"),
 						labels: document.querySelector("#configuration-game-objects-labels"),
 						sizes: Array.from(document.querySelectorAll("input[property='objects-sizes']")),
@@ -117,6 +118,13 @@
 		function isNumLet(string) {
 			try {
 				return (/^[a-zA-Z0-9]+$/).test(string)
+			} catch (error) {console.log(error)}
+		}
+
+	/* isEmail */
+		function isEmail(string) {
+			try {
+				return (/[a-z0-9!#$%&\'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/).test(string)
 			} catch (error) {console.log(error)}
 		}
 
@@ -277,7 +285,9 @@
 		function displayRoomName(name) {
 			try {
 				// update name
-					ELEMENTS.configuration.room.name.value = name
+					if (document.activeElement !== ELEMENTS.configuration.room.name) {
+						ELEMENTS.configuration.room.name.value = name
+					}
 
 				// update permissions
 					if (STATE.isHost) {
@@ -293,6 +303,9 @@
 		ELEMENTS.configuration.room.name.addEventListener(TRIGGERS.change, updateRoomName)
 		function updateRoomName(event) {
 			try {
+				// assume no error
+					ELEMENTS.configuration.room.name.removeAttribute("error")
+
 				// not the host
 					if (!STATE.isHost) {
 						showToast({success: false, message: "not the host"})
@@ -301,8 +314,9 @@
 
 				// get value
 					let name = ELEMENTS.configuration.room.name.value.trim() || ""
-					if (!name || !name.length || !isNumLet(name.replace(/\s/g, "")) || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength) {
-						showToast({success: false, message: "room name must be " + CONSTANTS.minimumNameLength + " - " + CONSTANTS.maximumNameLength + " letters, numbers, and spaces only"})
+					if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
+						ELEMENTS.configuration.room.name.setAttribute("error", true)
+						showToast({success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters"})
 						return
 					}
 
@@ -370,11 +384,15 @@
 			try {
 				// name
 					let nameInput = element.querySelector(".player-name")
+					if (document.activeElement !== nameInput) {
 						nameInput.value = player.name
+					}
 
 				// role
 					let roleSelect = element.querySelector(".player-role")
+					if (document.activeElement !== roleSelect) {
 						roleSelect.value = player.role
+					}
 
 				// permissions
 					if (STATE.isHost || player.id == STATE.playerId) {
@@ -441,6 +459,9 @@
 	/* updatePlayer */
 		function updatePlayer(event) {
 			try {
+				// assume no error
+					event.target.removeAttribute("error")
+
 				// get player
 					let player = event.target.closest(".player-row")
 					let id = player.id.split("-")
@@ -462,8 +483,9 @@
 					let role = player.querySelector(".player-role").value || null
 
 				// invalid name
-					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength) {
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumNameLength + " - " + CONSTANTS.maximumNameLength + " letters & numbers only"})
+					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+						event.target.setAttribute("error", true)
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " - " + CONSTANTS.maximumPlayerNameLength + " letters & numbers only"})
 						return
 					}
 
@@ -480,26 +502,62 @@
 		}
 
 /*** invite ***/
-	/* updateInvite */
-		ELEMENTS.configuration.players.invite.name.addEventListener(TRIGGERS.change, updateInvite)
-		ELEMENTS.configuration.players.invite.email.addEventListener(TRIGGERS.change, updateInvite)
-		function updateInvite(event) {
+	/* updateInviteName */
+		ELEMENTS.configuration.players.invite.name.addEventListener(TRIGGERS.change, updateInviteName)
+		function updateInviteName(event) {
 			try {
+				// assume no error
+					ELEMENTS.configuration.players.invite.name.removeAttribute("error")
+
 				// get name
 					let name = ELEMENTS.configuration.players.invite.name.value.trim() || "anonymous"
 					let email = ELEMENTS.configuration.players.invite.email.value.trim() || null
 
 				// invalid name
-					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength) {
-						ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
+					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+						ELEMENTS.configuration.players.invite.name.setAttribute("error", true)
 						ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
 						return
 					}
 					ELEMENTS.configuration.players.invite.link.removeAttribute("disabled")
 
 				// no email
-					if (!email || !email.length) {
+					if (!email || !email.length || !isEmail(email)) {
 						ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
+						ELEMENTS.configuration.players.invite.mailto.removeAttribute("href")
+						return
+					}
+
+				// update invite mailto
+					let url = window.location.protocol + "//" + window.location.host + "?roomid=" + STATE.roomId + "&name=" + name
+					ELEMENTS.configuration.players.invite.mailto.href = "mailto:" + email + "?subject=Invite&body=Join the Game! " + encodeURIComponent(url)
+					ELEMENTS.configuration.players.invite.mailto.removeAttribute("disabled")
+			} catch (error) {console.log(error)}
+		}
+
+	/* updateInviteEmail */
+		ELEMENTS.configuration.players.invite.email.addEventListener(TRIGGERS.change, updateInviteEmail)
+		function updateInviteEmail(event) {
+			try {
+				// assume no error
+					ELEMENTS.configuration.players.invite.email.removeAttribute("error")
+
+				// get email
+					let name = ELEMENTS.configuration.players.invite.name.value.trim() || "anonymous"
+					let email = ELEMENTS.configuration.players.invite.email.value.trim() || null
+
+				// invalid name
+					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+						ELEMENTS.configuration.players.invite.name.setAttribute("error", true)
+						ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
+						name = "anonymous"
+					}
+
+				// no email
+					if (!email || !email.length || !isEmail(email)) {
+						ELEMENTS.configuration.players.invite.email.setAttribute("error", true)
+						ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
+						ELEMENTS.configuration.players.invite.mailto.removeAttribute("href")
 						return
 					}
 
@@ -519,37 +577,61 @@
 
 				// create link
 					let url = window.location.protocol + "//" + window.location.host + "?roomid=" + STATE.roomId + "&name=" + name
-					navigator.clipboard.writeText(url)
+					if (false && navigator.clipboard) {
+						navigator.clipboard.writeText(url)
+						showToast({success: true, message: "link copied to clipboard"})
+					}
 
-				// toast
-					showToast({success: true, message: "link copied to clipboard"})
+				// not allowed to use clipboard directly
+					else {
+						let textarea = document.createElement("textarea")
+							textarea.id = "temp-text"
+							textarea.value = url
+						document.body.appendChild(textarea)
+							textarea.focus()
+							textarea.select()
 
-				// clear
-					ELEMENTS.configuration.players.invite.name.value = ""
-					ELEMENTS.configuration.players.invite.email.value = ""
-					ELEMENTS.configuration.players.invite.mailto.href = "#"
+						try {
+							document.execCommand("copy")
+							showToast({success: true, message: "link copied to clipboard"})
+						} catch (err) {
+							showToast({success: false, message: "unable to copy link"})
+						}
+
+						textarea.remove()
+					}					
+
+				// blur
+					ELEMENTS.configuration.players.invite.link.blur()
 			} catch (error) {console.log(error)}
 		}
 
 	/* clickInviteEmail */
-		ELEMENTS.configuration.players.invite.mailto.addEventListener(TRIGGERS.click, clickInviteEmail)
+		ELEMENTS.configuration.players.invite.mailto.onclick = clickInviteEmail
 		function clickInviteEmail(event) {
 			try {
+				// prevent default
+					window.open(ELEMENTS.configuration.players.invite.mailto.href, "popup", "width=500,height=500")
+					event.preventDefault()
+
 				// regular link click first
 					setTimeout(function() {
-						// disable
-							ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
-							ELEMENTS.configuration.players.invite.mailto.setAttribute("disabled", true)
-
-						// clear
-							ELEMENTS.configuration.players.invite.name.value = ""
-							ELEMENTS.configuration.players.invite.email.value = ""
-							ELEMENTS.configuration.players.invite.mailto.href = "#"
+						// blur
+							ELEMENTS.configuration.players.invite.mailto.blur()
 					}, 0)
 			} catch (error) {console.log(error)}
 		}
 
 /*** configuration ***/
+	/* openConfiguration */
+		ELEMENTS.configuration.button.addEventListener(TRIGGERS.click, openConfiguration)
+		function openConfiguration(event) {
+			try {
+				// scroll to top
+					ELEMENTS.configuration.overlay.scrollTop = 0
+			} catch (error) {console.log(error)}
+		}
+
 	/* closeConfiguration */
 		ELEMENTS.configuration.close.addEventListener(TRIGGERS.click, closeConfiguration)
 		function closeConfiguration(event) {
@@ -578,49 +660,80 @@
 					}
 
 				// preset
-					ELEMENTS.configuration.game.preset.value = configuration.preset || "custom"
+					if (document.activeElement !== ELEMENTS.configuration.game.preset) {
+						ELEMENTS.configuration.game.preset.value = configuration.preset || "custom"
+					}
 
 				// timer
-					ELEMENTS.configuration.game.timer.active.checked = configuration.timer.active || false
-					ELEMENTS.configuration.game.timer.seconds.value = Number(configuration.timer.seconds) || 0
+					if (document.activeElement !== ELEMENTS.configuration.game.timer.active) {
+						ELEMENTS.configuration.game.timer.active.checked = configuration.timer.active || false
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.timer.seconds) {
+						ELEMENTS.configuration.game.timer.seconds.value = Number(configuration.timer.seconds) || 0
+					}
 
 				// board
-					ELEMENTS.configuration.game.board.x.value = Number(configuration.board.x) || 2
-					ELEMENTS.configuration.game.board.y.value = Number(configuration.board.y) || 2
-					ELEMENTS.configuration.game.board.grid.checked = configuration.board.grid || false
-					ELEMENTS.configuration.game.board.coordinates.checked = configuration.board.coordinates || false
-					ELEMENTS.configuration.game.board.background.value = configuration.board.background.name || "none"
+					if (document.activeElement !== ELEMENTS.configuration.game.board.x) {
+						ELEMENTS.configuration.game.board.x.value = Number(configuration.board.x) || 2
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.board.y) {
+						ELEMENTS.configuration.game.board.y.value = Number(configuration.board.y) || 2
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.board.grid) {
+						ELEMENTS.configuration.game.board.grid.checked = configuration.board.grid || false
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.board.coordinates) {
+						ELEMENTS.configuration.game.board.coordinates.checked = configuration.board.coordinates || false
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.board.background) {
+						ELEMENTS.configuration.game.board.background.value = configuration.board.background.name || "blank"
+					}
 
 				// objects
-					ELEMENTS.configuration.game.objects.count.value = Number(configuration.objects.count) || 1
-					ELEMENTS.configuration.game.objects.unused.value = Number(configuration.objects.unused) || 0
-					ELEMENTS.configuration.game.objects.overlap.checked = configuration.objects.overlap || false
-					ELEMENTS.configuration.game.objects.translucent.checked = configuration.objects.translucent || false
-					ELEMENTS.configuration.game.objects.borders.checked = configuration.objects.borders || false
-					ELEMENTS.configuration.game.objects.labels.checked = configuration.objects.labels || false
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.count) {
+						ELEMENTS.configuration.game.objects.count.value = Number(configuration.objects.count) || 1
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.unused) {
+						ELEMENTS.configuration.game.objects.unused.value = Number(configuration.objects.unused) || 0
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.overlap) {
+						ELEMENTS.configuration.game.objects.overlap.checked = configuration.objects.overlap || false
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.borders) {
+						ELEMENTS.configuration.game.objects.borders.checked = configuration.objects.borders || false
+					}
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.labels) {
+						ELEMENTS.configuration.game.objects.labels.checked = configuration.objects.labels || false
+					}
 
 				// sizes
 					for (let i in ELEMENTS.configuration.game.objects.sizes) {
 						let element = ELEMENTS.configuration.game.objects.sizes[i]
-						let value = element.id.split("-")
-							value = value[value.length - 1]
-						element.checked = configuration.objects.sizes.includes(value) || false
+						if (document.activeElement !== element) {
+							let value = element.id.split("-")
+								value = value[value.length - 1]
+							element.checked = configuration.objects.sizes.includes(value) || false
+						}
 					}
 
 				// shapes
 					for (let i in ELEMENTS.configuration.game.objects.shapes) {
 						let element = ELEMENTS.configuration.game.objects.shapes[i]
-						let value = element.id.split("-")
-							value = value[value.length - 1].replace(/_/g, " ")
-						element.checked = configuration.objects.shapes.includes(value) || false
+						if (document.activeElement !== element) {
+							let value = element.id.split("-")
+								value = value[value.length - 1].replace(/_/g, " ")
+							element.checked = configuration.objects.shapes.includes(value) || false
+						}
 					}
 
 				// colors
 					for (let i in ELEMENTS.configuration.game.objects.colors) {
 						let element = ELEMENTS.configuration.game.objects.colors[i]
-						let value = element.id.split("-")
-							value = value[value.length - 1].replace(/_/g, "-")
-						element.checked = configuration.objects.colors.includes(value) || false
+						if (document.activeElement !== element) {
+							let value = element.id.split("-")
+								value = value[value.length - 1].replace(/_/g, "-")
+							element.checked = configuration.objects.colors.includes(value) || false
+						}
 					}
 
 				// cell-size
@@ -638,6 +751,9 @@
 		})
 		function updateConfiguration(event) {
 			try {
+				// assume no error
+					event.target.removeAttribute("error")
+
 				// not the host
 					if (!STATE.isHost) {
 						showToast({success: false, message: "not the host"})
@@ -672,6 +788,17 @@
 						}
 						else if (event.target.type == "number") {
 							value = Number(event.target.value)
+
+							let max = event.target.getAttribute("max")
+							let min = event.target.getAttribute("min")
+							if (max !== null && value > Number(max)) {
+								event.target.setAttribute("error", true)
+								return
+							}
+							if (min !== null && value < Number(min)) {
+								event.target.setAttribute("error", true)
+								return
+							}
 						}
 						else {
 							value = event.target.value
@@ -682,6 +809,7 @@
 					if (category == "preset") {
 						configuration = null
 						if (value == "custom") {
+							ELEMENTS.configuration.game.advanced.open = true
 							return
 						}
 					}
@@ -710,11 +838,13 @@
 						ELEMENTS.configuration.game.status.current.value = "in play"
 						ELEMENTS.configuration.game.status.start.setAttribute("visibility", false)
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", true)
+						ELEMENTS.configuration.close.setAttribute("visibility", true)
 					}
 					else {
 						ELEMENTS.configuration.game.status.current.value = "setup"
 						ELEMENTS.configuration.game.status.start.setAttribute("visibility", true)
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
+						ELEMENTS.configuration.close.setAttribute("visibility", false)
 					}
 
 				// host
@@ -838,7 +968,7 @@
 						}
 					}
 
-				// informer / actor
+				// speaker / actor
 					else {
 						activeScreens = 1
 
@@ -1064,11 +1194,6 @@
 					screen.objectElements[object.id] = element
 					screen.querySelector(".drawer").appendChild(element)
 
-				// translucent
-					if (object.translucent) {
-						element.style.opacity = CONSTANTS.translucentOpacity
-					}
-
 				// border
 					let inner = null
 					if (object.border) {
@@ -1163,6 +1288,12 @@
 					STATE.cursor.actualX = event.touches && event.touches.length ? event.touches[0].clientX : event.clientX
 					STATE.cursor.actualY = event.touches && event.touches.length ? event.touches[0].clientY : event.clientY
 
+				// outside of screen
+					if ((STATE.cursor.actualX < 0 || STATE.cursor.actualX > window.innerWidth)
+					 || (STATE.cursor.actualY < 0 || STATE.cursor.actualY > window.innerHeight)) {
+						return
+					}
+
 					let boardRect = screen.querySelector(".board").getBoundingClientRect()
 					STATE.cursor.x = (STATE.cursor.actualX - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x
 					STATE.cursor.y = (STATE.cursor.actualY - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y
@@ -1211,6 +1342,12 @@
 					if (x !== undefined && y !== undefined) {
 						STATE.cursor.actualX = x
 						STATE.cursor.actualY = y
+					}
+
+				// outside of screen
+					if ((STATE.cursor.actualX < 0 || STATE.cursor.actualX > window.innerWidth)
+					 || (STATE.cursor.actualY < 0 || STATE.cursor.actualY > window.innerHeight)) {
+						return
 					}
 
 				// in drawer

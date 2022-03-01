@@ -69,7 +69,7 @@
 		h3 {
 			font-size: var(--small-font-size);
 			font-family: var(--font-0);
-			margin: var(--large-gap-size) 0 0 0;
+			margin: var(--large-gap-size) 0 var(--small-gap-size) 0;
 			text-transform: uppercase;
 			user-select: none !important;
 			-webkit-user-select: none !important;
@@ -94,7 +94,6 @@
 		.form-row {
 			float: left;
 			width: 100%;
-			margin-bottom: var(--small-gap-size);
 		}
 
 	/* inputs */
@@ -119,7 +118,7 @@
 		}
 
 		input[readonly], input[disabled], button[disabled], a[disabled], select[disabled] {
-			filter: brightness(var(--hover-brightness));
+			filter: brightness(var(--disabled-brightness));
 			user-select: none !important;
 			-webkit-user-select: none !important;
 			-moz-user-select: none !important;
@@ -139,6 +138,10 @@
 		input[type="checkbox"]:focus, input[type="checkbox"]:hover {
 			box-shadow: none;
 			filter: brightness(var(--hover-brightness));
+		}
+
+		input[error], select[error] {
+			background-color: var(--light-red);
 		}
 
 	/* button */
@@ -241,7 +244,13 @@
 		}
 
 		details summary {
+			cursor: pointer;
 			list-style-type: none;
+		}
+
+		details summary:hover, details summary:focus {
+			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
+			filter: brightness(var(--hover-brightness));
 		}
 
 		details summary::-webkit-details-marker {

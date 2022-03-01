@@ -9,24 +9,24 @@
 			top: var(--medium-gap-size);
 			left: var(--medium-gap-size);
 			background: var(--dark-orange);
+			width: auto;
 		}
 
 	/* overlay */
 		#configuration-overlay {
+			box-sizing: border-box;
 			z-index: 1001;
 			position: absolute;
-			top: var(--medium-gap-size);
-			left: var(--medium-gap-size);
+			top: 0;
+			left: 0;
 			overflow-x: hidden;
-			overflow-y: scroll;
 			background: var(--dark-gray);
 			color: var(--medium-gray);
 			font-family: var(--font-0);
-			height: calc(100vh - 4 * var(--medium-gap-size));
-			width: calc(100vw - 4 * var(--medium-gap-size));
+			height: 100vh;
+			width: 100vw;
 			padding: var(--medium-gap-size);
 			border: none;
-			border-radius: var(--border-radius);
 			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 		}
 
@@ -61,8 +61,25 @@
 			background: var(--medium-red);
 		}
 
+		#configuration-players-invite-link, #configuration-players-invite-mailto {
+			width: auto;
+			background: var(--medium-blue);
+			color: var(--light-gray) !important;
+		}
+
+		#temp-text {
+			position: fixed;
+			opacity: 0;
+			top: -100vh;
+			left: -100vw;
+		}
+
 		#configuration-players-list {
 			margin-bottom: var(--large-gap-size);
+		}
+
+		#configuration-players-list .form-row {
+			margin-bottom: var(--small-gap-size);
 		}
 
 		.player-name {
@@ -76,8 +93,51 @@
 			border-bottom-left-radius: 0;
 		}
 
+		#configuration-game-advanced {
+			width: 100%;
+			float: left;
+			margin-top: calc(4 * var(--medium-gap-size));
+		}
+
+		#configuration-game-advanced summary {
+			width: 100%;
+		}
+
+		#configuration-game-advanced:not([open]) summary h2:before {
+			content: "▶";
+		}
+
+		#configuration-game-advanced[open] summary h2:before {
+			content: "▼";
+		}
+
+		#configuration-game-board-x, #configuration-game-board-y {
+			margin-bottom: var(--small-gap-size);
+		}
+
 		#configuration-game-board-background {
 			max-width: calc(100vw - 5 * var(--medium-gap-size));
+		}
+
+		#configuration-game-objects-count, #configuration-game-objects-unused {
+			margin-bottom: var(--small-gap-size);
+		}
+
+		.configuration-game-objects-shape-sample {
+			display: inline-block;
+			background: var(--medium-gray);
+			height: var(--medium-font-size);
+			width: var(--medium-font-size);
+			margin: var(--medium-gap-size);
+		}
+
+		.configuration-game-objects-color-sample {
+			display: inline-block;
+			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+			height: var(--medium-font-size);
+			width: var(--medium-font-size);
+			margin: var(--medium-gap-size);
+			border-radius: 100%;
 		}
 
 		#configuration-game-status-start {
@@ -127,6 +187,10 @@
 			#configuration-players-invite-link, #configuration-players-invite-mailto {
 				float: right;
 			}
+
+			#configuration-game-status-start, #configuration-game-status-end {
+				margin-bottom: calc(var(--medium-gap-size) * 2 + var(--medium-font-size)) !important;
+			}
 		}
 
 /*** container ***/
@@ -137,6 +201,7 @@
 		width: 100%;
 		height: 100%;
 		overflow: hidden;
+		background: var(--dark-gray);
 	}
 
 	/* name */
@@ -188,7 +253,7 @@
 			height: 100%;
 		}
 
-		/* actor / informer */
+		/* actor / speaker */
 			#screens[count='1'] .screen, .screen:first-child:last-child {
 				position: absolute;
 				top: 0;
@@ -295,6 +360,7 @@
 				transform: translateX(-50%) translateY(-50%);
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
+				outline: var(--border-size) solid var(--medium-gray);
 			}
 
 			#screens .board-grid, #screens .board-coordinates {
@@ -313,13 +379,13 @@
 				box-sizing: border-box;
 				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
-				border: var(--border-size) solid var(--dark-gray);
+				outline: var(--border-size) solid var(--medium-gray);
 			}
 
 			#screens .board-coordinate {
 				text-align: center;
 				vertical-align: bottom;
-				color: var(--dark-gray);
+				color: var(--medium-gray);
 				font-family: var(--font-0);
 				text-transform: uppercase;
 				user-select: none;
@@ -377,7 +443,7 @@
 			}
 
 		/* drawer */
-			#screens:not([count='1']) .drawer, #screens .screen[role='informer'] .drawer {
+			#screens:not([count='1']) .drawer, #screens .screen[role='speaker'] .drawer {
 				display: none;
 			}
 

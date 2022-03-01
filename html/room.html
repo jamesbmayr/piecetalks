@@ -21,10 +21,10 @@
 			<div id="screens" count="0"></div>
 		</div>
 		<details id="configuration" open>
-			<summary id="configuration-button" class="pseudo-button">&#x2699;</summary>
+			<summary id="configuration-button" class="pseudo-button">&#x2699; game setup</summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
 				<section id="configuration-room">
-					<button id="configuration-close" class="pseudo-button">&#x2715;</button>
+					<button id="configuration-close" class="pseudo-button" visibility="false">&#x2715;</button>
 					<h2>
 						<span>room id:</span>
 						<output id="configuration-room-id" value="<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"></output>
@@ -34,26 +34,31 @@
 							<span>name</span>
 							<input id="configuration-room-name" type="text" placeholder="room name" autocomplete="off" spellcheck="false" readonly>
 						</label>
-						<button id="configuration-room-leave">leave &#x1f6aa;</button>
+						<button id="configuration-room-leave">&#x1f6aa; leave</button>
 					</div>
 				</section>
 				<section id="configuration-players">
 					<h2>players</h2>
 					<div id="configuration-players-list"></div>
-					<div id="configuration-players-invite" class="form-row">
+					<div id="configuration-players-invite">
 						<div class="form-row">
 							<h3>invite</h3>
 						</div>
-						<button id="configuration-players-invite-link">&#x1f517;</button>
-						<label>
-							<span>name</span>
-							<input type="text" id="configuration-players-invite-name" placeholder="name" autocomplete="off" spellcheck="false">
-						</label>
-						<label>
-							<span>email</span>
-							<input type="email" id="configuration-players-invite-email" placeholder="email" autocomplete="off" spellcheck="false">
-						</label>
-						<a href="#" id="configuration-players-invite-mailto" target="_blank" class="pseudo-button">&#x1f4e7;</a>
+						<div class="form-row">
+							<label>
+								<span>name</span>
+								<input type="text" id="configuration-players-invite-name" placeholder="name" autocomplete="off" spellcheck="false">
+							</label>
+							<button id="configuration-players-invite-link">&#x1f517; copy link</button>
+						</div>
+						<label><label><span>or</span></label></label>
+						<div class="form-row">
+							<label>
+								<span>email</span>
+								<input type="email" id="configuration-players-invite-email" placeholder="email" autocomplete="off" spellcheck="false">
+							</label>
+							<a id="configuration-players-invite-mailto" target="popup" class="pseudo-button" disabled>&#x1f4e7; send email</a>
+						</div>
 					</div>
 				</section>
 				<section id="configuration-game">
@@ -82,86 +87,92 @@
 						<label><input type="checkbox" id="configuration-game-timer-active" configuration="true" disabled><span>active</span></label>
 						<label><input type="number" id="configuration-game-timer-seconds" step="1" min="0" placeholder="seconds" configuration="true" readonly><span>seconds</span></label>
 					</div>
-					<div class="form-row">
-						<h3>board</h3>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-board-grid" configuration="true" disabled><span>show cells</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-board-coordinates" configuration="true" disabled><span>show coordinates</span></label>
-					</div>
-					<div class="form-row">
-						<label><span>x</span><input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true" autocomplete="off" readonly></label>
-						<label><span>y</span><input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true" autocomplete="off" readonly></label>
-					</div>
-					<div class="form-row">
-						<label>
-							<span>background</span>
-							<select id="configuration-game-board-background" configuration="true" disabled>
-								<script node>
-									let backgrounds = ""
-									for (let i in CONFIGURATIONS.board.backgrounds) {
-										backgrounds += "<option value='" + i + "'>" + i + "</option>"
-									}
-									backgrounds
-								</script>node>
-							</select>
-						</label>
-					</div>
-					<div class="form-row">
-						<h3>objects</h3>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-objects-overlap" configuration="true" disabled><span>allow overlap</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-objects-translucent" configuration="true" disabled><span>allow translucent</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-objects-borders" configuration="true" disabled><span>borders</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="checkbox" id="configuration-game-objects-labels" configuration="true" disabled><span>labels</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly><span>used</span></label>
-					</div>
-					<div class="form-row">
-						<label><input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly><span>unused</span></label>
-					</div>
-					<div class="form-row">
-						<h3>sizes</h3>
-						<script node>
-							let sizes = ""
-							for (let i in CONFIGURATIONS.objects.sizes) {
-								sizes += "<label><input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true' disabled><span>" + i + "</span></label>"
-							}
-							sizes
-						</script>node>
-					</div>
-					<div class="form-row">
-						<h3>shapes</h3>
-						<script node>
-							let shapes = ""
-							for (let i in CONFIGURATIONS.objects.shapes) {
-								shapes += "<label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true' disabled><span>" + i + "</span></label>"
-							}
-							shapes
-						</script>node>
-					</div>
-					<div class="form-row">
-						<h3>colors</h3>
-						<script node>
-							let colors = ""
-							for (let i in CONFIGURATIONS.objects.colors) {
-								colors += "<label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled><span>" + i.replace(/-/g, " ") + "</span></label>"
-							}
-							colors
-						</script>node>
-					</div>
+					<details id="configuration-game-advanced">
+						<summary>
+							<div class="form-row">
+								<h2>advanced options</h2>
+							</div>
+						</summary>
+						<div class="form-row">
+							<h3>board</h3>
+						</div>
+						<div class="form-row">
+							<label><input type="checkbox" id="configuration-game-board-grid" configuration="true" disabled><span>show grid</span></label>
+						</div>
+						<div class="form-row">
+							<label><input type="checkbox" id="configuration-game-board-coordinates" configuration="true" disabled><span>show coordinates</span></label>
+						</div>
+						<div class="form-row">
+							<label><span>x</span><input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true" autocomplete="off" readonly><span>cells</span></label>
+						</div>
+						<div class="form-row">
+							<label><span>y</span><input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true" autocomplete="off" readonly><span>cells</span></label>
+						</div>
+						<div class="form-row">
+							<label>
+								<select id="configuration-game-board-background" configuration="true" disabled>
+									<script node>
+										let backgrounds = ""
+										for (let i in CONFIGURATIONS.board.backgrounds) {
+											backgrounds += "<option value='" + i + "'>" + i + "</option>"
+										}
+										backgrounds
+									</script>node>
+								</select>
+								<span>background</span>
+							</label>
+						</div>
+						<div class="form-row">
+							<h3>objects</h3>
+						</div>
+						<div class="form-row">
+							<label><input type="checkbox" id="configuration-game-objects-overlap" configuration="true" disabled><span>allow overlap</span></label>
+						</div>
+						<div class="form-row">
+							<label><input type="checkbox" id="configuration-game-objects-borders" configuration="true" disabled><span>borders</span></label>
+						</div>
+						<div class="form-row">
+							<label><input type="checkbox" id="configuration-game-objects-labels" configuration="true" disabled><span>letter labels</span></label>
+						</div>
+						<div class="form-row">
+							<label><input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly><span>used</span></label>
+						</div>
+						<div class="form-row">
+							<label><input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly><span>unused</span></label>
+						</div>
+						<div class="form-row">
+							<h3>object sizes</h3>
+							<script node>
+								let sizes = ""
+								for (let i in CONFIGURATIONS.objects.sizes) {
+									sizes += "<div class='form-row'><label><input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true' disabled><span>" + i + " cells</span></label></div>"
+								}
+								sizes
+							</script>node>
+						</div>
+						<div class="form-row">
+							<h3>object shapes</h3>
+							<script node>
+								let shapes = ""
+								for (let i in CONFIGURATIONS.objects.shapes) {
+									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-shape-sample' style='clip-path: " + CONFIGURATIONS.objects.shapes[i] + "'></div><span>" + i + "</span></label></div>"
+								}
+								shapes
+							</script>node>
+						</div>
+						<div class="form-row">
+							<h3>object colors</h3>
+							<script node>
+								let colors = ""
+								for (let i in CONFIGURATIONS.objects.colors) {
+									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-color-sample' style='background: " + CONFIGURATIONS.objects.colors[i] + "'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+								}
+								colors
+							</script>node>
+						</div>
+					</details>
 				</section>
-				<section>
+				<section id="configuration-game-status">
 					<h2>
 						<span>status: </span>
 						<output id="configuration-game-status-current" readonly></output>

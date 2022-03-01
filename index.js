@@ -43,6 +43,12 @@
 	/* parseRequest */
 		function parseRequest(REQUEST, RESPONSE, data) {
 			try {
+				// redirect non-https
+					if ((/^http\:\/\//).test(REQUEST.headers.host)) {
+						_302(REQUEST.url.replace(REQUEST, RESPONSE, "http://", "https://"))
+						return
+					}
+
 				// get info
 					REQUEST.get         = QS.parse(REQUEST.url.split("?")[1]) || {}
 					REQUEST.path        = REQUEST.url.split("?")[0].split("/") || []
@@ -125,7 +131,6 @@
 								case (/[.]([a-zA-Z0-9])+$/).test(REQUEST.url):
 									try {
 										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
-										console.log(REQUEST.path[REQUEST.path.length - 1])
 										FS.readFile("./assets/" + REQUEST.path[REQUEST.path.length - 1], function (error, file) {
 											if (error) {
 												_404(REQUEST, RESPONSE, error)

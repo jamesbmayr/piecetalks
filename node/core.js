@@ -171,8 +171,10 @@
 						case "css":
 						case "csv":
 						case "html":
-						case "js":
 							return "text/" + extension
+						break
+						case "js":
+							return "text/javascript"
 						break
 						case "md":
 							return "text/html"
@@ -252,13 +254,12 @@
 										y: 0,
 										grid: false,
 										coordinates: false,
-										background: {name: "none", value: "transparent"}
+										background: {name: "blank", value: "transparent"}
 									},
 									objects: {
 										count: 0,
 										unused: 0,
 										overlap: false,
-										translucent: false,
 										borders: false,
 										labels: false,
 										sizes: [],
@@ -290,8 +291,7 @@
 								shape: null,
 								color: null,
 								border: null,
-								label: null,
-								translucent: false
+								label: null
 							}
 						break
 
@@ -402,8 +402,9 @@
 								"huge-font-size": "50px",
 								"transition-time": "1s",
 								"hover-brightness": "0.75",
+								"disabled-brightness": "0.25",
 								"drawer-opacity": "0.5",
-								"object-opacity": "0.95",
+								"object-opacity": "0.85",
 								"object-border": "80%"
 							}
 						break
@@ -418,15 +419,16 @@
 								cookieLength: 1000 * 60 * 60 * 24 * 7,
 								minimumPlayers: 2,
 								maximumPlayers: 10,
-								minimumNameLength: 3,
-								maximumNameLength: 16,
+								minimumPlayerNameLength: 3,
+								maximumPlayerNameLength: 20,
+								minimumRoomNameLength: 3,
+								maximumRoomNameLength: 40,
 								roomIdLength: 4,
 								rounding: 100,
-								roles: ["informer", "actor", "spectator"],
+								roles: ["speaker", "actor", "spectator"],
 								attempts: 10,
 								borderProbability: 0.5,
-								labelProbability: 1,
-								translucentProbability: 0.5
+								labelProbability: 1
 							}
 						break
 
@@ -449,7 +451,7 @@
 										maximum: 10
 									},
 									backgrounds: {
-										"none": "transparent",
+										"blank": "transparent",
 										"horizontal color gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
 										"vertical color gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
 										"radial color gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
@@ -497,6 +499,8 @@
 										"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
 										"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
 										"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
+										"5 point star": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
+										"pentagram": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
 										"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
 									},
 									colors: getAsset("colors")
@@ -513,18 +517,17 @@
 											y: 3,
 											grid: true,
 											coordinates: true,
-											background: {name: "none", value: "transparent"}
+											background: {name: "blank", value: "transparent"}
 										},
 										objects: {
 											count: 5,
 											unused: 0,
 											overlap: false,
-											translucent: false,
 											borders: false,
 											labels: true,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle up", "square", "octagon", "cross", "8 point star"],
-											colors: ["dark-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
+											colors: ["light-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
 										}
 									},
 									medium: {
@@ -544,12 +547,11 @@
 											count: 10,
 											unused: 0,
 											overlap: false,
-											translucent: false,
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "square", "diamond", "rectangle horizontal", "hexagon horizontal", "octagon", "cross", "8 point star"],
-											colors: ["dark-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
+											shapes: ["circle", "triangle up", "square", "diamond", "rectangle horizontal", "hexagon horizontal", "octagon", "cross", "5 point star", "8 point star"],
+											colors: ["light-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
 										}
 									},
 									challenging: {
@@ -569,19 +571,18 @@
 											count: 10,
 											unused: 5,
 											overlap: false,
-											translucent: false,
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "triangle down", "square", "diamond", "rectangle horizontal", "rectangle vertical", "hexagon horizontal", "hexagon vertical", "octagon", "cross", "x", "8 point star"],
-											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											shapes: ["circle", "triangle up", "triangle down", "square", "diamond", "rectangle horizontal", "rectangle vertical", "hexagon horizontal", "hexagon vertical", "octagon", "cross", "x", "5 point star", "8 point star"],
+											colors: ["light-gray", "medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									difficult: {
 										preset: "difficult",
 										timer: {
 											active: true,
-											seconds: 240
+											seconds: 300
 										},
 										board: {
 											x: 8,
@@ -594,19 +595,18 @@
 											count: 10,
 											unused: 10,
 											overlap: true,
-											translucent: false,
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "hourglass vertical", "octagon", "octagon diagonal", "cross", "x", "8 point star"],
-											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "hourglass vertical", "octagon", "octagon diagonal", "cross", "x", "5 point star", "8 point star"],
+											colors: ["light-gray", "medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									insane: {
 										preset: "insane",
 										timer: {
 											active: true,
-											seconds: 180
+											seconds: 300
 										},
 										board: {
 											x: 10,
@@ -617,13 +617,12 @@
 										},
 										objects: {
 											count: 15,
-											unused: 20,
+											unused: 15,
 											overlap: true,
-											translucent: true,
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3", "5x5"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "hourglass horizontal", "hourglass vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "8 point star"],
+											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "hourglass horizontal", "hourglass vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "5 point star", "pentagram", "8 point star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
 										}
 									}
@@ -649,6 +648,18 @@
 		function isNumLet(string) {
 			try {
 				return (/^[a-zA-Z0-9]+$/).test(string)
+			}
+			catch (error) {
+				logError(error)
+				return false
+			}
+		}
+
+	/* isEmail */
+		module.exports.isEmail = isEmail
+		function isEmail(string) {
+			try {
+				return (/[a-z0-9!#$%&\'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/).test(string)
 			}
 			catch (error) {
 				logError(error)

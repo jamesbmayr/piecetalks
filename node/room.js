@@ -18,8 +18,8 @@
 						return
 					}
 
-					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
-						callback({success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters"})
+					if (CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+						callback({success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
 
@@ -73,8 +73,8 @@
 						return
 					}
 
-					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
-						callback({success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters"})
+					if (CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+						callback({success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
 
@@ -355,8 +355,8 @@
 
 				// no name
 					let name = REQUEST.post.name.trim() || null
-					if (!name || !name.length || !CORE.isNumLet(name.replace(/\s/g, "")) || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength) {
-						callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumNameLength + " - " + CONSTANTS.maximumNameLength + " letters, numbers, and spaces only", recipients: [REQUEST.session.id]})
+					if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
+						callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -479,7 +479,6 @@
 								room.configuration.objects[REQUEST.post.configuration] = value
 							break
 							case "objects-overlap":
-							case "objects-translucent":
 							case "objects-borders":
 							case "objects-labels":
 								room.configuration.objects[REQUEST.post.configuration] = Boolean(REQUEST.post.value)
@@ -542,12 +541,17 @@
 						room.configuration.preset = "custom"
 					}
 
+				// also clear out player objects
+					for (let i in room.players) {
+						room.players[i].objects = {}
+					}
+
 				// query
 					let query = CORE.getSchema("query")
 						query.collection = "rooms"
 						query.command = "update"
 						query.filters = {id: room.id}
-						query.document = {configuration: room.configuration}
+						query.document = {configuration: room.configuration, players: room.players}
 
 				// update
 					CORE.accessDatabase(query, function(results) {
@@ -608,8 +612,8 @@
 						return
 					}
 
-					if (CONSTANTS.minimumNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumNameLength) {
-						callback({roomId: room.id, success: false, message: "name must be between " + CONSTANTS.minimumNameLength + " and " + CONSTANTS.maximumNameLength + " characters", recipients: [REQUEST.session.id]})
+					if (CONSTANTS.minimumNamePlayerLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+						callback({roomId: room.id, success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -754,19 +758,24 @@
 					}
 
 				// no actors
-					let actors = []
-					let informers = []
+					let theseRoles = {}
 					for (let i in room.players) {
-						if (room.players[i].role == "actor") {
-							actors.push(i)
+						let role = room.players[i].role
+						if (!theseRoles[role]) {
+							theseRoles[role] = 1
 						}
-						if (room.players[i].role == "informer") {
-							informers.push(i)
+						else {
+							theseRoles[role]++
 						}
+					}					
+
+					if (!theseRoles.actor) {
+						callback({roomId: room.id, success: false, message: "at least 1 actor required", recipients: [REQUEST.session.id]})
+						return
 					}
 
-					if (!actors.length || !informers.length) {
-						callback({roomId: room.id, success: false, message: "at least 1 actor and 1 informer are required", recipients: [REQUEST.session.id]})
+					if (!theseRoles.speaker) {
+						callback({roomId: room.id, success: false, message: "at least 1 speaker required", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -845,6 +854,7 @@
 				// activate grid
 					room.configuration.board.grid = true
 					room.configuration.board.coordinates = true
+					room.configuration.preset = "custom"
 
 				// set roles
 					for (let i in room.players) {
@@ -1040,7 +1050,7 @@
 							object.target.x = Math.floor(Math.random() * room.configuration.board.x)
 							object.target.y = Math.floor(Math.random() * room.configuration.board.y)
 							attempts--
-						} while (!room.configuration.objects.overlap && hasOverlap(object, objects) && attempts)
+						} while (attempts && (hangsOff(room.configuration.board, object) || (!room.configuration.objects.overlap && hasOverlap(object, objects))))
 
 						if (!attempts) {
 							return false
@@ -1067,7 +1077,7 @@
 						if (room.players[i].role == "actor") {
 							room.players[i].objects = CORE.duplicateObject(objectObjects)
 						}
-						if (room.players[i].role == "informer") {
+						if (room.players[i].role == "speaker") {
 							room.players[i].objects = CORE.duplicateObject(objectObjects)
 							for (let j in room.players[i].objects) {
 								room.players[i].objects[j].position.x = room.players[i].objects[j].target.x
@@ -1112,11 +1122,6 @@
 						object.label = CORE.generateRandom(null, 1)
 					}
 
-				// translucent
-					if (configuration.objects.translucent) {
-						object.translucent = Boolean(Math.random() < CONSTANTS.translucentProbability)
-					}
-
 				// return
 					return object
 			}
@@ -1138,9 +1143,40 @@
 						if (objects[i].color       !== object.color)       { continue }
 						if (objects[i].border      !== object.border)      { continue }
 						if (objects[i].label       !== object.label)       { continue }
-						if (objects[i].translucent !== object.translucent) { continue }
 
 						return true
+					}
+
+				// still here
+					return false
+			}
+			catch (error) {
+				CORE.logError(error)
+				return false
+			}
+		}
+
+	/* hangsOff */
+		module.exports.hangsOff = hangsOff
+		function hangsOff(board, object) {
+			try {
+				// cells
+					let theseCells = []
+					let diffX = Math.floor(object.size.x / 2)
+					let diffY = Math.floor(object.size.y / 2)
+
+					for (let x = 0; x < object.size.x; x++) {
+						for (let y = 0; y < object.size.y; y++) {
+							// get this cell
+								let thisCellX = (object.target.x + x - diffX)
+								let thisCellY = (object.target.y + y - diffY)
+
+							// hanging off board
+								if ((thisCellX < 0 || thisCellX > board.x)
+								 || (thisCellY < 0 || thisCellY > board.y)) {
+									return true
+								}
+						}
 					}
 
 				// still here
@@ -1163,7 +1199,12 @@
 
 					for (let x = 0; x < object.size.x; x++) {
 						for (let y = 0; y < object.size.y; y++) {
-							theseCells.push((object.target.x + x - diffX) + "," + (object.target.y + y - diffY))
+							// get this cell
+								let thisCellX = (object.target.x + x - diffX)
+								let thisCellY = (object.target.y + y - diffY)
+
+							// add to list of cells
+								theseCells.push(thisCellX + "," + thisCellY)
 						}
 					}
 
@@ -1200,18 +1241,36 @@
 		module.exports.isVictory = isVictory
 		function isVictory(room, player) {
 			try {
+				// board size
+					let boardMaxX = room.configuration.board.x
+					let boardMaxY = room.configuration.board.y
+
 				// loop through objects
 					for (let i in player.objects) {
 						let object = player.objects[i]
-						if ((object.target.x == null && object.target.y == null)
-						 && (object.position.x !== null || object.position.y !== null)) {
-							return false
-						}
 
-						if ((object.target.x !== null && object.target.y !== null)
-						 && (object.position.x !== object.target.x || object.position.y !== object.target.y)) {
-							return false
-						}
+						// should be on board
+							if ((object.target.x !== null && object.target.y !== null)
+							 && (object.position.x !== object.target.x || object.position.y !== object.target.y)) {
+								return false
+							}
+
+						// should be in drawer --> check if on board
+							if (object.target.x == null && object.target.y == null) {
+								if (object.position.x == null && object.position.y == null) {
+									continue
+								}
+
+								let objectMinX = object.position.x - Math.floor(object.size.x / 2)
+								let objectMaxX = object.position.x + Math.floor(object.size.x / 2)
+								let objectMinY = object.position.y - Math.floor(object.size.y / 2)
+								let objectMaxY = object.position.y + Math.floor(object.size.y / 2)
+							
+								if ((objectMaxX >= 0 && objectMinX <= boardMaxX)
+								 && (objectMaxY >= 0 && objectMinY <= boardMaxY)) {
+									return false
+								}
+							}
 					}
 
 				// still here
