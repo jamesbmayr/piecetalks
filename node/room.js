@@ -1107,14 +1107,18 @@
 					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(configuration.objects.sizes)]
 
 				// shape
-					object.shape = CONFIGURATIONS.objects.shapes[CORE.chooseRandom(configuration.objects.shapes)]
+					let shape = CORE.chooseRandom(configuration.objects.shapes)
+					object.shape = CONFIGURATIONS.objects.shapes[shape]
 
 				// color
 					object.color = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
 
 				// border
 					if (configuration.objects.borders && Math.random() < CONSTANTS.borderProbability) {
-						object.border = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
+						object.border = {
+							color: CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)],
+							shape: CONFIGURATIONS.objects.borders[shape]
+						}
 					}
 
 				// label

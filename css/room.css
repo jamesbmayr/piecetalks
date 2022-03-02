@@ -21,13 +21,14 @@
 			left: 0;
 			overflow-x: hidden;
 			background: var(--dark-gray);
-			color: var(--medium-gray);
+			color: var(--light-gray);
 			font-family: var(--font-0);
 			height: 100vh;
 			width: 100vw;
 			padding: var(--medium-gap-size);
 			border: none;
 			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+			scroll-behavior: smooth;
 		}
 
 		#configuration-close {
@@ -38,13 +39,20 @@
 			z-index: 999;
 		}
 
+	/* overlay room */
 		#configuration-room h2 {
+			font-size: 0;
 			width: calc(100% - (var(--medium-font-size) + 3 * var(--medium-gap-size)));
-			font-size: var(--large-font-size);
 			margin-top: 0;
 		}
 
+		#configuration-room h2 span {
+			font-size: var(--large-font-size);
+			margin-right: var(--medium-gap-size);
+		}
+
 		#configuration-room-id {
+			font-size: var(--large-font-size);
 			font-weight: bold;
 			pointer-events: all;
 			user-select: all;
@@ -61,7 +69,28 @@
 			background: var(--medium-red);
 		}
 
+	/* overlay status */
+		#configuration-game-status-start {
+			width: 100%;
+			background: var(--medium-green);
+		}
+
+		#configuration-game-status-end {
+			width: 100%;
+			background: var(--medium-orange);
+		}
+
+		#configuration-game-status-start:disabled, #configuration-game-status-end:disabled {
+			display: none;
+		}
+
+	/* overlay players */
+		#configuration-players-invite-name, #configuration-players-invite-email {
+			border-radius: var(--border-radius) 0 0 var(--border-radius);
+		}
+
 		#configuration-players-invite-link, #configuration-players-invite-mailto {
+			border-radius: 0 var(--border-radius) var(--border-radius) 0;
 			width: auto;
 			background: var(--medium-blue);
 			color: var(--light-gray) !important;
@@ -93,21 +122,139 @@
 			border-bottom-left-radius: 0;
 		}
 
+	/* overlay preview */
+		@media screen and (min-width: 1001px) {
+			#configuration-preview {
+				position: fixed;
+				bottom: calc(4 * var(--large-gap-size));
+				right: calc(4 * var(--large-gap-size));
+				background-color: var(--dark-gray);
+				box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+				border-radius: var(--border-radius);
+				height: calc(var(--cell-size) * var(--board-size-y) / 2);
+				width: calc(var(--cell-size) * var(--board-size-x) / 2);
+				padding: calc(3 * var(--large-gap-size));
+				overflow: hidden;
+				margin-bottom: 0;
+				z-index: 1000;
+			}
+
+			#configuration-preview-board {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+			}
+
+			#configuration-preview h2 {
+				position: absolute;
+				bottom: var(--medium-gap-size);
+				left: 0;
+				width: 100%;
+				text-align: center;
+			}
+		}
+
+		@media screen and (max-width: 1200px) {
+			#configuration-preview {
+				bottom: calc(2 * var(--large-gap-size));
+				right: calc(2 * var(--large-gap-size));
+			}
+		}
+
+		@media screen and (max-width: 1000px) {
+			#configuration-preview-board {
+				position: relative;
+				margin: calc(2 * var(--large-gap-size)) auto;
+			}
+		}
+
+		#configuration-preview-board {
+			pointer-events: none;
+			display: block;
+			height: calc(var(--cell-size) * var(--board-size-y) / 2);
+			width: calc(var(--cell-size) * var(--board-size-x) / 2);
+			outline: var(--border-size) solid var(--medium-gray);
+		}
+
+		#configuration-preview-board .board-grid {
+			height: 100%;
+			width: 100%;
+		}
+
+		#configuration-preview-board .board-coordinates {
+			width: 100%;
+			height: 100%;
+			transform: translateY(-100%);
+		}
+
+		#configuration-preview-board .board-grid-cell {
+			float: left;
+			box-sizing: border-box;
+			height: calc(var(--cell-size) / 2);
+			width: calc(var(--cell-size) / 2);
+			outline: var(--border-size) solid var(--medium-gray);
+		}
+
+		#configuration-preview-board .board-coordinate {
+			text-align: center;
+			vertical-align: bottom;
+			color: var(--medium-gray);
+			font-family: var(--font-0);
+			text-transform: uppercase;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+		}
+
+		#configuration-preview-board .board-coordinate-x {
+			font-size: var(--medium-font-size);
+			display: inline-block;
+			height: var(--medium-font-size);
+			width: calc(var(--cell-size) / 2);
+			transform: translateY(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
+		}
+
+		#configuration-preview-board .board-coordinate-y {
+			font-size: var(--medium-font-size);
+			display: block;
+			width: var(--medium-font-size);
+			height: calc(var(--cell-size) / 2);
+			writing-mode: vertical-rl;
+			text-orientation: upright;
+			transform: translateY(calc(-1 * var(--medium-font-size))) translateX(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
+		}
+
+		#configuration-preview-board .object {
+			position: absolute;
+			cursor: default;
+			transform: translateX(-50%) translateY(-50%);
+			opacity: var(--object-opacity);
+		}
+
+		#configuration-preview-board .object-inner {
+			height: var(--object-border);
+			width: var(--object-border);
+		}
+
+	/* overlay game */
 		#configuration-game-advanced {
 			width: 100%;
 			float: left;
-			margin-top: calc(4 * var(--medium-gap-size));
+			margin-top: calc(2 * var(--large-gap-size));
 		}
 
-		#configuration-game-advanced summary {
+		#configuration-game-advanced-toggle {
 			width: 100%;
 		}
 
-		#configuration-game-advanced:not([open]) summary h2:before {
+		#configuration-game-advanced:not([open]) #configuration-game-advanced-toggle h2:before {
 			content: "▶";
 		}
 
-		#configuration-game-advanced[open] summary h2:before {
+		#configuration-game-advanced[open] #configuration-game-advanced-toggle h2:before {
 			content: "▼";
 		}
 
@@ -140,25 +287,50 @@
 			border-radius: 100%;
 		}
 
-		#configuration-game-status-start {
+	/* overlay back to top */
+		#configuration-back-to-top {
 			width: 100%;
-			background: var(--medium-green);
-		}
-
-		#configuration-game-status-end {
-			width: 100%;
-			background: var(--medium-orange);
-		}
-
-		#configuration-game-status-start:disabled, #configuration-game-status-end:disabled {
-			display: none;
+			color: var(--medium-blue);
+			font-family: var(--font-0);
+			text-align: center;
 		}
 
 	/* mobile */
 		@media screen and (max-width: 800px) {
+			#configuration-overlay {
+				padding-bottom: calc(var(--large-gap-size) * 2);
+			}
+
+			#configuration-room-name-outer {
+				margin: 0;
+				width: 100%;
+			}
+
+			#configuration-room-name-outer span {
+				display: none;
+			}
+
+			#configuration-room-name {
+				width: 100%;
+			}
+
 			#configuration-room-leave {
 				margin-top: var(--medium-gap-size);
 				width: 100%;
+			}
+
+			#configuration-players-invite-email {
+				margin-top: var(--small-gap-size);
+			}
+
+			#configuration-players-invite-name, #configuration-players-invite-email {
+				width: 100%;
+				border-radius: var(--border-radius) var(--border-radius) 0 0;
+			}
+
+			#configuration-players-invite-link, #configuration-players-invite-mailto {
+				width: 100%;
+				border-radius: 0 0 var(--border-radius) var(--border-radius);
 			}
 
 			.player-row span {
@@ -180,16 +352,8 @@
 				display: none;
 			}
 
-			#configuration-players-invite-name {
-				margin-bottom: var(--medium-gap-size);
-			}
-
-			#configuration-players-invite-link, #configuration-players-invite-mailto {
-				float: right;
-			}
-
-			#configuration-game-status-start, #configuration-game-status-end {
-				margin-bottom: calc(var(--medium-gap-size) * 2 + var(--medium-font-size)) !important;
+			#configuration-game-board-background ~ span {
+				display: none;
 			}
 		}
 
@@ -368,7 +532,6 @@
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
-				border-radius: var(--border-radius);
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
 				pointer-events: none;
@@ -485,8 +648,8 @@
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
-				height: var(--object-border);
-				width: var(--object-border);
+				height: 100%;
+				width: 100%;
 			}
 
 			.object-label {

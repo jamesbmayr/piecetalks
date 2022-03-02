@@ -26,7 +26,8 @@
 			maximumRoomNameLength: 40,
 			second: 1000,
 			roles: ["speaker", "actor", "spectator"],
-			objectOffset: 0.5
+			objectOffset: 0.5,
+			attempts: 10
 		}
 
 	/* state */
@@ -74,6 +75,9 @@
 					},
 					rows: {}
 				},
+				preview: {
+					board: document.querySelector("#configuration-preview-board")
+				},
 				game: {
 					preset: document.querySelector("#configuration-game-preset"),
 					timer: {
@@ -103,7 +107,8 @@
 						start: document.querySelector("#configuration-game-status-start"),
 						end: document.querySelector("#configuration-game-status-end")
 					}
-				}
+				},
+				backToTop: document.querySelector("#configuration-back-to-top")
 			},
 			container: {
 				roomName: document.querySelector("#room-name"),
@@ -126,6 +131,18 @@
 			try {
 				return (/[a-z0-9!#$%&\'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/).test(string)
 			} catch (error) {console.log(error)}
+		}
+
+	/* chooseRandom */
+		function chooseRandom(options) {
+			try {
+				if (!Array.isArray(options)) {
+					return false
+				}
+
+				return options[Math.floor(Math.random() * options.length)]
+			}
+			catch (error) {console.log(error)}
 		}
 
 	/* showToast */
@@ -185,7 +202,9 @@
 	/* createSocket */
 		function createSocket() {
 			try {
-				STATE.socket = new WebSocket(location.href.replace("http","ws"))
+				let url = location.href.replace("http","ws")
+					url = url.slice(0, url.includes("#") ? url.indexOf("#") : url.length)
+				STATE.socket = new WebSocket(url)
 				STATE.socket.onopen = function() {
 					STATE.socket.send(null)
 				}
@@ -451,6 +470,21 @@
 						roleSelect.appendChild(option)
 					}
 
+				// help text
+					let helpText = document.createElement("details")
+						helpText.className = "help-text"
+					label.appendChild(helpText)
+
+					let summary = document.createElement("summary")
+						summary.className = "help-text-button pseudo-button"
+						summary.innerText = "?"
+					helpText.appendChild(summary)
+
+					let description = document.createElement("description")
+						description.className = "help-text-description"
+						description.innerText = "actors move objects | speakers know the solution"
+					helpText.appendChild(description)
+
 				// return
 					return element
 			} catch (error) {console.log(error)}
@@ -641,6 +675,15 @@
 			} catch (error) {console.log(error)}
 		}
 
+	/* jumpToTopConfiguration */
+		ELEMENTS.configuration.backToTop.addEventListener(TRIGGERS.click, jumpToTopConfiguration)
+		function jumpToTopConfiguration(event) {
+			try {
+				// scrolltop
+					ELEMENTS.configuration.overlay.scrollTop = 0
+			} catch (error) {console.log(error)}
+		}
+
 	/* displayConfiguration */
 		function displayConfiguration(status, configuration) {
 			try {
@@ -742,6 +785,9 @@
 						"--board-size-x: " + configuration.board.x + "; " +
 						"--board-size-y: " + configuration.board.y + "; " +
 					"}"
+
+				// preview
+					displayPreview(ELEMENTS.configuration.preview.board, configuration)
 			} catch (error) {console.log(error)}
 		}
 
@@ -1002,30 +1048,9 @@
 					screen.querySelector(".screen-role").value = player.role || ""
 					screen.querySelector(".screen-connected").checked = player.connected || false
 
-				// background
-					screen.querySelector(".board").style.background = configuration.board.background ? configuration.board.background.value : "transparent"
-
-				// grid
-					if (configuration.board.grid) {
-						let count = configuration.board.x * configuration.board.y
-						if (Array.from(screen.querySelectorAll(".board-grid-cell")).length !== count) {
-							displayGrid(screen.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
-						}
-					}
-					else {
-						screen.querySelector(".board-grid").innerHTML = ""
-					}
-
-				// coordinates
-					if (configuration.board.coordinates) {
-						let count = configuration.board.x + configuration.board.y
-						if (Array.from(screen.querySelectorAll(".board-coordinate")).length !== count) {
-							displayCoordinates(screen.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
-						}
-					}
-					else {
-						screen.querySelector(".board-coordinates").innerHTML = ""	
-					}
+				// display board
+					let board = screen.querySelector(".board")
+					displayBoard(board, configuration)
 
 				// display objects
 					displayObjects(screen, player.objects)
@@ -1060,19 +1085,7 @@
 					screen.appendChild(connected)
 
 				// board
-					let board = document.createElement("div")
-						board.className = "board"
-					screen.appendChild(board)
-
-				// grid
-					let grid = document.createElement("div")
-						grid.className = "board-grid"
-					board.appendChild(grid)
-
-				// coordinates
-					let coordinates = document.createElement("div")
-						coordinates.className = "board-coordinates"
-					board.appendChild(coordinates)
+					createBoard(screen)
 
 				// drawer
 					let drawer = document.createElement("div")
@@ -1084,6 +1097,56 @@
 
 				// return
 					return screen
+			} catch (error) {console.log(error)}
+		}
+
+	/* createBoard */
+		function createBoard(container) {
+			try {
+				// board
+					let board = document.createElement("div")
+						board.className = "board"
+					container.appendChild(board)
+
+				// grid
+					let grid = document.createElement("div")
+						grid.className = "board-grid"
+					board.appendChild(grid)
+
+				// coordinates
+					let coordinates = document.createElement("div")
+						coordinates.className = "board-coordinates"
+					board.appendChild(coordinates)
+			} catch (error) {console.log(error)}
+		}
+
+	/* displayBoard */
+		function displayBoard(board, configuration) {
+			try {
+				// background
+					board.style.background = configuration.board.background ? configuration.board.background.value : "transparent"
+
+				// grid
+					if (configuration.board.grid) {
+						let count = configuration.board.x * configuration.board.y
+						if (Array.from(board.querySelectorAll(".board-grid-cell")).length !== count) {
+							displayGrid(board.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
+						}
+					}
+					else {
+						board.querySelector(".board-grid").innerHTML = ""
+					}
+
+				// coordinates
+					if (configuration.board.coordinates) {
+						let count = configuration.board.x + configuration.board.y
+						if (Array.from(board.querySelectorAll(".board-coordinate")).length !== count) {
+							displayCoordinates(board.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
+						}
+					}
+					else {
+						board.querySelector(".board-coordinates").innerHTML = ""
+					}
 			} catch (error) {console.log(error)}
 		}
 
@@ -1129,11 +1192,89 @@
 		}
 
 /*** objects ***/
+	/* displayPreview */
+		function displayPreview(board, configuration) {
+			try {
+				// board
+					displayBoard(ELEMENTS.configuration.preview.board, configuration)
+
+				// clear out objects
+					Array.from(board.querySelectorAll(".object")).forEach(function(element) {
+						element.remove()
+					})
+
+				// no count / sizes / shapes / colors
+					if (!configuration.objects.count || !configuration.objects.sizes.length || !configuration.objects.shapes.length || !configuration.objects.colors.length) {
+						return
+					}
+
+				// display samples
+					let positions = []
+					for (let i = 0; i < configuration.objects.count; i++) {
+						// random parameters
+							let sizeName = chooseRandom(configuration.objects.sizes)
+							let sizeValue = {x: Number(sizeName.split("x")[0]), y: Number(sizeName.split("x")[1])}
+
+							let shapeName = chooseRandom(configuration.objects.shapes).replace(/\s/g, "_")
+							let shapeValue = document.querySelector("#configuration-game-objects-shapes-" + shapeName).nextSibling.style.clipPath
+
+							let colorName = chooseRandom(configuration.objects.colors).replace(/-/g, "_")
+							let colorValue = document.querySelector("#configuration-game-objects-colors-" + colorName).nextSibling.style.background
+
+						// random position (no overlap)
+							let positionValue = {x: null, y: null}
+							let attempts = CONSTANTS.attempts
+							do {
+								positionValue.x = Math.floor(Math.random() * configuration.board.x)
+								positionValue.y = Math.floor(Math.random() * configuration.board.x)
+								positionValue.z = i
+								attempts--
+							} while (!configuration.objects.overlap && positions.includes(positionValue.x + "," + positionValue.y) && attempts)
+							positions.push(positionValue.x + "," + positionValue.y)
+
+						// escape hatch
+							if (!attempts) {
+								return
+							}
+
+						// border
+							let borderValue = null
+							if (configuration.objects.borders) {
+								let borderName = chooseRandom(configuration.objects.colors).replace(/-/g, "_")
+								borderValue = {
+									color: document.querySelector("#configuration-game-objects-colors-" + borderName).nextSibling.style.background,
+									shape: shapeValue
+								}								
+							}
+
+						// object object
+							let object = {
+								preview: true,
+								id: i,
+								position: positionValue,
+								size: sizeValue,
+								shape: shapeValue,
+								color: colorValue,
+								border: borderValue,
+								label: configuration.objects.labels ? CONSTANTS.alphabet[i] : null
+							}
+
+						// object element
+							let element = createObject(ELEMENTS.configuration.preview.board, ELEMENTS.configuration.preview.board, object)
+							displayObject(ELEMENTS.configuration.preview.board, null, element, object)
+					}
+			} catch (error) {console.log(error)}
+		}
+
 	/* displayObjects */
 		function displayObjects(screen, objects) {
 			try {
 				// get ids
 					let ids = Object.keys(objects)
+
+				// get board & drawer
+					let board = screen.querySelector(".board")
+					let drawer = screen.querySelector(".drawer")
 
 				// get existing objects
 					for (let i in screen.objectElements) {
@@ -1145,24 +1286,27 @@
 							}
 
 						// update
-							displayObject(screen, screen.objectElements[i], objects[i])
+							displayObject(board, drawer, screen.objectElements[i], objects[i])
 							ids = ids.filter(function(j) { return j !== i }) || []
 					}
 
 				// remaining ids
 					for (let i in ids) {
-						let element = createObject(screen, objects[ids[i]])
-						displayObject(screen, element, objects[ids[i]])
+						let element = createObject(screen, drawer, objects[ids[i]])
+						displayObject(board, drawer, element, objects[ids[i]])
 					}
 			} catch (error) {console.log(error)}
 		}
 
 	/* displayObject */
-		function displayObject(screen, element, object) {
+		function displayObject(board, drawer, element, object) {
 			try {
 				// active
-					if (STATE.grabbed && STATE.grabbed.id == screen.id + "-object-" + object.id) {
-						return
+					if (STATE.grabbed) {
+						let id = STATE.grabbed.id.split("-")
+						if (id[id.length - 1] == object.id) {
+							return
+						}
 					}
 
 				// in drawer
@@ -1172,34 +1316,36 @@
 					}
 
 				// not in drawer
-					screen.querySelector(".board").appendChild(element)
-					element.style.left = "calc(var(--cell-size) * " + (object.position.x + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
-					element.style.top  = "calc(var(--cell-size) * " + (object.position.y + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
+					board.appendChild(element)
+					element.style.left = "calc(var(--cell-size) * " + (object.position.x + CONSTANTS.objectOffset) + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
+					element.style.top  = "calc(var(--cell-size) * " + (object.position.y + CONSTANTS.objectOffset) + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
 			} catch (error) {console.log(error)}
 		}
 
 	/* createObject */
-		function createObject(screen, object) {
+		function createObject(screen, drawer, object) {
 			try {
 				// create
 					let element = document.createElement("div")
 						element.className = "object"
 						element.id = screen.id + "-object-" + object.id
-						element.style.width  = "calc(var(--cell-size) * " + object.size.x + " / var(--screen-count) * var(--multiplier))"
-						element.style.height = "calc(var(--cell-size) * " + object.size.y + " / var(--screen-count) * var(--multiplier))"
+						element.style.width  = "calc(var(--cell-size) * " + object.size.x + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
+						element.style.height = "calc(var(--cell-size) * " + object.size.y + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
 						element.style.clipPath = object.shape
-						element.style.background = object.border ? object.border : object.color
+						element.style.background = object.border ? object.border.color : object.color
 						element.style.zIndex = object.position.z
 						element.addEventListener(TRIGGERS.mousedown, grabObject)
-					screen.objectElements[object.id] = element
-					screen.querySelector(".drawer").appendChild(element)
+					if (!object.preview) {
+						screen.objectElements[object.id] = element
+					}
+					drawer.appendChild(element)
 
 				// border
 					let inner = null
 					if (object.border) {
 						inner = document.createElement("div")
 						inner.className = "object-inner"
-						inner.style.clipPath = object.shape
+						inner.style.clipPath = object.border.shape
 						inner.style.background = object.color
 						element.appendChild(inner)
 					}

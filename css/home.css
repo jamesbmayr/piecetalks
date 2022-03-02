@@ -22,7 +22,7 @@
 	/* heading */
 		#heading {
 			text-transform: uppercase;
-			color: var(--medium-gray);
+			color: var(--light-gray);
 		}
 
 	/* form */

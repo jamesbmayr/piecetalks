@@ -353,7 +353,9 @@
 									fonts = fonts.slice(fonts.indexOf("family=") + 7, fonts.indexOf("&display="))
 									fonts = fonts.split("|")
 								for (let i in fonts) {
-									output += ("--font-" + i + ": '" + fonts[i].replace(/\+/i, " ") + "', sans-serif; ")
+									let font = fonts[i].replace(/\+/i, " ")
+										font = font.split(":")[0]
+									output += ("--font-" + i + ": '" + font + "', sans-serif; ")
 								}
 
 							// return
@@ -503,6 +505,35 @@
 										"pentagram": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
 										"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
 									},
+									borders: {
+										"circle": "circle(40%)",
+										"triangle up": "polygon(50% 14%, 90% 94%, 10% 94%)",
+										"triangle down": "polygon(10% 6%, 90% 6%, 50% 86%)",
+										"triangle left": "polygon(14% 50%, 94% 10%, 94% 90%)",
+										"triangle right": "polygon(86% 50%, 6% 10%, 6% 90%)",
+										"square": "polygon(10% 10%, 90% 10%, 90% 90%, 10% 90%)",
+										"diamond": "polygon(50% 10%, 90% 50%, 50% 90%, 10% 50%)",
+										"rectangle horizontal": "polygon(6% 26%, 94% 26%, 94% 74%, 6% 74%)",
+										"rectangle vertical": "polygon(74% 6%, 74% 94%, 26% 94%, 26% 6%)",
+										"rhombus positive": "polygon(30% 30%, 90% 10%, 70% 70%, 10% 90%)",
+										"rhombus negative": "polygon(10% 10%, 70% 30%, 90% 90%, 30% 70%)",
+										"chevron up": "polygon(10% 90%, 50% 10%, 90% 90%, 50% 70%)",
+										"chevron down": "polygon(10% 10%, 50% 30%, 90% 10%, 50% 90%)",
+										"chevron left": "polygon(10% 10%, 90% 50%, 10% 90%, 30% 50%)",
+										"chevron right": "polygon(10% 50%, 90% 10%, 70% 50%, 90% 90%)",
+										"hexagon horizontal": "polygon(26% 14%, 74% 14%, 90% 50%, 74% 86%, 26% 86%, 10% 50%)",
+										"hexagon vertical": "polygon(14% 26%, 50% 10%, 82% 26%, 82% 74%, 50% 90%, 14% 74%)",
+										"hourglass horizontal": "polygon(5% 10%, 50% 37%, 95% 10%, 95% 90%, 50% 63%, 5% 90%)",
+										"hourglass vertical": "polygon(90% 5%, 63% 50%, 90% 95%, 10% 95%, 37% 50%, 10% 5%)",
+										"octagon": "polygon(30% 10%, 70% 10%, 90% 30%, 90% 70%, 70% 90%, 30% 90%, 10% 70%, 10% 30%)",
+										"octagon diagonal": "polygon(50% 10%, 80% 20%, 90% 50%, 80% 80%, 50% 90%, 20% 80%, 10% 50%, 20% 20%)",
+										"4 point star": "polygon(50% 10%, 62% 38%, 90% 50%, 62% 62%, 50% 90%, 38% 62%, 10% 50%, 38% 38%)",
+										"cross": "polygon(40% 5%, 60% 5%, 60% 40%, 95% 40%, 95% 60%, 60% 60%, 60% 95%, 40% 95%, 40% 60%, 5% 60%, 5% 40%, 40% 40%)",
+										"x": "polygon(20% 5%, 50% 35%, 80% 5%, 95% 20%, 65% 50%, 95% 80%, 80% 95%, 50% 65%, 20% 95%, 5% 80%, 35% 50%, 5% 20%)",
+										"5 point star": "polygon(50% 11%, 60.4% 41.4%, 90% 41.4%, 66% 60.6%, 74% 91%, 50% 72.6%, 26% 91%, 34% 60.6%, 10% 41.4%, 39.6% 41.4%)",
+										"pentagram": "polygon(50% 89%, 60.4% 58.6%, 90% 58.6%, 66% 39.4%, 74% 9%, 50% 27.4%, 26% 9%, 34% 39.4%, 10% 58.6%, 39.6% 58.6%)",
+										"8 point star": "polygon(18% 18%, 42% 30%, 50% 10%, 58% 30%, 82% 18%, 70% 42%, 90% 50%, 70% 58%, 82% 82%, 58% 70%, 50% 90%, 42% 70%, 18% 82%, 30% 58%, 10% 50%, 30% 42%)"	
+									},
 									colors: getAsset("colors")
 								},
 								presets: {
@@ -588,8 +619,8 @@
 											x: 8,
 											y: 8,
 											grid: false,
-											coordinates: false,
-											background: {name: "vertical color gradient", value: "vertical color gradient"}
+											coordinates: true,
+											background: {name: "vertical color gradient", value: "linear-gradient(red, yellow, green, cyan, blue, magenta)"}
 										},
 										objects: {
 											count: 10,
@@ -780,7 +811,7 @@
 				logError(error)
 				return false
 			}
-		}	
+		}
 
 	/* sortRandom */
 		module.exports.sortRandom = sortRandom

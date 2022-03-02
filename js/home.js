@@ -7,8 +7,8 @@
 
 	/* constants */
 		const CONSTANTS = {
-			minimumNameLength: 3,
-			maximumNameLength: 16,
+			minimumPlayerNameLength: 3,
+			maximumPlayerNameLength: 20,
 			roomIdLength: 4,
 		}
 
@@ -144,8 +144,8 @@
 			try {
 				// name
 					let name = (ELEMENTS.nameInput.value || "").trim()
-					if (!name || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength || !isNumLet(name)) {
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumNameLength + " to " + CONSTANTS.maximumNameLength + " letters and numbers"})
+					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength || !isNumLet(name)) {
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " letters and numbers"})
 						return
 					}
 
@@ -170,8 +170,8 @@
 
 				// name
 					let name = (ELEMENTS.nameInput.value || "").trim()
-					if (!name || CONSTANTS.minimumNameLength > name.length || name.length > CONSTANTS.maximumNameLength || !isNumLet(name)) {
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumNameLength + " to " + CONSTANTS.maximumNameLength + " letters and numbers"})
+					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength || !isNumLet(name)) {
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " letters and numbers"})
 						return
 					}
 
