@@ -27,7 +27,8 @@
 			second: 1000,
 			roles: ["speaker", "actor", "spectator"],
 			objectOffset: 0.5,
-			attempts: 10
+			attempts: 100,
+			drawerExtra: 50
 		}
 
 	/* state */
@@ -51,6 +52,7 @@
 
 	/* elements */
 		const ELEMENTS = {
+			body: document.body,
 			cssVariables: {
 				cells: document.querySelector("#css-variables-cells"),
 				screens: document.querySelector("#css-variables-screens")
@@ -63,7 +65,8 @@
 				room: {
 					id: document.querySelector("#configuration-room-id"),
 					name: document.querySelector("#configuration-room-name"),
-					leave: document.querySelector("#configuration-room-leave")
+					leave: document.querySelector("#configuration-room-leave"),
+					darkness: document.querySelector("#configuration-room-darkness")
 				},
 				players: {
 					list: document.querySelector("#configuration-players-list"),
@@ -76,6 +79,7 @@
 					rows: {}
 				},
 				preview: {
+					element: document.querySelector("#configuration-preview"),
 					board: document.querySelector("#configuration-preview-board")
 				},
 				game: {
@@ -141,6 +145,78 @@
 				}
 
 				return options[Math.floor(Math.random() * options.length)]
+			}
+			catch (error) {console.log(error)}
+		}
+
+	/* hangsOff */
+		function hangsOff(board, object) {
+			try {
+				// cells
+					let diffX = Math.floor(object.size.x / 2)
+					let diffY = Math.floor(object.size.y / 2)
+
+					for (let x = 0; x < object.size.x; x++) {
+						for (let y = 0; y < object.size.y; y++) {
+							// get this cell
+								let thisCellX = (object.target.x + x - diffX)
+								let thisCellY = (object.target.y + y - diffY)
+
+							// hanging off board
+								if ((thisCellX < 0 || thisCellX >= board.x)
+								 || (thisCellY < 0 || thisCellY >= board.y)) {
+									return true
+								}
+						}
+					}
+
+				// still here
+					return false
+			}
+			catch (error) {console.log(error)}
+		}
+
+	/* hasOverlap */
+		function hasOverlap(object, objects) {
+			try {
+				// cells
+					let theseCells = []
+					let diffX = Math.floor(object.size.x / 2)
+					let diffY = Math.floor(object.size.y / 2)
+
+					for (let x = 0; x < object.size.x; x++) {
+						for (let y = 0; y < object.size.y; y++) {
+							// get this cell
+								let thisCellX = (object.target.x + x - diffX)
+								let thisCellY = (object.target.y + y - diffY)
+
+							// add to list of cells
+								theseCells.push(thisCellX + "," + thisCellY)
+						}
+					}
+
+				// loop through objects
+					for (let i in objects) {
+						// skip self
+							if (objects[i].id == object.id) {
+								continue
+							}
+
+						// check for overlapping cells
+							let diffX = Math.floor(objects[i].size.x / 2)
+							let diffY = Math.floor(objects[i].size.y / 2)
+
+							for (let x = 0; x < objects[i].size.x; x++) {
+								for (let y = 0; y < objects[i].size.y; y++) {
+									if (theseCells.includes((objects[i].target.x + x - diffX) + "," + (objects[i].target.y + y - diffY))) {
+										return true
+									}
+								}
+							}
+					}
+
+				// still here
+					return false
 			}
 			catch (error) {console.log(error)}
 		}
@@ -283,8 +359,8 @@
 				// set state
 					STATE.room = room
 
-				// room name
-					displayRoomName(STATE.room.status.name)
+				// game status
+					displayStatus(STATE.room.status)
 
 				// players
 					displayPlayers(STATE.room.status, STATE.room.players)
@@ -292,29 +368,8 @@
 				// game configurations
 					displayConfiguration(STATE.room.status, STATE.room.configuration)
 
-				// game status
-					displayStatus(STATE.room.status)
-
 				// screens
 					displayScreens(STATE.room.players)
-			} catch (error) {console.log(error)}
-		}
-
-	/* displayRoomName */
-		function displayRoomName(name) {
-			try {
-				// update name
-					if (document.activeElement !== ELEMENTS.configuration.room.name) {
-						ELEMENTS.configuration.room.name.value = name
-					}
-
-				// update permissions
-					if (STATE.isHost) {
-						ELEMENTS.configuration.room.name.removeAttribute("readonly")
-					}
-					else {
-						ELEMENTS.configuration.room.name.setAttribute("readonly", true)
-					}
 			} catch (error) {console.log(error)}
 		}
 
@@ -349,6 +404,29 @@
 			} catch (error) {console.log(error)}
 		}
 
+	/* updateRoomDarkness */
+		ELEMENTS.configuration.room.darkness.addEventListener(TRIGGERS.change, updateRoomDarkness)
+		function updateRoomDarkness(event) {
+			try {
+				// not the host
+					if (!STATE.isHost) {
+						showToast({success: false, message: "not the host"})
+						return
+					}
+
+				// get value
+					let value = ELEMENTS.configuration.room.darkness.checked || false
+
+				// update
+					STATE.socket.send(JSON.stringify({
+						action: "updateRoom",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId,
+						darkness: value
+					}))
+			} catch (error) {console.log(error)}
+		}
+
 	/* leaveRoom */
 		ELEMENTS.configuration.room.leave.addEventListener(TRIGGERS.click, leaveRoom)
 		function leaveRoom(event) {
@@ -364,6 +442,143 @@
 				// send command to server
 					STATE.socket.send(JSON.stringify({
 						action: "leaveRoom",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId
+					}))
+			} catch (error) {console.log(error)}
+		}
+
+/*** status ***/
+	/* displayStatus */
+		function displayStatus(status) {
+			try {
+				// darkness
+					if (status.darkness) {
+						ELEMENTS.body.setAttribute("darkness", true)
+					}
+					else {
+						ELEMENTS.body.removeAttribute("darkness")
+					}
+
+				// name
+					ELEMENTS.container.roomName.innerText = status.name
+					if (document.activeElement !== ELEMENTS.configuration.room.name) {
+						ELEMENTS.configuration.room.name.value = status.name
+					}
+
+				// darkness
+					if (document.activeElement !== ELEMENTS.configuration.room.darkness) {
+						ELEMENTS.configuration.room.darkness.checked = status.darkness
+					}
+
+				// status
+					if (status.play) {
+						ELEMENTS.configuration.game.status.current.value = "in play"
+						ELEMENTS.configuration.game.status.start.setAttribute("visibility", false)
+						ELEMENTS.configuration.game.status.end.setAttribute("visibility", true)
+						ELEMENTS.configuration.close.setAttribute("visibility", true)
+					}
+					else {
+						ELEMENTS.configuration.game.status.current.value = "setup"
+						ELEMENTS.configuration.game.status.start.setAttribute("visibility", true)
+						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
+						ELEMENTS.configuration.close.setAttribute("visibility", false)
+					}
+
+				// host
+					if (STATE.isHost) {
+						ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
+						ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
+						ELEMENTS.configuration.room.name.removeAttribute("readonly")
+						ELEMENTS.configuration.room.darkness.removeAttribute("disabled")
+					}
+					else {
+						ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
+						ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
+						ELEMENTS.configuration.room.name.setAttribute("readonly", true)
+						ELEMENTS.configuration.room.darkness.setAttribute("disabled", true)
+					}
+
+				// timer
+					if (status.play && status.timeRemaining !== null) {
+						clearInterval(STATE.timerLoop)
+						let timeRemaining = Math.max(0, status.timeRemaining)
+						ELEMENTS.container.timer.innerText = Math.floor(timeRemaining / 60) + ":" + ("0" + String(timeRemaining % 60)).slice(-2)
+						ELEMENTS.container.timer.setAttribute("visibility", true)
+						STATE.timerLoop = setInterval(updateTimer, CONSTANTS.second)
+					}
+					else {
+						ELEMENTS.container.timer.setAttribute("visibility", false)
+						clearInterval(STATE.timerLoop)
+					}
+			} catch (error) {console.log(error)}
+		}
+
+	/* updateTimer */
+		function updateTimer() {
+			try {
+				// no timer?
+					if (!STATE.room || !STATE.room.status.play || !STATE.room.status.timeRemaining || !STATE.room.configuration.timer.active) {
+						ELEMENTS.container.timer.setAttribute("visibility", false)
+						clearInterval(STATE.timerLoop)
+						return
+					}
+
+				// get time
+					let time = ELEMENTS.container.timer.innerText || ""
+						time = time.split(":")
+					let minutes = Number(time[0])
+					let seconds = Number(time[1])
+					let totalTime = minutes * 60 + seconds
+
+				// over
+					if (totalTime <= 0 && STATE.isHost) {
+						STATE.socket.send(JSON.stringify({
+							action: "endGame",
+							playerId: STATE.playerId,
+							roomId: STATE.roomId
+						}))
+						return
+					}
+
+				// set time
+					totalTime = Math.max(0, totalTime - 1)
+					ELEMENTS.container.timer.innerText = Math.floor(totalTime / 60) + ":" + ("0" + String(totalTime % 60)).slice(-2)
+			} catch (error) {console.log(error)}
+		}
+
+	/* startGame */
+		ELEMENTS.configuration.game.status.start.addEventListener(TRIGGERS.click, startGame)
+		function startGame(event) {
+			try {
+				// not the host
+					if (!STATE.isHost) {
+						showToast({success: false, message: "not the host"})
+						return
+					}
+
+				// send command to server
+					STATE.socket.send(JSON.stringify({
+						action: "startGame",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId
+					}))
+			} catch (error) {console.log(error)}
+		}
+
+	/* endGame */
+		ELEMENTS.configuration.game.status.end.addEventListener(TRIGGERS.click, endGame)
+		function endGame(event) {
+			try {
+				// not the host
+					if (!STATE.isHost) {
+						showToast({success: false, message: "not the host"})
+						return
+					}
+
+				// send command to server
+					STATE.socket.send(JSON.stringify({
+						action: "endGame",
 						playerId: STATE.playerId,
 						roomId: STATE.roomId
 					}))
@@ -621,7 +836,7 @@
 						let textarea = document.createElement("textarea")
 							textarea.id = "temp-text"
 							textarea.value = url
-						document.body.appendChild(textarea)
+						ELEMENTS.body.appendChild(textarea)
 							textarea.focus()
 							textarea.select()
 
@@ -764,7 +979,7 @@
 						let element = ELEMENTS.configuration.game.objects.shapes[i]
 						if (document.activeElement !== element) {
 							let value = element.id.split("-")
-								value = value[value.length - 1].replace(/_/g, " ")
+								value = value[value.length - 1].replace(/_/g, "-")
 							element.checked = configuration.objects.shapes.includes(value) || false
 						}
 					}
@@ -787,7 +1002,7 @@
 					"}"
 
 				// preview
-					displayPreview(ELEMENTS.configuration.preview.board, configuration)
+					displayPreview(status, configuration)
 			} catch (error) {console.log(error)}
 		}
 
@@ -820,7 +1035,7 @@
 					if (property) {
 						category = property.split("-")[0]
 						configuration = property.split("-")[1]
-						value = id[id.length - 1]
+						value = id[id.length - 1].split("_").join("-")
 						include = event.target.checked || false
 					}
 
@@ -873,122 +1088,6 @@
 			} catch (error) {console.log(error)}
 		}
 
-	/* displayStatus */
-		function displayStatus(status) {
-			try {
-				// name
-					ELEMENTS.container.roomName.innerText = status.name
-
-				// status
-					if (status.play) {
-						ELEMENTS.configuration.game.status.current.value = "in play"
-						ELEMENTS.configuration.game.status.start.setAttribute("visibility", false)
-						ELEMENTS.configuration.game.status.end.setAttribute("visibility", true)
-						ELEMENTS.configuration.close.setAttribute("visibility", true)
-					}
-					else {
-						ELEMENTS.configuration.game.status.current.value = "setup"
-						ELEMENTS.configuration.game.status.start.setAttribute("visibility", true)
-						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
-						ELEMENTS.configuration.close.setAttribute("visibility", false)
-					}
-
-				// host
-					if (STATE.isHost) {
-						ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
-						ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
-					}
-					else {
-						ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
-						ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
-					}
-
-				// timer
-					if (status.play && status.timeRemaining !== null) {
-						clearInterval(STATE.timerLoop)
-						let timeRemaining = Math.max(0, status.timeRemaining)
-						ELEMENTS.container.timer.innerText = Math.floor(timeRemaining / 60) + ":" + ("0" + String(timeRemaining % 60)).slice(-2)
-						ELEMENTS.container.timer.setAttribute("visibility", true)
-						STATE.timerLoop = setInterval(updateTimer, CONSTANTS.second)
-					}
-					else {
-						ELEMENTS.container.timer.setAttribute("visibility", false)
-						clearInterval(STATE.timerLoop)
-					}
-			} catch (error) {console.log(error)}
-		}
-
-	/* updateTimer */
-		function updateTimer() {
-			try {
-				// no timer?
-					if (!STATE.room || !STATE.room.status.play || !STATE.room.status.timeRemaining || !STATE.room.configuration.timer.active) {
-						ELEMENTS.container.timer.setAttribute("visibility", false)
-						clearInterval(STATE.timerLoop)
-						return
-					}
-
-				// get time
-					let time = ELEMENTS.container.timer.innerText || ""
-						time = time.split(":")
-					let minutes = Number(time[0])
-					let seconds = Number(time[1])
-					let totalTime = minutes * 60 + seconds
-
-				// over
-					if (totalTime <= 0 && STATE.isHost) {
-						STATE.socket.send(JSON.stringify({
-							action: "endGame",
-							playerId: STATE.playerId,
-							roomId: STATE.roomId
-						}))
-						return
-					}
-
-				// set time
-					totalTime = Math.max(0, totalTime - 1)
-					ELEMENTS.container.timer.innerText = Math.floor(totalTime / 60) + ":" + ("0" + String(totalTime % 60)).slice(-2)
-			} catch (error) {console.log(error)}
-		}
-
-	/* startGame */
-		ELEMENTS.configuration.game.status.start.addEventListener(TRIGGERS.click, startGame)
-		function startGame(event) {
-			try {
-				// not the host
-					if (!STATE.isHost) {
-						showToast({success: false, message: "not the host"})
-						return
-					}
-
-				// send command to server
-					STATE.socket.send(JSON.stringify({
-						action: "startGame",
-						playerId: STATE.playerId,
-						roomId: STATE.roomId
-					}))
-			} catch (error) {console.log(error)}
-		}
-
-	/* endGame */
-		ELEMENTS.configuration.game.status.end.addEventListener(TRIGGERS.click, endGame)
-		function endGame(event) {
-			try {
-				// not the host
-					if (!STATE.isHost) {
-						showToast({success: false, message: "not the host"})
-						return
-					}
-
-				// send command to server
-					STATE.socket.send(JSON.stringify({
-						action: "endGame",
-						playerId: STATE.playerId,
-						roomId: STATE.roomId
-					}))
-			} catch (error) {console.log(error)}
-		}
-
 /*** screens ***/
 	/* displayScreens */
 		function displayScreens(players) {
@@ -1031,7 +1130,8 @@
 				// css variable
 					ELEMENTS.container.screensContainer.setAttribute("count", activeScreens)
 					ELEMENTS.cssVariables.screens.innerText = ":root {" +
-						"--screen-count: " + (activeScreens == 1 ? 1 : activeScreens <= 4 ? 2 : 3) + "; " +
+						"--screen-count: "   + (activeScreens == 1 ? 1 : activeScreens <= 4 ? 2 : 3) + "; " +
+						"--screen-count-y: " + (activeScreens <= 2 ? 1 : activeScreens <= 6 ? 2 : 3) + "; " +
 					"}"
 			} catch (error) {console.log(error)}
 		}
@@ -1124,7 +1224,7 @@
 		function displayBoard(board, configuration) {
 			try {
 				// background
-					board.style.background = configuration.board.background ? configuration.board.background.value : "transparent"
+					board.style.background = "var(--" + (configuration.board.background || "blank") + ")"
 
 				// grid
 					if (configuration.board.grid) {
@@ -1191,15 +1291,23 @@
 			} catch (error) {console.log(error)}
 		}
 
-/*** objects ***/
+/*** preview ***/
 	/* displayPreview */
-		function displayPreview(board, configuration) {
+		function displayPreview(status, configuration) {
 			try {
+				// in play
+					if (status.play) {
+						ELEMENTS.configuration.preview.element.setAttribute("visibility", false)
+						return
+					}
+					
+					ELEMENTS.configuration.preview.element.setAttribute("visibility", true)
+
 				// board
 					displayBoard(ELEMENTS.configuration.preview.board, configuration)
 
 				// clear out objects
-					Array.from(board.querySelectorAll(".object")).forEach(function(element) {
+					Array.from(ELEMENTS.configuration.preview.board.querySelectorAll(".object")).forEach(function(element) {
 						element.remove()
 					})
 
@@ -1209,63 +1317,75 @@
 					}
 
 				// display samples
-					let positions = []
+					displayPreviewObjects(ELEMENTS.configuration.preview.board, configuration)
+			} catch (error) {console.log(error)}
+		}
+
+	/* displayPreviewObjects */
+		function displayPreviewObjects(board, configuration) {
+			try {
+				// build objects
+					let objects = []
 					for (let i = 0; i < configuration.objects.count; i++) {
-						// random parameters
-							let sizeName = chooseRandom(configuration.objects.sizes)
-							let sizeValue = {x: Number(sizeName.split("x")[0]), y: Number(sizeName.split("x")[1])}
-
-							let shapeName = chooseRandom(configuration.objects.shapes).replace(/\s/g, "_")
-							let shapeValue = document.querySelector("#configuration-game-objects-shapes-" + shapeName).nextSibling.style.clipPath
-
-							let colorName = chooseRandom(configuration.objects.colors).replace(/-/g, "_")
-							let colorValue = document.querySelector("#configuration-game-objects-colors-" + colorName).nextSibling.style.background
-
-						// random position (no overlap)
-							let positionValue = {x: null, y: null}
+						// object
 							let attempts = CONSTANTS.attempts
-							do {
-								positionValue.x = Math.floor(Math.random() * configuration.board.x)
-								positionValue.y = Math.floor(Math.random() * configuration.board.x)
-								positionValue.z = i
-								attempts--
-							} while (!configuration.objects.overlap && positions.includes(positionValue.x + "," + positionValue.y) && attempts)
-							positions.push(positionValue.x + "," + positionValue.y)
+							let object = {
+								id: i,
+								preview: true
+							}
 
-						// escape hatch
+						// random parameters
+							do {
+								object.shape = chooseRandom(configuration.objects.shapes)
+								object.color = chooseRandom(configuration.objects.colors)
+								object.size = chooseRandom(configuration.objects.sizes)
+								object.label = configuration.objects.labels ? CONSTANTS.alphabet[i] : null
+								object.border = configuration.objects.borders ? chooseRandom(configuration.objects.colors) : null
+								attempts--
+							} while (attempts && objects.find(function(o) {
+								return o.shape == object.shape && o.color == object.color && o.size == object.size && o.label == object.label && o.border == object.border
+							}))
+
+						// escape
 							if (!attempts) {
+								showToast({success: false, message: "unable to generate sample"})
 								return
 							}
 
-						// border
-							let borderValue = null
-							if (configuration.objects.borders) {
-								let borderName = chooseRandom(configuration.objects.colors).replace(/-/g, "_")
-								borderValue = {
-									color: document.querySelector("#configuration-game-objects-colors-" + borderName).nextSibling.style.background,
-									shape: shapeValue
-								}								
+						// size
+							object.size = {x: Number(object.size.split("x")[0]), y: Number(object.size.split("x")[1])}
+
+						// random position (no overlap)
+							object.target = {x: null, y: null, z: i}
+							do {
+								object.target.x = Math.floor(Math.random() * configuration.board.x)
+								object.target.y = Math.floor(Math.random() * configuration.board.x)
+								attempts--
+							} while (attempts && (hangsOff(configuration.board, object) || (!configuration.objects.overlap && hasOverlap(object, objects))))
+
+						// escape
+							if (!attempts) {
+								showToast({success: false, message: "unable to generate sample"})
+								return
 							}
 
-						// object object
-							let object = {
-								preview: true,
-								id: i,
-								position: positionValue,
-								size: sizeValue,
-								shape: shapeValue,
-								color: colorValue,
-								border: borderValue,
-								label: configuration.objects.labels ? CONSTANTS.alphabet[i] : null
+						// add object
+							object.position = {
+								x: object.target.x,
+								y: object.target.y
 							}
+							objects.push(object)
+					}
 
-						// object element
-							let element = createObject(ELEMENTS.configuration.preview.board, ELEMENTS.configuration.preview.board, object)
-							displayObject(ELEMENTS.configuration.preview.board, null, element, object)
+				// display
+					for (let i in objects) {
+						let element = createObject(ELEMENTS.configuration.preview.board, ELEMENTS.configuration.preview.board, objects[i])
+						displayObject(ELEMENTS.configuration.preview.board, null, element, objects[i])
 					}
 			} catch (error) {console.log(error)}
 		}
 
+/*** objects ***/
 	/* displayObjects */
 		function displayObjects(screen, objects) {
 			try {
@@ -1311,7 +1431,7 @@
 
 				// in drawer
 					if (object.position.x === null || object.position.y === null) {
-						let drawer = screen.querySelector(".drawer").appendChild(element)
+						drawer.appendChild(element)
 						return
 					}
 
@@ -1331,8 +1451,8 @@
 						element.id = screen.id + "-object-" + object.id
 						element.style.width  = "calc(var(--cell-size) * " + object.size.x + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
 						element.style.height = "calc(var(--cell-size) * " + object.size.y + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
-						element.style.clipPath = object.shape
-						element.style.background = object.border ? object.border.color : object.color
+						element.style.clipPath = "var(--" + object.shape + ")"
+						element.style.background = "var(--" + (object.border || object.color) + ")"
 						element.style.zIndex = object.position.z
 						element.addEventListener(TRIGGERS.mousedown, grabObject)
 					if (!object.preview) {
@@ -1345,8 +1465,8 @@
 					if (object.border) {
 						inner = document.createElement("div")
 						inner.className = "object-inner"
-						inner.style.clipPath = object.border.shape
-						inner.style.background = object.color
+						inner.style.clipPath = "var(--border-" + object.shape + ")"
+						inner.style.background = "var(--" + object.color + ")"
 						element.appendChild(inner)
 					}
 
@@ -1500,8 +1620,8 @@
 					let drawer = screen.querySelector(".drawer")
 					let drawerRect = drawer.getBoundingClientRect()
 
-					if ((drawerRect.left <= STATE.cursor.actualX && STATE.cursor.actualX <= drawerRect.right)
-					 && (drawerRect.top  <= STATE.cursor.actualY && STATE.cursor.actualY <= drawerRect.bottom)) {
+					if ((drawerRect.left - CONSTANTS.drawerExtra <= STATE.cursor.actualX && STATE.cursor.actualX <= drawerRect.right  + CONSTANTS.drawerExtra)
+					 && (drawerRect.top  - CONSTANTS.drawerExtra <= STATE.cursor.actualY && STATE.cursor.actualY <= drawerRect.bottom + CONSTANTS.drawerExtra)) {
 						STATE.cursor.x = null
 						STATE.cursor.y = null
 

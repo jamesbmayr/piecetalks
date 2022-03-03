@@ -241,7 +241,8 @@
 									startTime: null,
 									endTime: null,
 									timeRemaining: null,
-									play: false
+									play: false,
+									darkness: true
 								},
 								configuration: {
 									preset: "custom",
@@ -254,7 +255,7 @@
 										y: 0,
 										grid: false,
 										coordinates: false,
-										background: {name: "blank", value: "transparent"}
+										background: "blank"
 									},
 									objects: {
 										count: 0,
@@ -342,6 +343,24 @@
 									output += ("--" + i + ": " + colors[i] + "; ")
 								}
 
+							// backgrounds
+								let backgrounds = getAsset("backgrounds")
+								for (let i in backgrounds) {
+									output += ("--" + i + ": " + backgrounds[i] + "; ")
+								}
+
+							// shapes
+								let shapes = getAsset("shapes")
+								for (let i in shapes) {
+									output += ("--" + i + ": " + shapes[i] + "; ")
+								}
+
+							// borders
+								let borders = getAsset("borders")
+								for (let i in borders) {
+									output += ("--border-" + i + ": " + borders[i] + "; ")
+								}
+
 							// sizes
 								let sizes = getAsset("sizes")
 								for (let i in sizes) {
@@ -385,7 +404,83 @@
 								"dark-blue": "#111155",
 								"light-purple": "#ddaadd",
 								"medium-purple": "#aa55aa",
-								"dark-purple": "#551155",
+								"dark-purple": "#551155"
+							}
+						break
+
+						case "backgrounds":
+							return {
+								"blank": "transparent",
+								"horizontal-color-gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
+								"vertical-color-gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
+								"radial-color-gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
+								"horizontal-grayscale-gradient": "linear-gradient(to right, white, black)",
+								"vertical-grayscale-gradient": "linear-gradient(white, black)",
+								"radial-grayscale-gradient": "radial-gradient(white, black)"
+							}
+						break
+
+						case "shapes":
+							return {
+								"circle": "circle(50%)",
+								"triangle-up": "polygon(50% 0%, 100% 100%, 0% 100%)",
+								"triangle-down": "polygon(0% 0%, 100% 0%, 50% 100%)",
+								"triangle-left": "polygon(100% 0%, 100% 100%, 0% 50%)",
+								"triangle-right": "polygon(0% 0%, 100% 50%, 0% 100%)",
+								"square": "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+								"diamond": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+								"rectangle-horizontal": "polygon(0% 20%, 100% 20%, 100% 80%, 0% 80%)",
+								"rectangle-vertical": "polygon(20% 0%, 80% 0%, 80% 100%, 20% 100%)",
+								"rhombus-positive": "polygon(25% 25%, 100% 0%, 75% 75%, 0% 100%)",
+								"rhombus-negative": "polygon(0% 0%, 75% 25%, 100% 100%, 25% 75%)",
+								"chevron-up": "polygon(0% 100%, 50% 0%, 100% 100%, 50% 75%)",
+								"chevron-down": "polygon(0% 0%, 50% 25%, 100% 0%, 50% 100%)",
+								"chevron-left": "polygon(0% 0%, 100% 50%, 0% 100%, 25% 50%)",
+								"chevron-right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
+								"hexagon-horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
+								"hexagon-vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
+								"hourglass-horizontal": "polygon(0% 0%, 50% 30%, 100% 0%, 100% 100%, 50% 70%, 0% 100%)",
+								"hourglass-vertical": "polygon(0% 0%, 100% 0%, 70% 50%, 100% 100%, 0% 100%, 30% 50%)",
+								"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+								"octagon-diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
+								"4-point-star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
+								"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
+								"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
+								"5-point-star": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
+								"pentagram": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
+								"8-point-star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
+							}
+						break
+						
+						case "borders":
+							return {
+								"circle": "circle(40%)",
+								"triangle-up": "polygon(50% 14%, 90% 94%, 10% 94%)",
+								"triangle-down": "polygon(10% 6%, 90% 6%, 50% 86%)",
+								"triangle-left": "polygon(14% 50%, 94% 10%, 94% 90%)",
+								"triangle-right": "polygon(86% 50%, 6% 10%, 6% 90%)",
+								"square": "polygon(10% 10%, 90% 10%, 90% 90%, 10% 90%)",
+								"diamond": "polygon(50% 10%, 90% 50%, 50% 90%, 10% 50%)",
+								"rectangle-horizontal": "polygon(6% 26%, 94% 26%, 94% 74%, 6% 74%)",
+								"rectangle-vertical": "polygon(74% 6%, 74% 94%, 26% 94%, 26% 6%)",
+								"rhombus-positive": "polygon(30% 30%, 90% 10%, 70% 70%, 10% 90%)",
+								"rhombus-negative": "polygon(10% 10%, 70% 30%, 90% 90%, 30% 70%)",
+								"chevron-up": "polygon(10% 90%, 50% 10%, 90% 90%, 50% 70%)",
+								"chevron-down": "polygon(10% 10%, 50% 30%, 90% 10%, 50% 90%)",
+								"chevron-left": "polygon(10% 10%, 90% 50%, 10% 90%, 30% 50%)",
+								"chevron-right": "polygon(10% 50%, 90% 10%, 70% 50%, 90% 90%)",
+								"hexagon-horizontal": "polygon(26% 14%, 74% 14%, 90% 50%, 74% 86%, 26% 86%, 10% 50%)",
+								"hexagon-vertical": "polygon(14% 26%, 50% 10%, 82% 26%, 82% 74%, 50% 90%, 14% 74%)",
+								"hourglass-horizontal": "polygon(5% 10%, 50% 37%, 95% 10%, 95% 90%, 50% 63%, 5% 90%)",
+								"hourglass-vertical": "polygon(90% 5%, 63% 50%, 90% 95%, 10% 95%, 37% 50%, 10% 5%)",
+								"octagon": "polygon(30% 10%, 70% 10%, 90% 30%, 90% 70%, 70% 90%, 30% 90%, 10% 70%, 10% 30%)",
+								"octagon-diagonal": "polygon(50% 10%, 80% 20%, 90% 50%, 80% 80%, 50% 90%, 20% 80%, 10% 50%, 20% 20%)",
+								"4-point-star": "polygon(50% 10%, 62% 38%, 90% 50%, 62% 62%, 50% 90%, 38% 62%, 10% 50%, 38% 38%)",
+								"cross": "polygon(40% 5%, 60% 5%, 60% 40%, 95% 40%, 95% 60%, 60% 60%, 60% 95%, 40% 95%, 40% 60%, 5% 60%, 5% 40%, 40% 40%)",
+								"x": "polygon(20% 5%, 50% 35%, 80% 5%, 95% 20%, 65% 50%, 95% 80%, 80% 95%, 50% 65%, 20% 95%, 5% 80%, 35% 50%, 5% 20%)",
+								"5-point-star": "polygon(50% 11%, 60.4% 41.4%, 90% 41.4%, 66% 60.6%, 74% 91%, 50% 72.6%, 26% 91%, 34% 60.6%, 10% 41.4%, 39.6% 41.4%)",
+								"pentagram": "polygon(50% 89%, 60.4% 58.6%, 90% 58.6%, 66% 39.4%, 74% 9%, 50% 27.4%, 26% 9%, 34% 39.4%, 10% 58.6%, 39.6% 58.6%)",
+								"8-point-star": "polygon(18% 18%, 42% 30%, 50% 10%, 58% 30%, 82% 18%, 70% 42%, 90% 50%, 70% 58%, 82% 82%, 58% 70%, 50% 90%, 42% 70%, 18% 82%, 30% 58%, 10% 50%, 30% 42%)"
 							}
 						break
 
@@ -404,10 +499,9 @@
 								"huge-font-size": "50px",
 								"transition-time": "1s",
 								"hover-brightness": "0.75",
-								"disabled-brightness": "0.25",
-								"drawer-opacity": "0.5",
-								"object-opacity": "0.85",
-								"object-border": "80%"
+								"disabled-brightness": "0.5",
+								"disconnected-opacity": "0.5",
+								"object-opacity": "0.85"
 							}
 						break
 
@@ -428,7 +522,7 @@
 								roomIdLength: 4,
 								rounding: 100,
 								roles: ["speaker", "actor", "spectator"],
-								attempts: 10,
+								attempts: 100,
 								borderProbability: 0.5,
 								labelProbability: 1
 							}
@@ -452,15 +546,7 @@
 										minimum: 2,
 										maximum: 10
 									},
-									backgrounds: {
-										"blank": "transparent",
-										"horizontal color gradient": "linear-gradient(to right, red, yellow, green, cyan, blue, magenta)",
-										"vertical color gradient": "linear-gradient(red, yellow, green, cyan, blue, magenta)",
-										"radial color gradient": "radial-gradient(red, yellow, green, cyan, blue, magenta)",
-										"horizontal grayscale gradient": "linear-gradient(to right, white, black)",
-										"vertical grayscale gradient": "linear-gradient(white, black)",
-										"radial grayscale gradient": "radial-gradient(white, black)"
-									}
+									backgrounds: getAsset("backgrounds")
 								},
 								objects: {
 									count: {
@@ -476,64 +562,8 @@
 										"3x3": {x: 3, y: 3},
 										"5x5": {x: 5, y: 5}
 									},
-									shapes: {
-										"circle": "circle(50%)",
-										"triangle up": "polygon(50% 0%, 100% 100%, 0% 100%)",
-										"triangle down": "polygon(0% 0%, 100% 0%, 50% 100%)",
-										"triangle left": "polygon(100% 0%, 100% 100%, 0% 50%)",
-										"triangle right": "polygon(0% 0%, 100% 50%, 0% 100%)",
-										"square": "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-										"diamond": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-										"rectangle horizontal": "polygon(0% 20%, 100% 20%, 100% 80%, 0% 80%)",
-										"rectangle vertical": "polygon(20% 0%, 80% 0%, 80% 100%, 20% 100%)",
-										"rhombus positive": "polygon(25% 25%, 100% 0%, 75% 75%, 0% 100%)",
-										"rhombus negative": "polygon(0% 0%, 75% 25%, 100% 100%, 25% 75%)",
-										"chevron up": "polygon(0% 100%, 50% 0%, 100% 100%, 50% 75%)",
-										"chevron down": "polygon(0% 0%, 50% 25%, 100% 0%, 50% 100%)",
-										"chevron left": "polygon(0% 0%, 100% 50%, 0% 100%, 25% 50%)",
-										"chevron right": "polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%)",
-										"hexagon horizontal": "polygon(20% 5%, 80% 5%, 100% 50%, 80% 95%, 20% 95%, 0% 50%)",
-										"hexagon vertical": "polygon(5% 20%, 50% 0%, 90% 20%, 90% 80%, 50% 100%, 5% 80%)",
-										"hourglass horizontal": "polygon(0% 0%, 50% 30%, 100% 0%, 100% 100%, 50% 70%, 0% 100%)",
-										"hourglass vertical": "polygon(0% 0%, 100% 0%, 70% 50%, 100% 100%, 0% 100%, 30% 50%)",
-										"octagon": "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
-										"octagon diagonal": "polygon(50% 0%, 87.5% 12.5%, 100% 50%, 87.5% 87.5%, 50% 100%, 12.5% 87.5%, 0% 50%, 12.5% 12.5%)",
-										"4 point star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
-										"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
-										"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
-										"5 point star": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
-										"pentagram": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
-										"8 point star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
-									},
-									borders: {
-										"circle": "circle(40%)",
-										"triangle up": "polygon(50% 14%, 90% 94%, 10% 94%)",
-										"triangle down": "polygon(10% 6%, 90% 6%, 50% 86%)",
-										"triangle left": "polygon(14% 50%, 94% 10%, 94% 90%)",
-										"triangle right": "polygon(86% 50%, 6% 10%, 6% 90%)",
-										"square": "polygon(10% 10%, 90% 10%, 90% 90%, 10% 90%)",
-										"diamond": "polygon(50% 10%, 90% 50%, 50% 90%, 10% 50%)",
-										"rectangle horizontal": "polygon(6% 26%, 94% 26%, 94% 74%, 6% 74%)",
-										"rectangle vertical": "polygon(74% 6%, 74% 94%, 26% 94%, 26% 6%)",
-										"rhombus positive": "polygon(30% 30%, 90% 10%, 70% 70%, 10% 90%)",
-										"rhombus negative": "polygon(10% 10%, 70% 30%, 90% 90%, 30% 70%)",
-										"chevron up": "polygon(10% 90%, 50% 10%, 90% 90%, 50% 70%)",
-										"chevron down": "polygon(10% 10%, 50% 30%, 90% 10%, 50% 90%)",
-										"chevron left": "polygon(10% 10%, 90% 50%, 10% 90%, 30% 50%)",
-										"chevron right": "polygon(10% 50%, 90% 10%, 70% 50%, 90% 90%)",
-										"hexagon horizontal": "polygon(26% 14%, 74% 14%, 90% 50%, 74% 86%, 26% 86%, 10% 50%)",
-										"hexagon vertical": "polygon(14% 26%, 50% 10%, 82% 26%, 82% 74%, 50% 90%, 14% 74%)",
-										"hourglass horizontal": "polygon(5% 10%, 50% 37%, 95% 10%, 95% 90%, 50% 63%, 5% 90%)",
-										"hourglass vertical": "polygon(90% 5%, 63% 50%, 90% 95%, 10% 95%, 37% 50%, 10% 5%)",
-										"octagon": "polygon(30% 10%, 70% 10%, 90% 30%, 90% 70%, 70% 90%, 30% 90%, 10% 70%, 10% 30%)",
-										"octagon diagonal": "polygon(50% 10%, 80% 20%, 90% 50%, 80% 80%, 50% 90%, 20% 80%, 10% 50%, 20% 20%)",
-										"4 point star": "polygon(50% 10%, 62% 38%, 90% 50%, 62% 62%, 50% 90%, 38% 62%, 10% 50%, 38% 38%)",
-										"cross": "polygon(40% 5%, 60% 5%, 60% 40%, 95% 40%, 95% 60%, 60% 60%, 60% 95%, 40% 95%, 40% 60%, 5% 60%, 5% 40%, 40% 40%)",
-										"x": "polygon(20% 5%, 50% 35%, 80% 5%, 95% 20%, 65% 50%, 95% 80%, 80% 95%, 50% 65%, 20% 95%, 5% 80%, 35% 50%, 5% 20%)",
-										"5 point star": "polygon(50% 11%, 60.4% 41.4%, 90% 41.4%, 66% 60.6%, 74% 91%, 50% 72.6%, 26% 91%, 34% 60.6%, 10% 41.4%, 39.6% 41.4%)",
-										"pentagram": "polygon(50% 89%, 60.4% 58.6%, 90% 58.6%, 66% 39.4%, 74% 9%, 50% 27.4%, 26% 9%, 34% 39.4%, 10% 58.6%, 39.6% 58.6%)",
-										"8 point star": "polygon(18% 18%, 42% 30%, 50% 10%, 58% 30%, 82% 18%, 70% 42%, 90% 50%, 70% 58%, 82% 82%, 58% 70%, 50% 90%, 42% 70%, 18% 82%, 30% 58%, 10% 50%, 30% 42%)"	
-									},
+									shapes: getAsset("shapes"),
+									borders: getAsset("borders"),
 									colors: getAsset("colors")
 								},
 								presets: {
@@ -548,7 +578,7 @@
 											y: 3,
 											grid: true,
 											coordinates: true,
-											background: {name: "blank", value: "transparent"}
+											background: "blank"
 										},
 										objects: {
 											count: 5,
@@ -557,8 +587,8 @@
 											borders: false,
 											labels: true,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "square", "octagon", "cross", "8 point star"],
-											colors: ["light-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
+											shapes: ["circle", "triangle-up", "square", "octagon", "cross", "8-point-star"],
+											colors: ["medium-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
 										}
 									},
 									medium: {
@@ -572,7 +602,7 @@
 											y: 5,
 											grid: true,
 											coordinates: false,
-											background: {name: "horizontal grayscale gradient", value: "linear-gradient(to right, white, black)"}
+											background: "radial-grayscale-gradient"
 										},
 										objects: {
 											count: 10,
@@ -581,8 +611,8 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "square", "diamond", "rectangle horizontal", "hexagon horizontal", "octagon", "cross", "5 point star", "8 point star"],
-											colors: ["light-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
+											shapes: ["circle", "triangle-up", "square", "diamond", "rectangle-horizontal", "hexagon-horizontal", "octagon", "cross", "5-point-star", "8-point-star"],
+											colors: ["medium-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
 										}
 									},
 									challenging: {
@@ -596,7 +626,7 @@
 											y: 6,
 											grid: true,
 											coordinates: false,
-											background: {name: "vertical grayscale gradient", value: "linear-gradient(white, black)"}
+											background: "vertical-grayscale-gradient"
 										},
 										objects: {
 											count: 10,
@@ -605,8 +635,8 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle up", "triangle down", "square", "diamond", "rectangle horizontal", "rectangle vertical", "hexagon horizontal", "hexagon vertical", "octagon", "cross", "x", "5 point star", "8 point star"],
-											colors: ["light-gray", "medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "5-point-star", "8-point-star"],
+											colors: ["medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									difficult: {
@@ -620,7 +650,7 @@
 											y: 8,
 											grid: false,
 											coordinates: true,
-											background: {name: "vertical color gradient", value: "linear-gradient(red, yellow, green, cyan, blue, magenta)"}
+											background: "vertical-color-gradient"
 										},
 										objects: {
 											count: 10,
@@ -629,8 +659,8 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "hexagon horizontal", "hexagon vertical", "hourglass vertical", "octagon", "octagon diagonal", "cross", "x", "5 point star", "8 point star"],
-											colors: ["light-gray", "medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "5-point-star", "8-point-star"],
+											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
 									insane: {
@@ -644,7 +674,7 @@
 											y: 10,
 											grid: false,
 											coordinates: false,
-											background: {name: "radial color gradient", value: "radial-gradient(red, yellow, green, cyan, blue, magenta)"}
+											background: "radial-color-gradient"
 										},
 										objects: {
 											count: 15,
@@ -653,7 +683,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3", "5x5"],
-											shapes: ["circle", "triangle up", "triangle down", "triangle left", "triangle right", "square", "diamond", "rectangle horizontal", "rectangle vertical", "rhombus positive", "rhombus negative", "chevron up", "chevron down", "chevron left", "chevron right", "hexagon horizontal", "hexagon vertical", "hourglass horizontal", "hourglass vertical", "octagon", "octagon diagonal", "4 point star", "cross", "x", "5 point star", "pentagram", "8 point star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "5-point-star", "pentagram", "8-point-star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
 										}
 									}

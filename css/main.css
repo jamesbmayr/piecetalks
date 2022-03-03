@@ -113,8 +113,12 @@
 			min-width: calc((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * var(--multiplier));
 		}
 
+		body:not([darkness]) input:not([type="checkbox"]) {
+			box-shadow: 0 0 0 var(--border-size) var(--dark-gray);
+		}
+
 		input:focus {
-			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-blue));
 		}
 
 		input[readonly], input[disabled], button[disabled], a[disabled], select[disabled] {
@@ -129,14 +133,15 @@
 
 		input[type="checkbox"] {
 			cursor: pointer;
-			zoom: 2;
 			margin: 0;
-			min-width: auto;
-			height: calc((var(--medium-font-size) + 2 * var(--medium-gap-size)) / 2);
+			min-width: var(--medium-font-size);
+			height: var(--medium-font-size);
+			background: transparent !important;
+			margin: var(--medium-gap-size) 0 0 0
 		}
 
-		input[type="checkbox"]:focus, input[type="checkbox"]:hover {
-			box-shadow: none;
+		input[type="checkbox"]:not([disabled]):focus, input[type="checkbox"]:not([disabled]):hover {
+			box-shadow: none !important;
 			filter: brightness(var(--hover-brightness));
 		}
 
@@ -171,9 +176,12 @@
 			vertical-align: bottom;
 		}
 
-		button:hover, button:focus, .pseudo-button:hover, .pseudo-button:focus {
-			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
-			filter: brightness(var(--hover-brightness));
+		body:not([darkness]) button, body:not([darkness]) .pseudo-button {
+			box-shadow: 0 0 0 var(--border-size) var(--dark-gray);
+		}
+
+		button:not([disabled]):hover, button:not([disabled]):focus, .pseudo-button:not([disabled]):hover, .pseudo-button:not([disabled]):focus {
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-blue)) brightness(var(--hover-brightness));
 		}
 
 	/* select */
@@ -193,8 +201,12 @@
 			text-transform: uppercase;
 		}
 
-		select:hover, select:focus {
-			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
+		body:not([darkness]) select {
+			box-shadow: 0 0 0 var(--border-size) var(--dark-gray);
+		}
+
+		select:not([disabled]):hover, select:not([disabled]):focus {
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-blue));
 		}
 
 	/* link */
@@ -210,7 +222,7 @@
 
 		a:hover, a:focus {
 			color: var(--medium-blue);
-			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-blue));
 		}
 
 	/* label */
@@ -246,11 +258,11 @@
 		details summary {
 			cursor: pointer;
 			list-style-type: none;
+			outline: none;
 		}
 
 		details summary:hover, details summary:focus {
-			box-shadow: 0 0 var(--shadow-size) var(--medium-blue);
-			filter: brightness(var(--hover-brightness));
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-blue)) brightness(var(--hover-brightness));
 		}
 
 		details summary::-webkit-details-marker {
@@ -323,6 +335,8 @@
 		padding: var(--small-gap-size);
 		display: block;
 		font-weight: bold;
+		outline: none !important;
+		box-shadow: none !important;
 	}
 
 	.help-text[open] .help-text-button {

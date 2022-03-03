@@ -199,12 +199,26 @@
 							room.players[playerId].connected = true
 							let name = room.players[playerId].name
 
+						// update time
+							let timeUpdated = false
+							if (room.status.play && room.configuration.timer.active) {
+								room.status.timeRemaining = Math.round((room.status.startTime + (room.configuration.timer.seconds * CONSTANTS.second) - new Date().getTime()) / CONSTANTS.second)
+								if (room.status.timeRemaining <= 0) {
+									endGame(REQUEST, room, null, callback)
+									return
+								}
+								timeUpdated = true
+							}
+
 						// query
 							let query = CORE.getSchema("query")
 								query.collection = "rooms"
 								query.command = "update"
 								query.filters = {id: room.id}
 								query.document = {players: room.players}
+							if (timeUpdated) {
+								query.document.status = room.status
+							}
 
 						// update room
 							CORE.accessDatabase(query, function(results) {
@@ -353,15 +367,26 @@
 						return
 					}
 
-				// no name
-					let name = REQUEST.post.name.trim() || null
-					if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
-						callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters", recipients: [REQUEST.session.id]})
+				// no parameters
+					if (REQUEST.post.name == undefined && REQUEST.post.darkness == undefined) {
+						callback({roomId: room.id, success: false, message: "nothing changed", recipients: [REQUEST.session.id]})
 						return
 					}
 
-				// set
-					room.status.name = name
+				// name
+					if (REQUEST.post.name !== undefined) {
+						let name = REQUEST.post.name.trim() || null
+						if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
+							callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters", recipients: [REQUEST.session.id]})
+							return
+						}
+						room.status.name = name
+					}
+
+				// darkness
+					if (REQUEST.post.darkness !== undefined) {
+						room.status.darkness = Boolean(REQUEST.post.darkness)
+					}
 
 				// query
 					let query = CORE.getSchema("query")
@@ -465,7 +490,7 @@
 									callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
 									return
 								}
-								room.configuration.board.background = {name: value, value: CONFIGURATIONS.board.backgrounds[value]}
+								room.configuration.board.background = value
 							break
 
 						// objects
@@ -501,7 +526,7 @@
 								}
 							break
 							case "objects-shapes":
-								value = REQUEST.post.value.replace(/_/g, " ")
+								value = REQUEST.post.value
 								if (REQUEST.post.include) {
 									if (!Object.keys(CONFIGURATIONS.objects.shapes).includes(value)) {
 										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
@@ -518,7 +543,7 @@
 								}
 							break
 							case "objects-colors":
-								value = REQUEST.post.value.replace(/_/g, "-")
+								value = REQUEST.post.value
 								if (REQUEST.post.include) {
 									if (!Object.keys(CONFIGURATIONS.objects.colors).includes(value)) {
 										callback({roomId: room.id, success: false, message: "invalid value", recipients: [REQUEST.session.id]})
@@ -587,12 +612,6 @@
 						return
 					}
 
-				// in progress
-					if (room.status.play) {
-						callback({roomId: room.id, success: false, message: "cannot change roles during a game", recipients: [REQUEST.session.id]})
-						return
-					}
-
 				// get target player
 					let targetPlayer = room.players[REQUEST.post.targetId]
 					if (!targetPlayer) {
@@ -603,6 +622,12 @@
 				// change role
 					if (!player.isHost && targetPlayer.role !== REQUEST.post.role) {
 						callback({roomId: room.id, success: false, message: "not the host", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// in progress
+					if (room.status.play && targetPlayer.role !== REQUEST.post.role) {
+						callback({roomId: room.id, success: false, message: "cannot change roles during a game", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -1072,10 +1097,11 @@
 				// copy for each player
 					for (let i in room.players) {
 						if (room.players[i].role == "spectator") {
-							continue
+							room.players[i].objects = {}
 						}
 						if (room.players[i].role == "actor") {
 							room.players[i].objects = CORE.duplicateObject(objectObjects)
+							continue
 						}
 						if (room.players[i].role == "speaker") {
 							room.players[i].objects = CORE.duplicateObject(objectObjects)
@@ -1107,18 +1133,14 @@
 					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(configuration.objects.sizes)]
 
 				// shape
-					let shape = CORE.chooseRandom(configuration.objects.shapes)
-					object.shape = CONFIGURATIONS.objects.shapes[shape]
+					object.shape = CORE.chooseRandom(configuration.objects.shapes)
 
 				// color
-					object.color = CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)]
+					object.color = CORE.chooseRandom(configuration.objects.colors)
 
 				// border
 					if (configuration.objects.borders && Math.random() < CONSTANTS.borderProbability) {
-						object.border = {
-							color: CONFIGURATIONS.objects.colors[CORE.chooseRandom(configuration.objects.colors)],
-							shape: CONFIGURATIONS.objects.borders[shape]
-						}
+						object.border = CORE.chooseRandom(configuration.objects.colors)
 					}
 
 				// label
@@ -1165,7 +1187,6 @@
 		function hangsOff(board, object) {
 			try {
 				// cells
-					let theseCells = []
 					let diffX = Math.floor(object.size.x / 2)
 					let diffY = Math.floor(object.size.y / 2)
 
@@ -1176,8 +1197,8 @@
 								let thisCellY = (object.target.y + y - diffY)
 
 							// hanging off board
-								if ((thisCellX < 0 || thisCellX > board.x)
-								 || (thisCellY < 0 || thisCellY > board.y)) {
+								if ((thisCellX < 0 || thisCellX >= board.x)
+								 || (thisCellY < 0 || thisCellY >= board.y)) {
 									return true
 								}
 						}

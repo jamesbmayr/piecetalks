@@ -21,7 +21,7 @@
 			<div id="screens" count="0"></div>
 		</div>
 		<details id="configuration" open>
-			<summary id="configuration-button" class="pseudo-button">&#x2699; game setup</summary>
+			<summary id="configuration-button" class="pseudo-button">&#x2699; <span>setup</span></summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
 				<section id="configuration-room">
 					<button id="configuration-close" class="pseudo-button" visibility="false">&#x2715;</button>
@@ -37,6 +37,14 @@
 						<label id="configuration-room-name-outer">
 							<span>name</span>
 							<input id="configuration-room-name" type="text" placeholder="room name" autocomplete="off" spellcheck="false" readonly>
+						</label>
+						<label>
+							<input id="configuration-room-darkness" type="checkbox">
+							<span>dark mode</span>
+							<details class="help-text">
+								<summary class="help-text-button pseudo-button">?</summary>
+								<div class="help-text-description">invert colors</div>
+							</details>
 						</label>
 						<button id="configuration-room-leave">&#x1f6aa; leave</button>
 					</div>
@@ -81,7 +89,7 @@
 						</div>
 					</div>
 				</section>
-				<section id="configuration-preview">
+				<section id="configuration-preview" visibility="false">
 					<h2>sample</h2>
 					<div id="configuration-preview-board" class="board">
 						<div class="board-grid"></div>
@@ -120,7 +128,7 @@
 							<span>active</span>
 						</label>
 						<label>
-							<input type="number" id="configuration-game-timer-seconds" step="1" min="0" placeholder="seconds" configuration="true" readonly>
+							<input type="number" id="configuration-game-timer-seconds" step="1" min="<script node>CONFIGURATIONS.timer.seconds.minimum</script>node>" max="<script node>CONFIGURATIONS.timer.seconds.maximum</script>node>" placeholder="seconds" configuration="true" readonly>
 							<span>seconds</span>
 							<details class="help-text">
 								<summary class="help-text-button pseudo-button">?</summary>
@@ -185,7 +193,7 @@
 									<script node>
 										let backgrounds = ""
 										for (let i in CONFIGURATIONS.board.backgrounds) {
-											backgrounds += "<option value='" + i + "'>" + i + "</option>"
+											backgrounds += "<option value='" + i + "'>" + i.replace(/-/g, " ") + "</option>"
 										}
 										backgrounds
 									</script>node>
@@ -265,7 +273,7 @@
 							<script node>
 								let shapes = ""
 								for (let i in CONFIGURATIONS.objects.shapes) {
-									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/\s/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-shape-sample' style='clip-path: " + CONFIGURATIONS.objects.shapes[i] + "'></div><span>" + i + "</span></label></div>"
+									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-shape-sample' style='clip-path: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								shapes
 							</script>node>
@@ -275,7 +283,7 @@
 							<script node>
 								let colors = ""
 								for (let i in CONFIGURATIONS.objects.colors) {
-									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-color-sample' style='background: " + CONFIGURATIONS.objects.colors[i] + "'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-color-sample' style='background: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								colors
 							</script>node>

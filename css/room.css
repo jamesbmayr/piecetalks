@@ -9,7 +9,7 @@
 			top: var(--medium-gap-size);
 			left: var(--medium-gap-size);
 			background: var(--dark-orange);
-			width: auto;
+			width: calc(var(--cell-size) / 2 + 4 * var(--medium-gap-size));
 		}
 
 	/* overlay */
@@ -20,15 +20,19 @@
 			top: 0;
 			left: 0;
 			overflow-x: hidden;
-			background: var(--dark-gray);
-			color: var(--light-gray);
+			background: var(--light-gray);
+			color: var(--dark-gray);
 			font-family: var(--font-0);
 			height: 100vh;
 			width: 100vw;
 			padding: var(--medium-gap-size);
 			border: none;
-			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 			scroll-behavior: smooth;
+		}
+
+		body[darkness] #configuration-overlay {
+			background: var(--dark-gray);
+			color: var(--light-gray);
 		}
 
 		#configuration-close {
@@ -128,7 +132,7 @@
 				position: fixed;
 				bottom: calc(4 * var(--large-gap-size));
 				right: calc(4 * var(--large-gap-size));
-				background-color: var(--dark-gray);
+				background-color: var(--light-gray);
 				box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 				border-radius: var(--border-radius);
 				height: calc(var(--cell-size) * var(--board-size-y) / 2);
@@ -137,6 +141,10 @@
 				overflow: hidden;
 				margin-bottom: 0;
 				z-index: 1000;
+			}
+
+			body[darkness] #configuration-preview {
+				background-color: var(--dark-gray);
 			}
 
 			#configuration-preview-board {
@@ -174,7 +182,7 @@
 			display: block;
 			height: calc(var(--cell-size) * var(--board-size-y) / 2);
 			width: calc(var(--cell-size) * var(--board-size-x) / 2);
-			outline: var(--border-size) solid var(--medium-gray);
+			box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
 		}
 
 		#configuration-preview-board .board-grid {
@@ -193,7 +201,7 @@
 			box-sizing: border-box;
 			height: calc(var(--cell-size) / 2);
 			width: calc(var(--cell-size) / 2);
-			outline: var(--border-size) solid var(--medium-gray);
+			box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
 		}
 
 		#configuration-preview-board .board-coordinate {
@@ -232,11 +240,6 @@
 			cursor: default;
 			transform: translateX(-50%) translateY(-50%);
 			opacity: var(--object-opacity);
-		}
-
-		#configuration-preview-board .object-inner {
-			height: var(--object-border);
-			width: var(--object-border);
 		}
 
 	/* overlay game */
@@ -297,6 +300,18 @@
 
 	/* mobile */
 		@media screen and (max-width: 800px) {
+			#room-name {
+				display: none;
+			}
+
+			#configuration-button {
+				width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			}
+
+			#configuration-button span {
+				display: none;
+			}
+
 			#configuration-overlay {
 				padding-bottom: calc(var(--large-gap-size) * 2);
 			}
@@ -304,6 +319,7 @@
 			#configuration-room-name-outer {
 				margin: 0;
 				width: 100%;
+				margin-bottom: var(--medium-gap-size);
 			}
 
 			#configuration-room-name-outer span {
@@ -311,11 +327,6 @@
 			}
 
 			#configuration-room-name {
-				width: 100%;
-			}
-
-			#configuration-room-leave {
-				margin-top: var(--medium-gap-size);
 				width: 100%;
 			}
 
@@ -365,7 +376,13 @@
 		width: 100%;
 		height: 100%;
 		overflow: hidden;
+		background: var(--light-gray);
+		color: var(--dark-gray);
+	}
+
+	body[darkness] #container {
 		background: var(--dark-gray);
+		color: var(--light-gray);
 	}
 
 	/* name */
@@ -378,7 +395,6 @@
 			margin: 0;
 			pointer-events: none;
 			width: 100%;
-			color: var(--light-gray);
 		}
 
 	/* timer */
@@ -388,20 +404,18 @@
 			right: var(--medium-gap-size);
 			font-size: var(--large-font-size);
 			font-family: var(--font-0);
-			color: var(--dark-gray);
 			pointer-events: none;
 			user-select: none;
 			-webkit-user-select: none;
 			-moz-user-select: none;
 			-ms-user-select: none;
 			-o-user-select: none;
-			color: var(--light-gray);
 			font-weight: bold;
 			z-index: 999;
 		}
 
 	/* screens */
-		#screens[count='1'] {
+		#screens[count="1"] {
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -409,7 +423,7 @@
 			height: 100%;
 		}
 
-		#screens:not([count='1']) {
+		#screens:not([count="1"]) {
 			position: absolute;
 			top: calc(4 * var(--medium-gap-size) + var(--medium-font-size));
 			left: 0;
@@ -418,7 +432,7 @@
 		}
 
 		/* actor / speaker */
-			#screens[count='1'] .screen, .screen:first-child:last-child {
+			#screens[count="1"] .screen, .screen:first-child:last-child {
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -427,34 +441,36 @@
 				overflow: hidden;
 			}
 
-			#screens[count='1'] .screen-name, .screen:first-child:last-child .screen-name {
+			#screens[count="1"] .screen-name, .screen:first-child:last-child .screen-name {
 				display: none;
 			}
 
-			#screens[count='1'] .screen-role, .screen:first-child:last-child .screen-role {
+			#screens[count="1"] .screen-role, .screen:first-child:last-child .screen-role {
 				display: none;
 			}
 
-			#screens[count='1'] .screen-connected, .screen:first-child:last-child .screen-connected {
+			#screens[count="1"] .screen-connected, .screen:first-child:last-child .screen-connected {
 				display: none;
 			}
 
 		/* spectator */
-			#screens:not([count='1']) .screen {
+			#screens:not([count="1"]) .screen {
 				position: relative;
 				float: left;
+				height: auto;
+				text-align: center;
 				width: calc(100vw / var(--screen-count));
-				height: calc((100vh - (4 * var(--medium-gap-size) + var(--medium-font-size))) / var(--screen-count));
+				height: calc((100vh - (4 * var(--medium-gap-size) + var(--medium-font-size))) / var(--screen-count-y));
 			}
 
-			#screens:not([count='1']) .screen-name {
-				position: absolute;
-				top: var(--small-gap-size);
-				left: 50%;
-				transform: translateX(-50%);
-				font-size: var(--medium-font-size);
+			#screens:not([count="1"]) .screen-name {
+				font-size: var(--small-font-size);
 				font-family: var(--font-0);
-				color: var(--light-gray);
+				color: var(--medium-gray);
+				height: var(--small-font-size);
+				vertical-align: top;
+				line-height: 1;
+				display: inline-block;
 				pointer-events: none;
 				user-select: none;
 				-webkit-user-select: none;
@@ -462,16 +478,21 @@
 				-ms-user-select: none;
 				-o-user-select: none;
 				z-index: 998;
+				margin-right: var(--small-gap-size);
 			}
 
-			#screens:not([count='1']) .screen-role {
-				position: absolute;
-				top: calc(var(--small-gap-size) + var(--medium-font-size));
-				left: 50%;
-				transform: translateX(-50%);
-				font-size: calc(var(--small-font-size) / 2);
+			#screens:not([count="1"]) .screen-name:after {
+				content: " - ";
+			}
+
+			#screens:not([count="1"]) .screen-role {
+				font-size: var(--small-font-size);
 				font-family: var(--font-0);
-				color: var(--light-gray);
+				color: var(--medium-gray);
+				height: var(--small-font-size);
+				vertical-align: top;
+				line-height: 1;
+				display: inline-block;
 				pointer-events: none;
 				text-transform: uppercase;
 				user-select: none;
@@ -482,7 +503,7 @@
 				z-index: 998;
 			}
 
-			#screens:not([count='1']) .screen-connected {
+			#screens:not([count="1"]) .screen-connected {
 				position: absolute;
 				top: 50%;
 				left: 50%;
@@ -491,29 +512,30 @@
 				zoom: 1;
 			}
 
-			#screens:not([count='1']) .screen-connected:not(:checked) {
+			#screens:not([count="1"]) .screen-connected:not(:checked) {
 				display: block;
 				height: 0;
 				width: 0;
 				border: 0;
 				padding: 0;
+				margin: 0;
 				pointer-events: none;
 				z-index: 999;
 			}
 
-			#screens:not([count='1']) .screen-connected:not(:checked):before {
+			#screens:not([count="1"]) .screen-connected:not(:checked):before {
 				position: absolute;
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
-				content: 'disconnected';
+				content: "disconnected";
 				background-color: var(--dark-red);
 				font-family: var(--font-family);
 				font-size: var(--medium-font-size);
 				padding: var(--medium-gap-size);
 				border-radius: var(--border-radius);
 				color: var(--light-gray);
-				opacity: var(--drawer-opacity);
+				opacity: var(--disconnected-opacity);
 			}
 
 		/* board */
@@ -524,7 +546,18 @@
 				transform: translateX(-50%) translateY(-50%);
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
-				outline: var(--border-size) solid var(--medium-gray);
+				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+			}
+
+			#screens[count="1"] .screen[role="actor"] .board {
+				margin-left: calc((var(--cell-size) / 2 + 6 * var(--medium-gap-size)) / 2);
+			}
+
+			@media screen and (max-width: 800px) {
+				#screens[count="1"] .screen[role="actor"] .board {
+					margin-left: 0;
+					margin-top: calc(-1 * (var(--cell-size) / 2 * var(--multiplier) + 3 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
+				}
 			}
 
 			#screens .board-grid, #screens .board-coordinates {
@@ -542,7 +575,7 @@
 				box-sizing: border-box;
 				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
-				outline: var(--border-size) solid var(--medium-gray);
+				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
 			}
 
 			#screens .board-coordinate {
@@ -558,7 +591,7 @@
 				-o-user-select: none;
 			}
 
-			#screens[count='1'] .screen .board-coordinate-x, .screen:first-child:last-child .board-coordinate-x {
+			#screens[count="1"] .screen .board-coordinate-x, .screen:first-child:last-child .board-coordinate-x {
 				font-size: var(--medium-font-size);
 				display: inline-block;
 				height: var(--medium-font-size);
@@ -566,7 +599,7 @@
 				transform: translateY(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
 			}
 
-			#screens[count='1'] .screen .board-coordinate-y, .screen:first-child:last-child .board-coordinate-y {
+			#screens[count="1"] .screen .board-coordinate-y, .screen:first-child:last-child .board-coordinate-y {
 				font-size: var(--medium-font-size);
 				display: block;
 				width: var(--medium-font-size);
@@ -576,7 +609,7 @@
 				transform: translateY(calc(-1 * var(--medium-font-size))) translateX(calc(-1 * (var(--medium-font-size) + var(--small-gap-size))));
 			}
 
-			#screens:not([count='1']) .screen .board-coordinate-x {
+			#screens:not([count="1"]) .screen .board-coordinate-x {
 				font-size: var(--small-font-size);
 				display: inline-block;
 				height: var(--small-font-size);
@@ -584,7 +617,7 @@
 				transform: translateY(calc(-1 * (var(--small-font-size) + var(--small-gap-size))));
 			}
 
-			#screens:not([count='1']) .screen .board-coordinate-y {
+			#screens:not([count="1"]) .screen .board-coordinate-y {
 				font-size: var(--small-font-size);
 				display: block;
 				width: var(--small-font-size);
@@ -601,44 +634,55 @@
 				opacity: var(--object-opacity);
 			}
 
-			#screens .screen[role='actor'] .board .object {
+			#screens .screen[role="actor"] .board .object {
 				cursor: grab;
 			}
 
 		/* drawer */
-			#screens:not([count='1']) .drawer, #screens .screen[role='speaker'] .drawer {
+			#screens:not([count="1"]) .drawer, #screens .screen[role="speaker"] .drawer {
 				display: none;
 			}
 
-			#screens[count='1'] .drawer, .screen:first-child:last-child .drawer {
+			#screens[count="1"] .screen[role="actor"] .drawer {
 				position: fixed;
-				left: 0;
-				bottom: 0;
+				left: var(--medium-gap-size);
+				top: calc(var(--medium-gap-size) + var(--medium-font-size) + 2 * var(--medium-gap-size) + var(--medium-gap-size));
 				box-sizing: border-box;
-				height: calc(var(--cell-size) / 2 + 2 * var(--medium-gap-size));
-				width: calc(100%);
-				border-top-left-radius: var(--border-radius);
-				border-top-right-radius: var(--border-radius);
-				overflow-x: scroll;
-				overflow-y: hidden;
+				height: calc(100% - (var(--medium-gap-size) + var(--medium-font-size) + 2 * var(--medium-gap-size) + 2 * var(--medium-gap-size)));
+				width: calc(var(--cell-size) / 2 * var(--multiplier) + 4 * var(--medium-gap-size));
+				padding: 0 var(--medium-gap-size);
+				border-radius: var(--border-radius);
+				overflow-x: hidden;
+				overflow-y: scroll;
 				display: flex;
-				flex-direction: row;
-				background-color: var(--medium-gray);
-				box-shadow: 0 0 var(--shadow-size) var(--dark-gray);
-				opacity: var(--drawer-opacity);
+				flex-direction: column;
+				background-color: transparent;
+				box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 				z-index: 999;
+				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+			}
+
+			@media screen and (max-width: 800px) {
+				#screens[count="1"] .screen[role="actor"] .drawer {
+					top: calc(100% - (var(--cell-size) / 2 * var(--multiplier) + 3 * var(--medium-gap-size)));
+					width: calc(100% - 2 * var(--medium-gap-size));
+					height: calc(var(--cell-size) / 2 * var(--multiplier) + 2 * var(--medium-gap-size));
+					flex-direction: row;
+					overflow-x: scroll;
+					overflow-y: hidden;
+				}
 			}
 
 			#screens .drawer .object {
 				float: left;
 				cursor: default;
 				flex-shrink: 0;
-				height: calc(var(--cell-size) / 2) !important;
-				width: calc(var(--cell-size) / 2) !important;
+				height: calc(var(--cell-size) / 2 * var(--multiplier)) !important;
+				width: calc(var(--cell-size) / 2 * var(--multiplier)) !important;
 				margin: var(--medium-gap-size);
 			}
 
-			#screens .screen[role='actor'] .drawer .object {
+			#screens .screen[role="actor"] .drawer .object {
 				cursor: grab;
 			}
 
