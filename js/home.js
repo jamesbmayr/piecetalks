@@ -10,10 +10,16 @@
 			minimumPlayerNameLength: 3,
 			maximumPlayerNameLength: 20,
 			roomIdLength: 4,
+			backgroundLoop: null,
+			loopTime: 5000,
+			neutralBackground: "gray.png",
+			backgroundImages: ["easy_light.png", "easy_dark.png", "medium_light.png", "medium_dark.png", "challenging_light.png", "challenging_dark.png", "difficult_light.png", "difficult_dark.png", "insane_light.png", "insane_dark.png"],
+			backgroundIndex: 0
 		}
 
 	/* elements */
 		const ELEMENTS = {
+			body: document.body,
 			newRoomForm: document.querySelector("#new-room-form"),
 			joinRoomForm: document.querySelector("#join-room-form"),
 			roomIdInput: document.querySelector("#room-id-input"),
@@ -189,5 +195,27 @@
 		function closeAbout(event) {
 			try {
 				ELEMENTS.about.open = false
+			} catch (error) {console.log(error)}
+		}
+
+/*** background ***/
+	/* changeBackground */
+		changeBackground()
+		CONSTANTS.backgroundLoop = setInterval(changeBackground, CONSTANTS.loopTime * 2)
+		function changeBackground() {
+			try {
+				// update index
+					CONSTANTS.backgroundIndex++
+					if (CONSTANTS.backgroundIndex >= CONSTANTS.backgroundImages.length) {
+						CONSTANTS.backgroundIndex = 0
+					}
+
+				// to neutral
+					ELEMENTS.body.style.backgroundImage = "url(" + CONSTANTS.neutralBackground + ")"
+
+				// update background
+					setTimeout(function() {
+						ELEMENTS.body.style.backgroundImage = "url(" + CONSTANTS.backgroundImages[CONSTANTS.backgroundIndex] + ")"
+					}, CONSTANTS.loopTime)
 			} catch (error) {console.log(error)}
 		}

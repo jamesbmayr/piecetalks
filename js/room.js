@@ -28,7 +28,7 @@
 			roles: ["speaker", "actor", "spectator"],
 			objectOffset: 0.5,
 			attempts: 100,
-			drawerExtra: 50
+			drawerExtra: 25
 		}
 
 	/* state */
@@ -476,13 +476,11 @@
 						ELEMENTS.configuration.game.status.current.value = "in play"
 						ELEMENTS.configuration.game.status.start.setAttribute("visibility", false)
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", true)
-						ELEMENTS.configuration.close.setAttribute("visibility", true)
 					}
 					else {
 						ELEMENTS.configuration.game.status.current.value = "setup"
 						ELEMENTS.configuration.game.status.start.setAttribute("visibility", true)
 						ELEMENTS.configuration.game.status.end.setAttribute("visibility", false)
-						ELEMENTS.configuration.close.setAttribute("visibility", false)
 					}
 
 				// host
@@ -1619,9 +1617,12 @@
 				// in drawer
 					let drawer = screen.querySelector(".drawer")
 					let drawerRect = drawer.getBoundingClientRect()
+					let setupRect = ELEMENTS.configuration.button.getBoundingClientRect()
 
-					if ((drawerRect.left - CONSTANTS.drawerExtra <= STATE.cursor.actualX && STATE.cursor.actualX <= drawerRect.right  + CONSTANTS.drawerExtra)
-					 && (drawerRect.top  - CONSTANTS.drawerExtra <= STATE.cursor.actualY && STATE.cursor.actualY <= drawerRect.bottom + CONSTANTS.drawerExtra)) {
+					if (((drawerRect.left - CONSTANTS.drawerExtra <= STATE.cursor.actualX && STATE.cursor.actualX <= drawerRect.right  + CONSTANTS.drawerExtra)
+					  && (drawerRect.top  - CONSTANTS.drawerExtra <= STATE.cursor.actualY && STATE.cursor.actualY <= drawerRect.bottom + CONSTANTS.drawerExtra))
+					 || ((setupRect.left - CONSTANTS.drawerExtra <= STATE.cursor.actualX && STATE.cursor.actualX <= setupRect.right  + CONSTANTS.drawerExtra)
+					  && (setupRect.top  - CONSTANTS.drawerExtra <= STATE.cursor.actualY && STATE.cursor.actualY <= setupRect.bottom + CONSTANTS.drawerExtra))) {
 						STATE.cursor.x = null
 						STATE.cursor.y = null
 

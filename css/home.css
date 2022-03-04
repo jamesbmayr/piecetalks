@@ -1,9 +1,10 @@
 /*** container ***/
 	body {
-		background-image: url(banner.png);
-		background-size: contain;
+		background-image: url("gray.png");
+		background-size: cover;
 		background-repeat: no-repeat;
 		background-position: center;
+		transition: calc(var(--transition-time) * 2);
 	}
 
 	#container {
@@ -16,7 +17,7 @@
 		background: var(--dark-gray);
 		text-align: center;
 		width: calc(((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size)) * var(--multiplier));
-		box-shadow: 0 0 var(--shadow-size) var(--dark-gray);
+		box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 	}
 
 	/* heading */

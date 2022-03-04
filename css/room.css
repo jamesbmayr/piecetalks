@@ -9,7 +9,8 @@
 			top: var(--medium-gap-size);
 			left: var(--medium-gap-size);
 			background: var(--dark-orange);
-			width: calc(var(--cell-size) / 2 + 4 * var(--medium-gap-size));
+			width: calc(var(--large-gap-size) * 4 + 4 * var(--medium-gap-size));
+			font-size: var(--medium-font-size);
 		}
 
 	/* overlay */
@@ -415,6 +416,26 @@
 		}
 
 	/* screens */
+		#screens[count="0"]:before {
+			content: "no boards yet!";
+			font-family: var(--font-0);
+			color: var(--medium-gray);
+			font-size: var(--large-font-size);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translateX(-50%) translateY(-50%);
+			pointer-events: none;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			font-weight: bold;
+			text-transform: uppercase;
+			font-weight: bold;
+		}
+
 		#screens[count="1"] {
 			position: absolute;
 			top: 0;
@@ -550,13 +571,13 @@
 			}
 
 			#screens[count="1"] .screen[role="actor"] .board {
-				margin-left: calc((var(--cell-size) / 2 + 6 * var(--medium-gap-size)) / 2);
+				margin-left: calc((var(--large-gap-size) * 4 + 5 * var(--medium-gap-size)) / 2);
 			}
 
 			@media screen and (max-width: 800px) {
 				#screens[count="1"] .screen[role="actor"] .board {
 					margin-left: 0;
-					margin-top: calc(-1 * (var(--cell-size) / 2 * var(--multiplier) + 3 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
+					margin-top: calc(-1 * (var(--large-gap-size) * 4 * var(--multiplier) + 6 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
 				}
 			}
 
@@ -649,8 +670,8 @@
 				top: calc(var(--medium-gap-size) + var(--medium-font-size) + 2 * var(--medium-gap-size) + var(--medium-gap-size));
 				box-sizing: border-box;
 				height: calc(100% - (var(--medium-gap-size) + var(--medium-font-size) + 2 * var(--medium-gap-size) + 2 * var(--medium-gap-size)));
-				width: calc(var(--cell-size) / 2 * var(--multiplier) + 4 * var(--medium-gap-size));
-				padding: 0 var(--medium-gap-size);
+				width: calc(var(--large-gap-size) * 4 * var(--multiplier) + 4 * var(--medium-gap-size));
+				padding: var(--medium-gap-size);
 				border-radius: var(--border-radius);
 				overflow-x: hidden;
 				overflow-y: scroll;
@@ -664,12 +685,13 @@
 
 			@media screen and (max-width: 800px) {
 				#screens[count="1"] .screen[role="actor"] .drawer {
-					top: calc(100% - (var(--cell-size) / 2 * var(--multiplier) + 3 * var(--medium-gap-size)));
+					top: calc(100% - (var(--large-gap-size) * 2 * var(--multiplier) + 5 * var(--medium-gap-size)));
 					width: calc(100% - 2 * var(--medium-gap-size));
-					height: calc(var(--cell-size) / 2 * var(--multiplier) + 2 * var(--medium-gap-size));
+					height: calc(var(--large-gap-size) * 2 * var(--multiplier) + 4 * var(--medium-gap-size));
 					flex-direction: row;
 					overflow-x: scroll;
 					overflow-y: hidden;
+					padding: 0;
 				}
 			}
 
@@ -677,8 +699,8 @@
 				float: left;
 				cursor: default;
 				flex-shrink: 0;
-				height: calc(var(--cell-size) / 2 * var(--multiplier)) !important;
-				width: calc(var(--cell-size) / 2 * var(--multiplier)) !important;
+				height: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
+				width: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
 				margin: var(--medium-gap-size);
 			}
 
