@@ -26,6 +26,7 @@
 			maximumRoomNameLength: 40,
 			second: 1000,
 			roles: ["speaker", "actor", "spectator"],
+			sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 			objectOffset: 0.5,
 			attempts: 100,
 			drawerExtra: 25
@@ -1332,11 +1333,20 @@
 								preview: true
 							}
 
+						// weighted sizes
+							let weightedSizes = []
+							for (let i in configuration.objects.sizes) {
+								let size = configuration.objects.sizes[i]
+								for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
+									weightedSizes.push(size)
+								}
+							}
+
 						// random parameters
 							do {
 								object.shape = chooseRandom(configuration.objects.shapes)
 								object.color = chooseRandom(configuration.objects.colors)
-								object.size = chooseRandom(configuration.objects.sizes)
+								object.size = chooseRandom(weightedSizes)
 								object.label = configuration.objects.labels ? CONSTANTS.alphabet[i] : null
 								object.border = configuration.objects.borders ? chooseRandom(configuration.objects.colors) : null
 								attempts--
@@ -1354,6 +1364,7 @@
 							object.size = {x: Number(object.size.split("x")[0]), y: Number(object.size.split("x")[1])}
 
 						// random position (no overlap)
+							attempts = CONSTANTS.attempts
 							object.target = {x: null, y: null, z: i}
 							do {
 								object.target.x = Math.floor(Math.random() * configuration.board.x)
@@ -1443,20 +1454,25 @@
 	/* createObject */
 		function createObject(screen, drawer, object) {
 			try {
-				// create
+				// object
 					let element = document.createElement("div")
 						element.className = "object"
 						element.id = screen.id + "-object-" + object.id
 						element.style.width  = "calc(var(--cell-size) * " + object.size.x + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
 						element.style.height = "calc(var(--cell-size) * " + object.size.y + (object.preview ? " / 2) " : " / var(--screen-count) * var(--multiplier))")
-						element.style.clipPath = "var(--" + object.shape + ")"
-						element.style.background = "var(--" + (object.border || object.color) + ")"
 						element.style.zIndex = object.position.z
-						element.addEventListener(TRIGGERS.mousedown, grabObject)
 					if (!object.preview) {
 						screen.objectElements[object.id] = element
 					}
 					drawer.appendChild(element)
+
+				// shape
+					let shape = document.createElement("div")
+						shape.className = "object-shape"
+						shape.style.clipPath = "var(--" + object.shape + ")"
+						shape.style.background = "var(--" + (object.border || object.color) + ")"
+						shape.addEventListener(TRIGGERS.mousedown, grabObject)
+					element.appendChild(shape)
 
 				// border
 					let inner = null

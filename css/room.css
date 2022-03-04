@@ -241,6 +241,8 @@
 			cursor: default;
 			transform: translateX(-50%) translateY(-50%);
 			opacity: var(--object-opacity);
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+			pointer-events: none;
 		}
 
 	/* overlay game */
@@ -417,7 +419,7 @@
 
 	/* screens */
 		#screens[count="0"]:before {
-			content: "no boards yet!";
+			content: "no boards";
 			font-family: var(--font-0);
 			color: var(--medium-gray);
 			font-size: var(--large-font-size);
@@ -434,6 +436,7 @@
 			font-weight: bold;
 			text-transform: uppercase;
 			font-weight: bold;
+			text-align: center;
 		}
 
 		#screens[count="1"] {
@@ -653,9 +656,11 @@
 				cursor: default;
 				transform: translateX(-50%) translateY(-50%);
 				opacity: var(--object-opacity);
+				filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+				pointer-events: none;
 			}
 
-			#screens .screen[role="actor"] .board .object {
+			#screens .screen[role="actor"] .board .object-shape {
 				cursor: grab;
 			}
 
@@ -702,15 +707,27 @@
 				height: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
 				width: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
 				margin: var(--medium-gap-size);
+				filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+				pointer-events: none;
 			}
 
-			#screens .screen[role="actor"] .drawer .object {
+			#screens .screen[role="actor"] .drawer .object-shape {
 				cursor: grab;
 			}
 
 		/* border & label */
+			.object-shape {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				height: 100%;
+				width: 100%;
+				pointer-events: all;
+			}
+
 			.object-inner {
-				position: relative;
+				position: absolute;
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
@@ -719,7 +736,7 @@
 			}
 
 			.object-label {
-				position: relative;
+				position: absolute;
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
@@ -738,6 +755,10 @@
 
 		/* grabbing */
 			#screens .board .object[grabbing], #screens .drawer .object[grabbing] {
+				z-index: 999 !important;
+			}
+
+			#screens .board .object[grabbing] .object-shape, #screens .drawer .object[grabbing] .object-shape {
 				cursor: grabbing !important;
 				filter: drop-shadow(0 0 var(--shadow-size) var(--medium-gray));
 			}

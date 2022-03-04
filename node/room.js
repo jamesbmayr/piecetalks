@@ -1057,7 +1057,6 @@
 						objects.push(object)
 					}
 
-
 				// set z
 					let z = 1
 					for (let i in objects) {
@@ -1130,7 +1129,14 @@
 					let object = CORE.getSchema("object")
 
 				// size
-					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(configuration.objects.sizes)]
+					let weightedSizes = []
+					for (let i in configuration.objects.sizes) {
+						let size = configuration.objects.sizes[i]
+						for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
+							weightedSizes.push(size)
+						}
+					}
+					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(weightedSizes)]
 
 				// shape
 					object.shape = CORE.chooseRandom(configuration.objects.shapes)

@@ -446,8 +446,8 @@
 								"4-point-star": "polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%)",
 								"cross": "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
 								"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
-								"5-point-star": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
-								"pentagram": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
+								"star-up": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
+								"star-down": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
 								"8-point-star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
 							}
 						break
@@ -478,8 +478,8 @@
 								"4-point-star": "polygon(50% 10%, 62% 38%, 90% 50%, 62% 62%, 50% 90%, 38% 62%, 10% 50%, 38% 38%)",
 								"cross": "polygon(40% 5%, 60% 5%, 60% 40%, 95% 40%, 95% 60%, 60% 60%, 60% 95%, 40% 95%, 40% 60%, 5% 60%, 5% 40%, 40% 40%)",
 								"x": "polygon(20% 5%, 50% 35%, 80% 5%, 95% 20%, 65% 50%, 95% 80%, 80% 95%, 50% 65%, 20% 95%, 5% 80%, 35% 50%, 5% 20%)",
-								"5-point-star": "polygon(50% 11%, 60.4% 41.4%, 90% 41.4%, 66% 60.6%, 74% 91%, 50% 72.6%, 26% 91%, 34% 60.6%, 10% 41.4%, 39.6% 41.4%)",
-								"pentagram": "polygon(50% 89%, 60.4% 58.6%, 90% 58.6%, 66% 39.4%, 74% 9%, 50% 27.4%, 26% 9%, 34% 39.4%, 10% 58.6%, 39.6% 58.6%)",
+								"star-up": "polygon(50% 11%, 60.4% 41.4%, 90% 41.4%, 66% 60.6%, 74% 91%, 50% 72.6%, 26% 91%, 34% 60.6%, 10% 41.4%, 39.6% 41.4%)",
+								"star-down": "polygon(50% 89%, 60.4% 58.6%, 90% 58.6%, 66% 39.4%, 74% 9%, 50% 27.4%, 26% 9%, 34% 39.4%, 10% 58.6%, 39.6% 58.6%)",
 								"8-point-star": "polygon(18% 18%, 42% 30%, 50% 10%, 58% 30%, 82% 18%, 70% 42%, 90% 50%, 70% 58%, 82% 82%, 58% 70%, 50% 90%, 42% 70%, 18% 82%, 30% 58%, 10% 50%, 30% 42%)"
 							}
 						break
@@ -522,6 +522,7 @@
 								roomIdLength: 4,
 								rounding: 100,
 								roles: ["speaker", "actor", "spectator"],
+								sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 								attempts: 100,
 								borderProbability: 0.5,
 								labelProbability: 1
@@ -611,7 +612,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle-up", "square", "diamond", "rectangle-horizontal", "hexagon-horizontal", "octagon", "cross", "5-point-star", "8-point-star"],
+											shapes: ["circle", "triangle-up", "square", "diamond", "rectangle-horizontal", "hexagon-horizontal", "octagon", "cross", "star-up", "8-point-star"],
 											colors: ["medium-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
 										}
 									},
@@ -635,7 +636,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "5-point-star", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "star-up", "8-point-star"],
 											colors: ["medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
@@ -655,11 +656,11 @@
 										objects: {
 											count: 10,
 											unused: 10,
-											overlap: true,
+											overlap: false,
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3"],
-											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "5-point-star", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "star-up", "8-point-star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
 										}
 									},
@@ -683,7 +684,7 @@
 											borders: true,
 											labels: false,
 											sizes: ["1x1", "3x3", "5x5"],
-											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "5-point-star", "pentagram", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "star-up", "star-down", "8-point-star"],
 											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
 										}
 									}
