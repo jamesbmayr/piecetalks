@@ -315,7 +315,7 @@
 				switch (index) {
 					// web
 						case "title":
-							return "Taking Shape"
+							return "Piece Talks"
 						break
 						case "logo":
 							return `<link rel="shortcut icon" href="logo.png"/>`

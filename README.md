@@ -1,8 +1,8 @@
-# Barrier Task Game (TBD)
+# Piece Talks
 
 ---
 <pre>
-Barrier Task Game (TBD)
+Piece Talks
 |
 |- package.json
 |
