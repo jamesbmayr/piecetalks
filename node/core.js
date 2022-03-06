@@ -237,7 +237,6 @@
 								created: new Date().getTime(),
 								updated: new Date().getTime(),
 								status: {
-									name: "unnamed room",
 									startTime: null,
 									endTime: null,
 									timeRemaining: null,
@@ -517,8 +516,6 @@
 								maximumPlayers: 10,
 								minimumPlayerNameLength: 3,
 								maximumPlayerNameLength: 20,
-								minimumRoomNameLength: 3,
-								maximumRoomNameLength: 40,
 								roomIdLength: 4,
 								rounding: 100,
 								roles: ["speaker", "actor", "spectator"],
@@ -603,7 +600,7 @@
 											y: 5,
 											grid: true,
 											coordinates: false,
-											background: "radial-grayscale-gradient"
+											background: "horizontal-color-gradient"
 										},
 										objects: {
 											count: 10,
@@ -627,7 +624,7 @@
 											y: 6,
 											grid: true,
 											coordinates: false,
-											background: "vertical-grayscale-gradient"
+											background: "radial-grayscale-gradient"
 										},
 										objects: {
 											count: 10,

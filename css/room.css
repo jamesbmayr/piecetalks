@@ -37,9 +37,9 @@
 		}
 
 		#configuration-close {
-			background: var(--medium-gray);
+			background: var(--medium-blue);
 			float: right;
-			width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+			width: auto;
 			margin-bottom: calc(-100%);
 			z-index: 999;
 		}
@@ -69,7 +69,6 @@
 
 		#configuration-room-leave {
 			float: right;
-			color: var(--dark-red);
 			width: auto;
 			background: var(--medium-red);
 		}
@@ -125,6 +124,16 @@
 			border-left: var(--border-size) solid var(--dark-gray);
 			border-top-left-radius: 0;
 			border-bottom-left-radius: 0;
+		}
+
+		.player-remove {
+			margin: var(--small-gap-size) 0 var(--small-gap-size) var(--small-gap-size);
+			padding: var(--small-gap-size);
+			height: calc(var(--medium-font-size) + 2 * var(--small-gap-size));
+			width: calc(var(--medium-font-size) + 2 * var(--small-gap-size));
+			font-size: var(--small-font-size);
+			background-color: var(--medium-red);
+			line-height: 1.2;
 		}
 
 	/* overlay preview */
@@ -303,34 +312,16 @@
 
 	/* mobile */
 		@media screen and (max-width: 800px) {
-			#room-name {
-				display: none;
-			}
-
 			#configuration-button {
 				width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 			}
 
-			#configuration-button span {
+			#configuration-button span, #configuration-close span, #configuration-room-leave span {
 				display: none;
 			}
 
 			#configuration-overlay {
 				padding-bottom: calc(var(--large-gap-size) * 2);
-			}
-
-			#configuration-room-name-outer {
-				margin: 0;
-				width: 100%;
-				margin-bottom: var(--medium-gap-size);
-			}
-
-			#configuration-room-name-outer span {
-				display: none;
-			}
-
-			#configuration-room-name {
-				width: 100%;
 			}
 
 			#configuration-players-invite-email {
@@ -387,18 +378,6 @@
 		background: var(--dark-gray);
 		color: var(--light-gray);
 	}
-
-	/* name */
-		#room-name {
-			position: fixed;
-			top: var(--medium-gap-size);
-			left: 50%;
-			transform: translateX(-50%);
-			text-align: center;
-			margin: 0;
-			pointer-events: none;
-			width: 100%;
-		}
 
 	/* timer */
 		#timer {
@@ -571,14 +550,15 @@
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
 				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+				z-index: 999;
 			}
 
-			#screens[count="1"] .screen[role="actor"] .board {
+			#screens[count="1"] .screen[player-role="actor"] .board {
 				margin-left: calc((var(--large-gap-size) * 4 + 5 * var(--medium-gap-size)) / 2);
 			}
 
 			@media screen and (max-width: 800px) {
-				#screens[count="1"] .screen[role="actor"] .board {
+				#screens[count="1"] .screen[player-role="actor"] .board {
 					margin-left: 0;
 					margin-top: calc(-1 * (var(--large-gap-size) * 4 * var(--multiplier) + 6 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
 				}
@@ -660,16 +640,16 @@
 				pointer-events: none;
 			}
 
-			#screens .screen[role="actor"] .board .object-shape {
+			#screens .screen[player-role="actor"] .board .object-shape {
 				cursor: grab;
 			}
 
 		/* drawer */
-			#screens:not([count="1"]) .drawer, #screens .screen[role="speaker"] .drawer {
+			#screens:not([count="1"]) .drawer, #screens .screen[player-role="speaker"] .drawer {
 				display: none;
 			}
 
-			#screens[count="1"] .screen[role="actor"] .drawer {
+			#screens[count="1"] .screen[player-role="actor"] .drawer {
 				position: fixed;
 				left: var(--medium-gap-size);
 				top: calc(var(--medium-gap-size) + var(--medium-font-size) + 2 * var(--medium-gap-size) + var(--medium-gap-size));
@@ -689,7 +669,7 @@
 			}
 
 			@media screen and (max-width: 800px) {
-				#screens[count="1"] .screen[role="actor"] .drawer {
+				#screens[count="1"] .screen[player-role="actor"] .drawer {
 					top: calc(100% - (var(--large-gap-size) * 2 * var(--multiplier) + 5 * var(--medium-gap-size)));
 					width: calc(100% - 2 * var(--medium-gap-size));
 					height: calc(var(--large-gap-size) * 2 * var(--multiplier) + 4 * var(--medium-gap-size));
@@ -711,7 +691,7 @@
 				pointer-events: none;
 			}
 
-			#screens .screen[role="actor"] .drawer .object-shape {
+			#screens .screen[player-role="actor"] .drawer .object-shape {
 				cursor: grab;
 			}
 

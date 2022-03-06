@@ -22,8 +22,6 @@
 			alphabet: "abcdefghijklmnopqrstuvwxyz",
 			minimumPlayerNameLength: 3,
 			maximumPlayerNameLength: 20,
-			minimumRoomNameLength: 3,
-			maximumRoomNameLength: 40,
 			second: 1000,
 			roles: ["speaker", "actor", "spectator"],
 			sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
@@ -65,7 +63,6 @@
 				close: document.querySelector("#configuration-close"),
 				room: {
 					id: document.querySelector("#configuration-room-id"),
-					name: document.querySelector("#configuration-room-name"),
 					leave: document.querySelector("#configuration-room-leave"),
 					darkness: document.querySelector("#configuration-room-darkness")
 				},
@@ -116,7 +113,6 @@
 				backToTop: document.querySelector("#configuration-back-to-top")
 			},
 			container: {
-				roomName: document.querySelector("#room-name"),
 				timer: document.querySelector("#timer"),
 				screensContainer: document.querySelector("#screens"),
 				screens: {}
@@ -124,13 +120,6 @@
 		}
 
 /*** tools ***/
-	/* isNumLet */
-		function isNumLet(string) {
-			try {
-				return (/^[a-zA-Z0-9]+$/).test(string)
-			} catch (error) {console.log(error)}
-		}
-
 	/* isEmail */
 		function isEmail(string) {
 			try {
@@ -374,37 +363,6 @@
 			} catch (error) {console.log(error)}
 		}
 
-	/* updateRoomName */
-		ELEMENTS.configuration.room.name.addEventListener(TRIGGERS.change, updateRoomName)
-		function updateRoomName(event) {
-			try {
-				// assume no error
-					ELEMENTS.configuration.room.name.removeAttribute("error")
-
-				// not the host
-					if (!STATE.isHost) {
-						showToast({success: false, message: "not the host"})
-						return
-					}
-
-				// get value
-					let name = ELEMENTS.configuration.room.name.value.trim() || ""
-					if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
-						ELEMENTS.configuration.room.name.setAttribute("error", true)
-						showToast({success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters"})
-						return
-					}
-
-				// update
-					STATE.socket.send(JSON.stringify({
-						action: "updateRoom",
-						playerId: STATE.playerId,
-						roomId: STATE.roomId,
-						name: name
-					}))
-			} catch (error) {console.log(error)}
-		}
-
 	/* updateRoomDarkness */
 		ELEMENTS.configuration.room.darkness.addEventListener(TRIGGERS.change, updateRoomDarkness)
 		function updateRoomDarkness(event) {
@@ -461,12 +419,6 @@
 						ELEMENTS.body.removeAttribute("darkness")
 					}
 
-				// name
-					ELEMENTS.container.roomName.innerText = status.name
-					if (document.activeElement !== ELEMENTS.configuration.room.name) {
-						ELEMENTS.configuration.room.name.value = status.name
-					}
-
 				// darkness
 					if (document.activeElement !== ELEMENTS.configuration.room.darkness) {
 						ELEMENTS.configuration.room.darkness.checked = status.darkness
@@ -488,13 +440,11 @@
 					if (STATE.isHost) {
 						ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
 						ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
-						ELEMENTS.configuration.room.name.removeAttribute("readonly")
 						ELEMENTS.configuration.room.darkness.removeAttribute("disabled")
 					}
 					else {
 						ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
 						ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
-						ELEMENTS.configuration.room.name.setAttribute("readonly", true)
 						ELEMENTS.configuration.room.darkness.setAttribute("disabled", true)
 					}
 
@@ -597,6 +547,7 @@
 							if (!ids.includes(i)) {
 								ELEMENTS.configuration.players.rows[i].remove()
 								delete ELEMENTS.configuration.players.rows[i]
+								continue
 							}
 
 						// update
@@ -669,6 +620,7 @@
 						nameInput.placeholder = "name"
 						nameInput.autocomplete = "off"
 						nameInput.spellcheck = false
+						nameInput.title = "player name input"
 						nameInput.addEventListener(TRIGGERS.change, updatePlayer)
 					label.appendChild(nameInput)
 
@@ -676,12 +628,23 @@
 					let roleSelect = document.createElement("select")
 						roleSelect.className = "player-role"
 						roleSelect.addEventListener(TRIGGERS.change, updatePlayer)
+						roleSelect.title = "player role selection"
 					label.appendChild(roleSelect)
 
 					for (let i in CONSTANTS.roles) {
 						let option = document.createElement("option")
 							option.value = option.innerText = CONSTANTS.roles[i]
 						roleSelect.appendChild(option)
+					}
+
+				// host
+					if (STATE.isHost && player.id !== STATE.playerId) {
+						let removeButton = document.createElement("button")
+							removeButton.className = "player-remove"
+							removeButton.innerHTML = "&#x1F6AB;"
+							removeButton.title = "remove player button"
+							removeButton.addEventListener(TRIGGERS.click, removePlayer)
+						label.appendChild(removeButton)
 					}
 
 				// help text
@@ -692,11 +655,12 @@
 					let summary = document.createElement("summary")
 						summary.className = "help-text-button pseudo-button"
 						summary.innerText = "?"
+						summary.title = "learn more"
 					helpText.appendChild(summary)
 
 					let description = document.createElement("description")
 						description.className = "help-text-description"
-						description.innerText = "actors move objects | speakers know the solution"
+						description.innerText = (STATE.isHost && player.id !== STATE.playerId) ? "remove player" : "actors move objects | speakers see solution"
 					helpText.appendChild(description)
 
 				// return
@@ -731,9 +695,9 @@
 					let role = player.querySelector(".player-role").value || null
 
 				// invalid name
-					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!name || !name.length || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
 						event.target.setAttribute("error", true)
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " - " + CONSTANTS.maximumPlayerNameLength + " letters & numbers only"})
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " - " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
 
@@ -745,6 +709,23 @@
 						targetId: id,
 						name: name,
 						role: role
+					}))
+			} catch (error) {console.log(error)}
+		}
+
+	/* removePlayer */
+		function removePlayer(event) {
+			try {
+				// get player
+					let targetId = event.target.closest(".player-row").id.split("-")
+						targetId = targetId[targetId.length - 1]
+
+				// send command to server
+					STATE.socket.send(JSON.stringify({
+						action: "removePlayer",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId,
+						targetId: targetId,
 					}))
 			} catch (error) {console.log(error)}
 		}
@@ -762,7 +743,7 @@
 					let email = ELEMENTS.configuration.players.invite.email.value.trim() || null
 
 				// invalid name
-					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!name || !name.length || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
 						ELEMENTS.configuration.players.invite.name.setAttribute("error", true)
 						ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
 						return
@@ -795,7 +776,7 @@
 					let email = ELEMENTS.configuration.players.invite.email.value.trim() || null
 
 				// invalid name
-					if (!name || !name.length || !isNumLet(name) || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!name || !name.length || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
 						ELEMENTS.configuration.players.invite.name.setAttribute("error", true)
 						ELEMENTS.configuration.players.invite.link.setAttribute("disabled", true)
 						name = "anonymous"
@@ -1140,7 +1121,7 @@
 			try {
 				// no screen yet
 					let screen = ELEMENTS.container.screens[player.id] || createScreen(player.id)
-						screen.setAttribute("role", player.role)
+						screen.setAttribute("player-role", player.role)
 
 				// name + role + active
 					screen.querySelector(".screen-name").value = player.name || ""
@@ -1183,13 +1164,13 @@
 						connected.className = "screen-connected"
 					screen.appendChild(connected)
 
-				// board
-					createBoard(screen)
-
 				// drawer
 					let drawer = document.createElement("div")
 						drawer.className = "drawer"
 					screen.appendChild(drawer)
+
+				// board
+					createBoard(screen)
 
 				// objects
 					screen.objectElements = {}

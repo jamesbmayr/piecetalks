@@ -362,6 +362,7 @@
 						case "startGame":
 						case "endGame":
 						case "leaveRoom":
+						case "removePlayer":
 							try {
 								ROOM.updateOne(REQUEST, sendSocketData)
 							}

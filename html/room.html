@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<title><script node>getAsset("title")</script>node>: <script node>REQUEST.path[REQUEST.path.length - 1].toUpperCase()</script>node></title>
 		<script node>getAsset("logo")</script>node>
@@ -16,7 +16,6 @@
 	</head>
 	<body>
 		<div id="container">
-			<h1 id="room-name"></h1>
 			<div id="timer" visibility="false"></div>
 			<div id="screens" count="0"></div>
 		</div>
@@ -24,29 +23,25 @@
 			<summary id="configuration-button" class="pseudo-button">&#x2699; <span>setup</span></summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
 				<section id="configuration-room">
-					<button id="configuration-close" class="pseudo-button">&#x2715;</button>
+					<button id="configuration-close" class="pseudo-button" title="close setup and show game boards button">&rarr; <span>game</span></button>
 					<h2>
 						<span>room id:</span>
 						<output id="configuration-room-id" value="<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>"></output>
 						<details class="help-text">
-							<summary class="help-text-button pseudo-button">?</summary>
+							<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 							<div class="help-text-description">players can join using this code</div>
 						</details>
 					</h2>
 					<div class="form-row">
-						<label id="configuration-room-name-outer">
-							<span>name</span>
-							<input id="configuration-room-name" type="text" placeholder="room name" autocomplete="off" spellcheck="false" readonly>
-						</label>
 						<label>
-							<input id="configuration-room-darkness" type="checkbox">
+							<input id="configuration-room-darkness" type="checkbox" title="light and dark mode toggle">
 							<span>dark mode</span>
 							<details class="help-text">
-								<summary class="help-text-button pseudo-button">?</summary>
+								<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 								<div class="help-text-description">invert colors</div>
 							</details>
 						</label>
-						<button id="configuration-room-leave">&#x1f6aa; leave</button>
+						<button id="configuration-room-leave">&#x1f6aa; <span>leave</span></button>
 					</div>
 				</section>
 				<section id="configuration-game-status">
@@ -54,8 +49,8 @@
 						<span>status: </span>
 						<output id="configuration-game-status-current" readonly></output>
 					</h2>
-					<button id="configuration-game-status-start">start</button>
-					<button id="configuration-game-status-end">end</button>
+					<button id="configuration-game-status-start" title="start the game button">start</button>
+					<button id="configuration-game-status-end" title="end the game button">end</button>
 				</section>
 				<section id="configuration-players">
 					<h2>players</h2>
@@ -67,10 +62,10 @@
 						<div class="form-row">
 							<label>
 								<span>name</span>
-								<input type="text" id="configuration-players-invite-name" placeholder="name" autocomplete="off" spellcheck="false">
-								<button id="configuration-players-invite-link">&#x1f517; copy link</button>
+								<input type="text" id="configuration-players-invite-name" placeholder="name" autocomplete="off" spellcheck="false" title="invite player name input">
+								<button id="configuration-players-invite-link" title="copy link to clipboard button">&#x1f517; copy link</button>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">invite someone by copying a link</div>
 								</details>
 							</label>
@@ -79,10 +74,10 @@
 						<div class="form-row">
 							<label>
 								<span>email</span>
-								<input type="email" id="configuration-players-invite-email" placeholder="email" autocomplete="off" spellcheck="false">
-								<a id="configuration-players-invite-mailto" target="popup" class="pseudo-button" disabled>&#x1f4e7; send email</a>
+								<input type="email" id="configuration-players-invite-email" placeholder="email" autocomplete="off" spellcheck="false" title="invite player email input">
+								<a id="configuration-players-invite-mailto" target="popup" class="pseudo-button" disabled title="send an email invite link">&#x1f4e7; send email</a>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">invite someone by emailing a link</div>
 								</details>
 							</label>
@@ -103,7 +98,7 @@
 					</div>
 					<div class="form-row">
 						<label>
-							<select id="configuration-game-preset" configuration="true" disabled>
+							<select id="configuration-game-preset" configuration="true" disabled title="game preset selection">
 								<option value="custom">custom</option>
 								<script node>
 									let presets = ""
@@ -114,7 +109,7 @@
 								</script>node>
 							</select>
 							<details class="help-text">
-								<summary class="help-text-button pseudo-button">?</summary>
+								<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 								<div class="help-text-description">select a set of configurations</div>
 							</details>
 						</label>
@@ -124,20 +119,20 @@
 					</div>
 					<div class="form-row">
 						<label>
-							<input type="checkbox" id="configuration-game-timer-active" configuration="true" disabled>
+							<input type="checkbox" id="configuration-game-timer-active" configuration="true" disabled title="timer active toggle">
 							<span>active</span>
 						</label>
 						<label>
-							<input type="number" id="configuration-game-timer-seconds" step="1" min="<script node>CONFIGURATIONS.timer.seconds.minimum</script>node>" max="<script node>CONFIGURATIONS.timer.seconds.maximum</script>node>" placeholder="seconds" configuration="true" readonly>
+							<input type="number" id="configuration-game-timer-seconds" step="1" min="<script node>CONFIGURATIONS.timer.seconds.minimum</script>node>" max="<script node>CONFIGURATIONS.timer.seconds.maximum</script>node>" placeholder="seconds" configuration="true" readonly title="timer seconds input">
 							<span>seconds</span>
 							<details class="help-text">
-								<summary class="help-text-button pseudo-button">?</summary>
+								<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 								<div class="help-text-description">set the length of a game timer</div>
 							</details>
 						</label>
 					</div>
 					<details id="configuration-game-advanced">
-						<summary id="configuration-game-advanced-toggle">
+						<summary id="configuration-game-advanced-toggle" title="advanced settings button">
 							<div class="form-row">
 								<h2>advanced options</h2>
 							</div>
@@ -147,20 +142,20 @@
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="checkbox" id="configuration-game-board-grid" configuration="true" disabled>
+								<input type="checkbox" id="configuration-game-board-grid" configuration="true" disabled title="show grid toggle">
 								<span>show grid</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">display a set of gridlines</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="checkbox" id="configuration-game-board-coordinates" configuration="true" disabled>
+								<input type="checkbox" id="configuration-game-board-coordinates" configuration="true" disabled title="show coordinates toggle">
 								<span>show coordinates</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">display chess-like coordinate labels</div>
 								</details>
 							</label>
@@ -168,10 +163,10 @@
 						<div class="form-row">
 							<label>
 								<span>x</span>
-								<input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true" autocomplete="off" readonly>
+								<input type="number" id="configuration-game-board-x" step="1" min="<script node>CONFIGURATIONS.board.x.minimum</script>node>" max="<script node>CONFIGURATIONS.board.x.maximum</script>node>" placeholder="x" configuration="true" autocomplete="off" readonly title="grid width input">
 								<span>cells</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">board width</div>
 								</details>
 							</label>
@@ -179,17 +174,17 @@
 						<div class="form-row">
 							<label>
 								<span>y</span>
-								<input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true" autocomplete="off" readonly>
+								<input type="number" id="configuration-game-board-y" step="1" min="<script node>CONFIGURATIONS.board.y.minimum</script>node>" max="<script node>CONFIGURATIONS.board.y.maximum</script>node>" placeholder="y" configuration="true" autocomplete="off" readonly title="grid height input">
 								<span>cells</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">board height</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<select id="configuration-game-board-background" configuration="true" disabled>
+								<select id="configuration-game-board-background" configuration="true" disabled title="grid background selection">
 									<script node>
 										let backgrounds = ""
 										for (let i in CONFIGURATIONS.board.backgrounds) {
@@ -200,7 +195,7 @@
 								</select>
 								<span>background</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">board surface</div>
 								</details>
 							</label>
@@ -210,50 +205,50 @@
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="checkbox" id="configuration-game-objects-overlap" configuration="true" disabled>
+								<input type="checkbox" id="configuration-game-objects-overlap" configuration="true" disabled title="allow object overlap toggle">
 								<span>allow overlap</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">let objects occupy the same space</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="checkbox" id="configuration-game-objects-borders" configuration="true" disabled>
+								<input type="checkbox" id="configuration-game-objects-borders" configuration="true" disabled title="object borders toggle">
 								<span>borders</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">give objects colored outlines</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="checkbox" id="configuration-game-objects-labels" configuration="true" disabled>
+								<input type="checkbox" id="configuration-game-objects-labels" configuration="true" disabled title="object letter labels toggle">
 								<span>letter labels</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description">show letters on objects</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly>
+								<input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly title="number of used objects input">
 								<span>used</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description"># objects included on the board</div>
 								</details>
 							</label>
 						</div>
 						<div class="form-row">
 							<label>
-								<input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly>
+								<input type="number" id="configuration-game-objects-unused" step="1" min="<script node>CONFIGURATIONS.objects.unused.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.unused.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly title="number of unused objects input">
 								<span>unused</span>
 								<details class="help-text">
-									<summary class="help-text-button pseudo-button">?</summary>
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
 									<div class="help-text-description"># extra objects not on board</div>
 								</details>
 							</label>
@@ -263,7 +258,7 @@
 							<script node>
 								let sizes = ""
 								for (let i in CONFIGURATIONS.objects.sizes) {
-									sizes += "<div class='form-row'><label><input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true' disabled><span>" + i + " cells</span></label></div>"
+									sizes += "<div class='form-row'><label><input type='checkbox' property='objects-sizes' id='configuration-game-objects-sizes-" + i + "' configuration='true' disabled title='" + i + " size toggle'><span>" + i + " cells</span></label></div>"
 								}
 								sizes
 							</script>node>
@@ -273,7 +268,7 @@
 							<script node>
 								let shapes = ""
 								for (let i in CONFIGURATIONS.objects.shapes) {
-									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-shape-sample' style='clip-path: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i + " shape toggle'><div class='configuration-game-objects-shape-sample' style='clip-path: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								shapes
 							</script>node>
@@ -283,7 +278,7 @@
 							<script node>
 								let colors = ""
 								for (let i in CONFIGURATIONS.objects.colors) {
-									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled><div class='configuration-game-objects-color-sample' style='background: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i + " color toggle'><div class='configuration-game-objects-color-sample' style='background: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								colors
 							</script>node>
@@ -291,7 +286,7 @@
 					</details>
 				</section>
 				<div class="form-row">
-					<button id="configuration-back-to-top">&uarr; back to top</button>
+					<button id="configuration-back-to-top" title="back to top button">&uarr; back to top</button>
 				</div>
 			</div>
 		</details>

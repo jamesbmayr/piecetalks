@@ -13,12 +13,7 @@
 		function createOne(REQUEST, callback) {
 			try {
 				// name
-					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
-						callback({success: false, message: "name must be letters and numbers only"})
-						return
-					}
-
-					if (CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!REQUEST.post.name || CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
 						callback({success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
@@ -68,12 +63,7 @@
 		function joinOne(REQUEST, callback) {
 			try {
 				// name
-					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
-						callback({success: false, message: "name must be letters and numbers only"})
-						return
-					}
-
-					if (CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!REQUEST.post.name || CONSTANTS.minimumPlayerNameLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
 						callback({success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
@@ -256,7 +246,7 @@
 					}
 
 				// action
-					if (!REQUEST.post || !REQUEST.post.action || !["updateRoom", "updateConfiguration", "updatePlayer", "updateObject", "startGame", "endGame", "leaveRoom", "disconnectPlayer"].includes(REQUEST.post.action)) {
+					if (!REQUEST.post || !REQUEST.post.action || !["updateRoom", "updateConfiguration", "updatePlayer", "updateObject", "startGame", "endGame", "leaveRoom", "removePlayer", "disconnectPlayer"].includes(REQUEST.post.action)) {
 						callback({roomId: roomId, success: false, message: "invalid action", recipients: [REQUEST.session.id]})
 						return
 					}
@@ -318,6 +308,10 @@
 									leaveRoom(REQUEST, room, player, callback)
 									return
 								break
+								case "removePlayer":
+									removePlayer(REQUEST, room, player, callback)
+									return
+								break
 								case "disconnectPlayer":
 									disconnectPlayer(REQUEST, room, player, callback)
 									return
@@ -368,19 +362,9 @@
 					}
 
 				// no parameters
-					if (REQUEST.post.name == undefined && REQUEST.post.darkness == undefined) {
+					if (REQUEST.post.darkness == undefined) {
 						callback({roomId: room.id, success: false, message: "nothing changed", recipients: [REQUEST.session.id]})
 						return
-					}
-
-				// name
-					if (REQUEST.post.name !== undefined) {
-						let name = REQUEST.post.name.trim() || null
-						if (!name || !name.length || CONSTANTS.minimumRoomNameLength > name.length || name.length > CONSTANTS.maximumRoomNameLength) {
-							callback({roomId: room.id, success: false, message: "room name must be " + CONSTANTS.minimumRoomNameLength + " - " + CONSTANTS.maximumRoomNameLength + " characters", recipients: [REQUEST.session.id]})
-							return
-						}
-						room.status.name = name
 					}
 
 				// darkness
@@ -632,12 +616,7 @@
 					}
 
 				// invalid name
-					if (!REQUEST.post.name || !CORE.isNumLet(REQUEST.post.name)) {
-						callback({roomId: room.id, success: false, message: "name must be letters and numbers only", recipients: [REQUEST.session.id]})
-						return
-					}
-
-					if (CONSTANTS.minimumNamePlayerLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
+					if (!REQUEST.post.name || CONSTANTS.minimumNamePlayerLength > REQUEST.post.name.length || REQUEST.post.name.length > CONSTANTS.maximumPlayerNameLength) {
 						callback({roomId: room.id, success: false, message: "name must be between " + CONSTANTS.minimumPlayerNameLength + " and " + CONSTANTS.maximumPlayerNameLength + " characters", recipients: [REQUEST.session.id]})
 						return
 					}
@@ -986,6 +965,67 @@
 						// for all other players
 							for (let i in room.players) {
 								callback({roomId: room.id, success: true, message: name + " left the room", room: room, recipients: [room.players[i].sessionId]})
+							}
+					})
+			}
+			catch (error) {
+				CORE.logError(error)
+				callback({roomId: REQUEST.path[REQUEST.path.length - 1], success: false, message: "unable to " + arguments.callee.name, recipients: [REQUEST.session.id]})
+			}
+		}
+
+	/* removePlayer */
+		module.exports.removePlayer = removePlayer
+		function removePlayer(REQUEST, room, player, callback) {
+			try {
+				// not host --> not allowed
+					if (!player.isHost) {
+						callback({success: false, roomId: room.id, message: "only the host can remove a player", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// no target id
+					if (!REQUEST.post.targetId || !CORE.isNumLet(REQUEST.post.targetId)) {
+						callback({success: false, roomId: room.id, message: "invalid player id", recipients: [REQUEST.session.id]})
+						return
+					}
+
+				// other --> remove player
+					let targetPlayer = room.players[REQUEST.post.targetId]
+					if (!targetPlayer) {
+						callback({success: false, roomId: room.id, message: "player not found", recipients: [REQUEST.session.id]})
+						return
+					}
+
+					let name = targetPlayer.name
+					let thatSessionId = targetPlayer.sessionId
+					delete room.players[targetPlayer.id]
+
+				// query
+					let query = CORE.getSchema("query")
+						query.collection = "rooms"
+						query.command = "update"
+						query.filters = {id: room.id}
+						query.document = {players: room.players}
+
+				// update
+					CORE.accessDatabase(query, function(results) {
+						if (!results.success) {
+							results.roomId = REQUEST.path[REQUEST.path.length - 1]
+							results.recipients = [REQUEST.session.id]
+							callback(results)
+							return
+						}
+
+						// updated room
+							let room = results.documents[0]
+
+						// for target player
+							callback({roomId: room.id, success: true, message: "removed from the room", playerId: null, recipients: [thatSessionId], location: "../../../../"})
+
+						// for all other players
+							for (let i in room.players) {
+								callback({roomId: room.id, success: true, message: name + " was removed from the room", room: room, recipients: [room.players[i].sessionId]})
 							}
 					})
 			}

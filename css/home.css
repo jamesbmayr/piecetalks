@@ -54,6 +54,7 @@
 			width: 100%;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 			margin-bottom: var(--medium-gap-size);
+			text-transform: uppercase;
 		}
 
 		#join-room-button {
