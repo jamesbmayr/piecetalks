@@ -774,7 +774,7 @@
 				// get
 					if (REQUEST.method == "GET") {
 						return {
-							"Set-Cookie": ("session=" + REQUEST.session.id + "; expires=" + (new Date(new Date().getTime() + ENVIRONMENT.cookieLength).toUTCString()) + "; path=/; domain=" + ENVIRONMENT.domain),
+							"Set-Cookie": ("session=" + REQUEST.session.id + "; expires=" + (new Date(new Date().getTime() + getAsset("constants").cookieLength).toUTCString()) + "; path=/; domain=" + ENVIRONMENT.domain + "; SameSite=Strict;"),
 							"Content-Type": "text/html; charset=utf-8"
 						}
 					}

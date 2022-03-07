@@ -20,7 +20,7 @@
 			<div id="screens" count="0"></div>
 		</div>
 		<details id="configuration" open>
-			<summary id="configuration-button" class="pseudo-button">&#x2699; <span>setup</span></summary>
+			<summary id="configuration-button" class="pseudo-button">&#x1f39b; <span>setup</span></summary>
 			<div id="configuration-overlay" method="post" action="javascript:;">
 				<section id="configuration-room">
 					<button id="configuration-close" class="pseudo-button" title="close setup and show game boards button">&rarr; <span>game</span></button>
@@ -70,7 +70,7 @@
 								</details>
 							</label>
 						</div>
-						<label><label><span>or</span></label></label>
+						<label id="configuration-players-invite-or"><span>or</span></label>
 						<div class="form-row">
 							<label>
 								<span>email</span>
@@ -268,7 +268,7 @@
 							<script node>
 								let shapes = ""
 								for (let i in CONFIGURATIONS.objects.shapes) {
-									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i + " shape toggle'><div class='configuration-game-objects-shape-sample' style='clip-path: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+									shapes += "<div class='form-row'><label><input type='checkbox' property='objects-shapes' id='configuration-game-objects-shapes-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i.replace(/-/g, " ") + " shape toggle'><div class='configuration-game-objects-shape-sample' style='clip-path: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								shapes
 							</script>node>
@@ -278,7 +278,7 @@
 							<script node>
 								let colors = ""
 								for (let i in CONFIGURATIONS.objects.colors) {
-									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i + " color toggle'><div class='configuration-game-objects-color-sample' style='background: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
+									colors += "<div class='form-row'><label><input type='checkbox' property='objects-colors' id='configuration-game-objects-colors-" + i.replace(/-/g, "_") + "' configuration='true' disabled title='" + i.replace(/-/g, " ") + " color toggle'><div class='configuration-game-objects-color-sample' style='background: var(--" + i + ")'></div><span>" + i.replace(/-/g, " ") + "</span></label></div>"
 								}
 								colors
 							</script>node>

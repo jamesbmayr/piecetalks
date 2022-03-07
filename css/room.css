@@ -1,6 +1,11 @@
 /*** configuration ***/
 	#configuration {
 		width: auto;
+		user-select: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		-o-user-select: none;
 	}
 
 	/* button */
@@ -11,12 +16,13 @@
 			background: var(--dark-orange);
 			width: calc(var(--large-gap-size) * 4 + 4 * var(--medium-gap-size));
 			font-size: var(--medium-font-size);
+			z-index: 996;
 		}
 
 	/* overlay */
 		#configuration-overlay {
 			box-sizing: border-box;
-			z-index: 1001;
+			z-index: 1000;
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -29,6 +35,12 @@
 			padding: var(--medium-gap-size);
 			border: none;
 			scroll-behavior: smooth;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			padding-bottom: calc(var(--large-gap-size) * 4);
 		}
 
 		body[darkness] #configuration-overlay {
@@ -41,7 +53,7 @@
 			float: right;
 			width: auto;
 			margin-bottom: calc(-100%);
-			z-index: 999;
+			z-index: 995;
 		}
 
 	/* overlay room */
@@ -98,6 +110,13 @@
 			width: auto;
 			background: var(--medium-blue);
 			color: var(--light-gray) !important;
+			margin-left: var(--border-size);
+		}
+
+		#configuration-players-invite-or {
+			cursor: default;
+			pointer-events: none;
+			margin-left: var(--large-gap-size);
 		}
 
 		#temp-text {
@@ -121,9 +140,9 @@
 		}
 
 		.player-role {
-			border-left: var(--border-size) solid var(--dark-gray);
 			border-top-left-radius: 0;
 			border-bottom-left-radius: 0;
+			margin-left: var(--border-size);
 		}
 
 		.player-remove {
@@ -140,6 +159,7 @@
 		@media screen and (min-width: 1001px) {
 			#configuration-preview {
 				position: fixed;
+				border: 0;
 				bottom: calc(4 * var(--large-gap-size));
 				right: calc(4 * var(--large-gap-size));
 				background-color: var(--light-gray);
@@ -150,7 +170,7 @@
 				padding: calc(3 * var(--large-gap-size));
 				overflow: hidden;
 				margin-bottom: 0;
-				z-index: 1000;
+				z-index: 1001;
 			}
 
 			body[darkness] #configuration-preview {
@@ -192,12 +212,15 @@
 			display: block;
 			height: calc(var(--cell-size) * var(--board-size-y) / 2);
 			width: calc(var(--cell-size) * var(--board-size-x) / 2);
-			box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
 		}
 
 		#configuration-preview-board .board-grid {
 			height: 100%;
 			width: 100%;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			box-shadow: 0 0 0 calc(var(--border-size) * 2) var(--medium-gray);
 		}
 
 		#configuration-preview-board .board-coordinates {
@@ -211,7 +234,8 @@
 			box-sizing: border-box;
 			height: calc(var(--cell-size) / 2);
 			width: calc(var(--cell-size) / 2);
-			box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+			outline: calc(var(--border-size) / 2) solid var(--medium-gray);
+			flex-shrink: 0;
 		}
 
 		#configuration-preview-board .board-coordinate {
@@ -250,8 +274,13 @@
 			cursor: default;
 			transform: translateX(-50%) translateY(-50%);
 			opacity: var(--object-opacity);
-			filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 4) var(--medium-gray));
 			pointer-events: none;
+		}
+
+		#configuration-preview-board .object-shape {
+			filter: drop-shadow(0 0 calc(var(--shadow-size) / 4) var(--medium-gray));
+			box-shadow: 0 0 calc(var(--shadow-size) / 2) var(--medium-gray);
 		}
 
 	/* overlay game */
@@ -263,6 +292,11 @@
 
 		#configuration-game-advanced-toggle {
 			width: 100%;
+		}
+
+		#configuration-game-advanced-toggle:hover, #configuration-game-advanced-toggle:focus, #configuration-game-advanced-toggle:focus-within {
+			box-shadow: none !important;
+			text-shadow: 0 0 var(--shadow-size) var(--medium-blue);
 		}
 
 		#configuration-game-advanced:not([open]) #configuration-game-advanced-toggle h2:before {
@@ -308,11 +342,23 @@
 			color: var(--medium-blue);
 			font-family: var(--font-0);
 			text-align: center;
+			box-shadow: none;
+		}
+
+		#configuration-back-to-top:hover, #configuration-back-to-top:focus, #configuration-back-to-top:focus-within {
+			filter: brightness(var(--hover-brightness));
+			box-shadow: 0 0 0 var(--border-size) var(--medium-blue);
 		}
 
 	/* mobile */
-		@media screen and (max-width: 800px) {
+		@media screen and (max-width: 1000px) {
 			#configuration-button {
+				width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
+				font-size: var(--small-font-size);
+				line-height: 1.5;
+			}
+
+			#configuration-button, #configuration-close, #configuration-room-leave {
 				width: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 			}
 
@@ -320,12 +366,8 @@
 				display: none;
 			}
 
-			#configuration-overlay {
-				padding-bottom: calc(var(--large-gap-size) * 2);
-			}
-
-			#configuration-players-invite-email {
-				margin-top: var(--small-gap-size);
+			#configuration-players label {
+				width: calc(100% - 2 * var(--medium-gap-size));
 			}
 
 			#configuration-players-invite-name, #configuration-players-invite-email {
@@ -336,6 +378,8 @@
 			#configuration-players-invite-link, #configuration-players-invite-mailto {
 				width: 100%;
 				border-radius: 0 0 var(--border-radius) var(--border-radius);
+				margin-left: 0;
+				margin-top: var(--border-size);
 			}
 
 			.player-row span {
@@ -351,9 +395,11 @@
 				width: 100%;
 				border-radius: 0 0 var(--border-radius) var(--border-radius);
 				border: 0;
+				margin-top: var(--border-size);
+				margin-left: 0;
 			}
 
-			#configuration-players-invite span {
+			#configuration-players-invite-or {
 				display: none;
 			}
 
@@ -393,7 +439,7 @@
 			-ms-user-select: none;
 			-o-user-select: none;
 			font-weight: bold;
-			z-index: 999;
+			z-index: 995;
 		}
 
 	/* screens */
@@ -418,20 +464,25 @@
 			text-align: center;
 		}
 
-		#screens[count="1"] {
+		#screens {
 			position: absolute;
-			top: 0;
-			left: 0;
 			width: 100%;
 			height: 100%;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+		}
+
+		#screens[count="1"] {
+			top: 0;
+			left: 0;
 		}
 
 		#screens:not([count="1"]) {
-			position: absolute;
 			top: calc(4 * var(--medium-gap-size) + var(--medium-font-size));
 			left: 0;
-			width: 100%;
-			height: 100%;
 		}
 
 		/* actor / speaker */
@@ -480,7 +531,7 @@
 				-moz-user-select: none;
 				-ms-user-select: none;
 				-o-user-select: none;
-				z-index: 998;
+				z-index: 995;
 				margin-right: var(--small-gap-size);
 			}
 
@@ -503,7 +554,7 @@
 				-moz-user-select: none;
 				-ms-user-select: none;
 				-o-user-select: none;
-				z-index: 998;
+				z-index: 995;
 			}
 
 			#screens:not([count="1"]) .screen-connected {
@@ -512,7 +563,6 @@
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
 				display: none;
-				zoom: 1;
 			}
 
 			#screens:not([count="1"]) .screen-connected:not(:checked) {
@@ -523,7 +573,7 @@
 				padding: 0;
 				margin: 0;
 				pointer-events: none;
-				z-index: 999;
+				z-index: 998;
 			}
 
 			#screens:not([count="1"]) .screen-connected:not(:checked):before {
@@ -543,22 +593,37 @@
 
 		/* board */
 			#screens .board {
+				box-shadow: 0 0 0 calc(var(--border-size) * 2) var(--medium-gray);
+			}
+
+			#screens .board, #screens .grabzone {
 				position: absolute;
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
-				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+				z-index: 997;
+				pointer-events: none;
+			}
+
+			#screens .grabzone {
 				z-index: 999;
 			}
 
-			#screens[count="1"] .screen[player-role="actor"] .board {
+			#screens[count="1"] .screen[player-role="actor"] .board, #screens[count="1"] .screen[player-role="actor"] .grabzone {
 				margin-left: calc((var(--large-gap-size) * 4 + 5 * var(--medium-gap-size)) / 2);
 			}
 
+			@media screen and (min-width: 801px) and (max-width: 1000px) {
+				#screens[count="1"] .screen[player-role="actor"] .board, #screens[count="1"] .screen[player-role="actor"] .grabzone {
+					margin-left: 0;
+					margin-top: calc(-1 * (var(--large-gap-size) * 4 * var(--multiplier) + 6 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
+				}
+			}
+
 			@media screen and (max-width: 800px) {
-				#screens[count="1"] .screen[player-role="actor"] .board {
+				#screens[count="1"] .screen[player-role="actor"] .board, #screens[count="1"] .screen[player-role="actor"] .grabzone {
 					margin-left: 0;
 					margin-top: calc(-1 * (var(--large-gap-size) * 4 * var(--multiplier) + 6 * var(--medium-gap-size)) / 2 + (var(--medium-font-size) + 3 * var(--medium-gap-size)) / 2);
 				}
@@ -572,6 +637,17 @@
 				height: calc(var(--cell-size) * var(--board-size-y) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) * var(--board-size-x) / var(--screen-count) * var(--multiplier));
 				pointer-events: none;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+			}
+
+			#screens .board-grid {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
 			}
 
 			#screens .board-grid-cell {
@@ -579,7 +655,14 @@
 				box-sizing: border-box;
 				height: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
 				width: calc(var(--cell-size) / var(--screen-count) * var(--multiplier));
-				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+				outline: calc(var(--border-size) / 2) solid var(--medium-gray);
+				pointer-events: none;
+				user-select: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-o-user-select: none;
+				flex-shrink: 0;
 			}
 
 			#screens .board-coordinate {
@@ -636,12 +719,15 @@
 				cursor: default;
 				transform: translateX(-50%) translateY(-50%);
 				opacity: var(--object-opacity);
-				filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+				filter: drop-shadow(0 0 calc(var(--shadow-size) / 4) var(--medium-gray));
 				pointer-events: none;
 			}
 
 			#screens .screen[player-role="actor"] .board .object-shape {
 				cursor: grab;
+				filter: drop-shadow(0 0 calc(var(--shadow-size) / 4) var(--medium-gray));
+				box-shadow: 0 0 calc(var(--shadow-size) / 2) var(--medium-gray);
+				pointer-events: all;
 			}
 
 		/* drawer */
@@ -664,8 +750,20 @@
 				flex-direction: column;
 				background-color: transparent;
 				box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
-				z-index: 999;
+				z-index: 998;
 				box-shadow: 0 0 0 var(--border-size) var(--medium-gray);
+			}
+
+			@media screen and (min-width: 801px) and (max-width: 1000px) {
+				#screens[count="1"] .screen[player-role="actor"] .drawer {
+					top: calc(100% - (var(--large-gap-size) * 4 + 5 * var(--medium-gap-size)));
+					width: calc(100% - 2 * var(--medium-gap-size));
+					height: calc(var(--large-gap-size) * 4 + 4 * var(--medium-gap-size));
+					flex-direction: row;
+					overflow-x: scroll;
+					overflow-y: hidden;
+					padding: var(--medium-gap-size);
+				}
 			}
 
 			@media screen and (max-width: 800px) {
@@ -683,6 +781,7 @@
 			#screens .drawer .object {
 				float: left;
 				cursor: default;
+				position: relative;
 				flex-shrink: 0;
 				height: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
 				width: calc(var(--large-gap-size) * 4 * var(--multiplier)) !important;
@@ -692,12 +791,14 @@
 			}
 
 			#screens .screen[player-role="actor"] .drawer .object-shape {
+				filter: drop-shadow(0 0 calc(var(--shadow-size) / 2) var(--medium-gray));
+				box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 				cursor: grab;
 			}
 
 		/* border & label */
 			.object-shape {
-				position: absolute;
+				position: relative;
 				top: 50%;
 				left: 50%;
 				transform: translateX(-50%) translateY(-50%);
@@ -734,11 +835,18 @@
 			}
 
 		/* grabbing */
-			#screens .board .object[grabbing], #screens .drawer .object[grabbing] {
+			#screens .grabzone .object {
 				z-index: 999 !important;
+				filter: drop-shadow(0 0 var(--shadow-size) var(--medium-gray));
+				position: absolute;
+				cursor: default;
+				transform: translateX(-50%) translateY(-50%);
+				opacity: var(--object-opacity);
+				pointer-events: none;
 			}
 
-			#screens .board .object[grabbing] .object-shape, #screens .drawer .object[grabbing] .object-shape {
+			#screens .grabzone .object-shape {
 				cursor: grabbing !important;
 				filter: drop-shadow(0 0 var(--shadow-size) var(--medium-gray));
+				box-shadow: 0 0 calc(var(--shadow-size) * 2) var(--medium-gray);
 			}

@@ -1,15 +1,40 @@
 /*** globals ***/
 	/* triggers */
-		const ISMOBILE = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent)
 		const TRIGGERS = {
 			change: "change",
 			click: "click",
-			submit: "submit",
-			mousedown: ISMOBILE ? "touchstart" : "mousedown",
-			mouseup: ISMOBILE ? "touchend" : "mouseup",
-			mousemove: ISMOBILE ? "touchmove" : "mousemove"
+			submit: "submit"
 		}
 
+		setTriggers()
+		function setTriggers(override) {
+			try {
+				// get mobile right now
+					let ISMOBILE = override || (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i).test(navigator.userAgent)
+					TRIGGERS.mousedown = ISMOBILE ? "touchstart" : "mousedown"
+					TRIGGERS.mouseup   = ISMOBILE ? "touchend" : "mouseup"
+					TRIGGERS.mousemove = ISMOBILE ? "touchmove" : "mousemove"
+
+				// listen for move/drop
+					window.addEventListener(TRIGGERS.mousemove, moveObject)
+					window.addEventListener(TRIGGERS.mouseup, dropObject)
+
+				// override mobile later
+					if (TRIGGERS.mousedown == "mousedown") {
+						window.addEventListener("touchstart", setTriggers)
+						return
+					}
+				
+				// overriding --> reset listeners
+					if (override) {
+						window.removeEventListener("touchstart", setTriggers)
+						window.removeEventListener("mousemove", moveObject)
+						window.removeEventListener("mouseup", dropObject)
+					}
+			} catch (error) {console.log(error)}
+		}
+
+	/* double click / right-click */
 		document.addEventListener("dblclick", preventDefault)
 		document.addEventListener("contextmenu", preventDefault)
 		function preventDefault(event) {
@@ -438,8 +463,14 @@
 
 				// host
 					if (STATE.isHost) {
-						ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
-						ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
+						if (status.play) {
+							ELEMENTS.configuration.game.status.end.removeAttribute("disabled")
+							ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
+						}
+						else {
+							ELEMENTS.configuration.game.status.start.removeAttribute("disabled")
+							ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
+						}
 						ELEMENTS.configuration.room.darkness.removeAttribute("disabled")
 					}
 					else {
@@ -857,7 +888,9 @@
 		function openConfiguration(event) {
 			try {
 				// scroll to top
-					ELEMENTS.configuration.overlay.scrollTop = 0
+					setTimeout(function() {
+						ELEMENTS.configuration.overlay.scrollTop = 0
+					}, 0)
 			} catch (error) {console.log(error)}
 		}
 
@@ -876,6 +909,7 @@
 			try {
 				// scrolltop
 					ELEMENTS.configuration.overlay.scrollTop = 0
+					ELEMENTS.configuration.backToTop.blur()
 			} catch (error) {console.log(error)}
 		}
 
@@ -1163,6 +1197,11 @@
 						connected.readonly = true
 						connected.className = "screen-connected"
 					screen.appendChild(connected)
+
+				// grabzone
+					let grabzone = document.createElement("div")
+						grabzone.className = "grabzone"
+					screen.appendChild(grabzone)
 
 				// drawer
 					let drawer = document.createElement("div")
@@ -1452,7 +1491,8 @@
 						shape.className = "object-shape"
 						shape.style.clipPath = "var(--" + object.shape + ")"
 						shape.style.background = "var(--" + (object.border || object.color) + ")"
-						shape.addEventListener(TRIGGERS.mousedown, grabObject)
+						shape.addEventListener("mousedown", grabObject)
+						shape.addEventListener("touchstart", grabObject)
 					element.appendChild(shape)
 
 				// border
@@ -1501,13 +1541,16 @@
 						return
 					}
 
+				// prevent default
+					event.preventDefault()
+
 				// grab
 					STATE.grabbed = event.target.closest(".object")
 					STATE.grabbed.setAttribute("grabbing", true)
 					screen.setAttribute("grabbing", true)
 
-				// move to board
-					screen.querySelector(".board").appendChild(STATE.grabbed)
+				// move to grabzone
+					screen.querySelector(".grabzone").appendChild(STATE.grabbed)
 
 				// trigger move
 					moveObject(event)
@@ -1515,7 +1558,6 @@
 		}
 
 	/* moveObject */
-		window.addEventListener(TRIGGERS.mousemove, moveObject)
 		function moveObject(event) {
 			try {
 				// not a player
@@ -1555,7 +1597,7 @@
 						return
 					}
 
-					let boardRect = screen.querySelector(".board").getBoundingClientRect()
+					let boardRect = screen.querySelector(".grabzone").getBoundingClientRect()
 					STATE.cursor.x = (STATE.cursor.actualX - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x
 					STATE.cursor.y = (STATE.cursor.actualY - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y
 
@@ -1566,7 +1608,6 @@
 		}
 
 	/* dropObject */
-		window.addEventListener(TRIGGERS.mouseup, dropObject)
 		function dropObject(event) {
 			try {
 				// not an actor
@@ -1630,10 +1671,12 @@
 
 				// snap to grid
 					else {
-						let boardRect = screen.querySelector(".board").getBoundingClientRect()
+						let board = screen.querySelector(".board")
+						let boardRect = board.getBoundingClientRect()
 						STATE.cursor.x = Math.floor((STATE.cursor.actualX - boardRect.left) / boardRect.width  * STATE.room.configuration.board.x)
 						STATE.cursor.y = Math.floor((STATE.cursor.actualY - boardRect.top ) / boardRect.height * STATE.room.configuration.board.y)
 
+						board.appendChild(STATE.grabbed)
 						STATE.grabbed.style.left = "calc(var(--cell-size) * " + (STATE.cursor.x + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
 						STATE.grabbed.style.top  = "calc(var(--cell-size) * " + (STATE.cursor.y + CONSTANTS.objectOffset) + " / var(--screen-count) * var(--multiplier))"
 					}

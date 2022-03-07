@@ -13,11 +13,12 @@
 		left: 50%;
 		transform: translateX(-50%) translateY(-50%);
 		padding: var(--medium-gap-size);
-		border-radius: var(--border-radius);
-		background: var(--dark-gray);
+		border-radius: calc(var(--border-radius) * 1.5);
+		background: rgba(17, 17, 17, 0.5);
 		text-align: center;
 		width: calc(((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size)) * var(--multiplier));
 		box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+		transition: 0s;
 	}
 
 	/* heading */
@@ -45,7 +46,7 @@
 
 		#new-room-button {
 			width: 100%;
-			height: calc(var(--medium-font-size) * 2 + 5 * var(--medium-gap-size));
+			height: calc(var(--medium-font-size) * 2 + 4 * var(--medium-gap-size));
 			background: var(--medium-green);
 		}
 
@@ -53,14 +54,16 @@
 			text-align: center;
 			width: 100%;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
-			margin-bottom: var(--medium-gap-size);
+			margin-bottom: 0;
 			text-transform: uppercase;
+			border-radius: var(--border-radius) var(--border-radius) 0 0;
 		}
 
 		#join-room-button {
 			width: 100%;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
 			background: var(--medium-blue);
+			border-radius: 0 0 var(--border-radius) var(--border-radius);
 		}
 
 	/* about */
@@ -76,21 +79,21 @@
 		}
 
 		#about-overlay {
-			z-index: 1001;
+			z-index: 1000;
 			position: absolute;
-			top: var(--medium-gap-size);
-			left: var(--medium-gap-size);
+			top: 0;
+			left: 0;
 			overflow-x: hidden;
 			overflow-y: scroll;
 			background: var(--light-gray);
 			color: var(--dark-gray);
 			font-size: var(--medium-font-size);
 			font-family: var(--font-0);
-			height: calc(100vh - 4 * var(--medium-gap-size));
-			width: calc(100vw - 4 * var(--medium-gap-size));
+			height: 100%;
+			width: 100%;
+			box-sizing: border-box;
 			padding: var(--medium-gap-size);
 			border: none;
-			border-radius: var(--border-radius);
 			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
 		}
 
@@ -112,7 +115,7 @@
 		height: 32px;
 		width: 32px;
 		cursor: pointer;
-		z-index: 1000;
+		z-index: 999;
 		outline: none;
 		filter: drop-shadow(0px 0px var(--shadow-size) var(--medium-gray));
 	}
