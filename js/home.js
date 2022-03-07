@@ -14,7 +14,7 @@
 			loopTime: 5000,
 			neutralBackground: "gray.png",
 			backgroundImages: ["easy_light.png", "easy_dark.png", "medium_light.png", "medium_dark.png", "challenging_light.png", "challenging_dark.png", "difficult_light.png", "difficult_dark.png", "insane_light.png", "insane_dark.png"],
-			backgroundIndex: 0
+			backgroundIndex: -1
 		}
 
 	/* elements */

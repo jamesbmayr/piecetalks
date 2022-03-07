@@ -374,6 +374,8 @@
 				// set state
 					STATE.room = room
 
+					debugger
+
 				// game status
 					displayStatus(STATE.room.status)
 
