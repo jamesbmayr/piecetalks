@@ -323,8 +323,6 @@
 	/* receiveSocket */
 		function receiveSocket(data) {
 			try {
-				console.log(data) // ???
-				debugger
 				// meta
 					// redirect
 						if (data.location) {
