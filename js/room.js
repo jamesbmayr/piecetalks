@@ -323,6 +323,8 @@
 	/* receiveSocket */
 		function receiveSocket(data) {
 			try {
+				console.log(data) // ???
+				debugger
 				// meta
 					// redirect
 						if (data.location) {
@@ -373,8 +375,6 @@
 			try {
 				// set state
 					STATE.room = room
-
-					debugger
 
 				// game status
 					displayStatus(STATE.room.status)
