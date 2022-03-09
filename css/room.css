@@ -444,7 +444,7 @@
 
 	/* screens */
 		#screens[count="0"]:before {
-			content: "no boards";
+			content: "setting up...";
 			font-family: var(--font-0);
 			color: var(--medium-gray);
 			font-size: var(--large-font-size);
@@ -507,7 +507,7 @@
 				display: none;
 			}
 
-		/* spectator */
+		/* viewer */
 			#screens:not([count="1"]) .screen {
 				position: relative;
 				float: left;

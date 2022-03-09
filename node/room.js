@@ -862,7 +862,7 @@
 
 				// set roles
 					for (let i in room.players) {
-						room.players[i].role = "spectator"
+						room.players[i].role = "viewer"
 					}
 
 				// query
@@ -1135,7 +1135,7 @@
 
 				// copy for each player
 					for (let i in room.players) {
-						if (room.players[i].role == "spectator") {
+						if (room.players[i].role == "viewer") {
 							room.players[i].objects = {}
 						}
 						if (room.players[i].role == "actor") {

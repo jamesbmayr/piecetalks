@@ -226,7 +226,7 @@
 								connected: false,
 								name: null,
 								isHost: false,
-								role: "spectator",
+								role: "viewer",
 								objects: {}
 							}
 						break
@@ -241,7 +241,7 @@
 									endTime: null,
 									timeRemaining: null,
 									play: false,
-									darkness: true
+									darkness: false
 								},
 								configuration: {
 									preset: "custom",
@@ -518,7 +518,7 @@
 								maximumPlayerNameLength: 20,
 								roomIdLength: 4,
 								rounding: 100,
-								roles: ["speaker", "actor", "spectator"],
+								roles: ["speaker", "actor", "viwer"],
 								sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 								attempts: 100,
 								borderProbability: 0.5,

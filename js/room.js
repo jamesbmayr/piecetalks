@@ -48,7 +48,7 @@
 			minimumPlayerNameLength: 3,
 			maximumPlayerNameLength: 20,
 			second: 1000,
-			roles: ["speaker", "actor", "spectator"],
+			roles: ["speaker", "actor", "viewer"],
 			sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 			objectOffset: 0.5,
 			attempts: 100,
@@ -62,7 +62,7 @@
 			playerId: null,
 			roomId: null,
 			isHost: false,
-			role: "spectator",
+			role: "viewer",
 			cursor: {
 				actualX: null,
 				actualY: null,
@@ -353,16 +353,24 @@
 							ELEMENTS.configuration.room.id.value = STATE.roomId
 						}
 
-					// launch
-						if (data.launch) {
-							closeConfiguration()
-						}
-
 					// room data
 						if (data.room) {
+							let wasHost = STATE.isHost
+
 							STATE.isHost = data.room.players[STATE.playerId].isHost
 							STATE.role = data.room.players[STATE.playerId].role
 							receiveRoom(data.room)
+
+							// fresh load for host
+								if (!wasHost && STATE.isHost) {
+									ELEMENTS.configuration.element.open = true
+									openConfiguration()
+								}
+						}
+
+					// launch
+						if (data.launch) {
+							closeConfiguration()
 						}
 			} catch (error) {console.log(error)}
 		}
@@ -1109,8 +1117,8 @@
 				// count
 					let activeScreens = 0
 
-				// spectator
-					if (STATE.role == "spectator") {
+				// viewer
+					if (STATE.role == "viewer") {
 						for (let i in ELEMENTS.container.screens) {
 							if (!STATE.room.players[i] || !Object.keys(STATE.room.players[i].objects).length) {
 								ELEMENTS.container.screens[i].remove()
