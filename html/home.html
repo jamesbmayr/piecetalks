@@ -11,6 +11,7 @@
 		<script src="home.js" defer></script>
 	</head>
 	<body>
+		<div id="background"></div>
 		<details id="about">
 			<summary id="about-button" class="pseudo-button" title="learn more about this game button">?</summary>
 			<div id="about-overlay">
@@ -25,7 +26,7 @@
 		</details>
 		<a id="j-logo" href="https://jamesmayr.com" target="_blank"></a>
 		<div id="container">
-			<h1 id="heading"><script node>getAsset("title")</script>node></h1>
+			<h1 id="heading"><div id="logo"></div><script node>getAsset("title")</script>node></h1>
 			<input type="text" placeholder="your name" id="name-input" autocomplete="off" spellcheck="false" title="player name input"/>
 			<form id="new-room-form" method="post" action="javascript:;">
 				<button id="new-room-button" title="create a new room button">new room</button>

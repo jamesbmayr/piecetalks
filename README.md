@@ -1,4 +1,7 @@
 # Piece Talks
+## a virtual barrier task game about communication
+
+http://piecetalksthegame.com
 
 ---
 <pre>
@@ -17,19 +20,30 @@ Piece Talks
 |   |- session.js
 |
 |- js
-|   |- room.js
 |   |- home.js
+|   |- room.js
 |
 |- css
-|   |- room.css
 |   |- home.css
 |   |- main.css
+|   |- room.css
 |
 |- html
 |   |- _404.html
-|   |- room.html
 |   |- home.html
+|   |- room.html
 |
 |- assets
 	|- logo.png
+	|
+	|- easy-light.png
+	|- easy-dark.png
+	|- medium-light.png
+	|- medium-dark.png
+	|- challenging-light.png
+	|- challenging-dark.png
+	|- difficult-light.png
+	|- difficult-dark.png
+	|- insane-light.png
+	|- insane-dark.png
 </pre>

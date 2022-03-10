@@ -783,12 +783,18 @@
 						return
 					}
 
+				// invalid timer
+					if (room.configuration.timer.active && (!room.configuration.timer.seconds || room.configuration.timer.seconds <= 0)) {
+						callback({roomId: room.id, success: false, message: "invalid timer length", recipients: [REQUEST.session.id]})
+						return
+					}
+
 				// generate board
 					let generatedRoom = generateBoard(room) || false
 
 				// unable
 					if (!generatedRoom) {
-						callback({roomId: room.id, success: false, message: "unable to fit all the objects on the board", recipients: [REQUEST.session.id]})
+						callback({roomId: room.id, success: false, message: "unable to fit generate a valid board", recipients: [REQUEST.session.id]})
 						return
 					}
 
@@ -1151,7 +1157,6 @@
 						}
 					}
 
-
 				// return room
 					return room
 			}
@@ -1337,8 +1342,8 @@
 								let objectMinY = object.position.y - Math.floor(object.size.y / 2)
 								let objectMaxY = object.position.y + Math.floor(object.size.y / 2)
 							
-								if ((objectMaxX >= 0 && objectMinX <= boardMaxX)
-								 && (objectMaxY >= 0 && objectMinY <= boardMaxY)) {
+								if ((objectMaxX >= 0 && objectMinX <= boardMaxX - 1)
+								 && (objectMaxY >= 0 && objectMinY <= boardMaxY - 1)) {
 									return false
 								}
 							}

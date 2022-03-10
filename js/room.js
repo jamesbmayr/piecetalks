@@ -51,7 +51,7 @@
 			roles: ["speaker", "actor", "viewer"],
 			sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 			objectOffset: 0.5,
-			attempts: 100,
+			attempts: 1000,
 			drawerExtra: 25
 		}
 
@@ -103,7 +103,8 @@
 				},
 				preview: {
 					element: document.querySelector("#configuration-preview"),
-					board: document.querySelector("#configuration-preview-board")
+					board: document.querySelector("#configuration-preview-board"),
+					caption: document.querySelector("#configuration-preview-caption")
 				},
 				game: {
 					preset: document.querySelector("#configuration-game-preset"),
@@ -357,8 +358,8 @@
 						if (data.room) {
 							let wasHost = STATE.isHost
 
-							STATE.isHost = data.room.players[STATE.playerId].isHost
-							STATE.role = data.room.players[STATE.playerId].role
+							STATE.isHost = data.room.players[STATE.playerId] ? data.room.players[STATE.playerId].isHost : false
+							STATE.role = data.room.players[STATE.playerId] ? data.room.players[STATE.playerId].role : "viewer"
 							receiveRoom(data.room)
 
 							// fresh load for host
@@ -680,7 +681,7 @@
 					if (STATE.isHost && player.id !== STATE.playerId) {
 						let removeButton = document.createElement("button")
 							removeButton.className = "player-remove"
-							removeButton.innerHTML = "&#x1F6AB;"
+							removeButton.innerHTML = "&#x1f6ab;"
 							removeButton.title = "remove player button"
 							removeButton.addEventListener(TRIGGERS.click, removePlayer)
 						label.appendChild(removeButton)
@@ -966,7 +967,7 @@
 						ELEMENTS.configuration.game.board.coordinates.checked = configuration.board.coordinates || false
 					}
 					if (document.activeElement !== ELEMENTS.configuration.game.board.background) {
-						ELEMENTS.configuration.game.board.background.value = configuration.board.background.name || "blank"
+						ELEMENTS.configuration.game.board.background.value = configuration.board.background || "blank"
 					}
 
 				// objects
@@ -1384,7 +1385,7 @@
 
 						// escape
 							if (!attempts) {
-								showToast({success: false, message: "unable to generate sample"})
+								ELEMENTS.configuration.preview.caption.innerText = "unable to show sample"
 								return
 							}
 
@@ -1402,7 +1403,7 @@
 
 						// escape
 							if (!attempts) {
-								showToast({success: false, message: "unable to generate sample"})
+								ELEMENTS.configuration.preview.caption.innerText = "unable to show sample"
 								return
 							}
 
@@ -1419,6 +1420,9 @@
 						let element = createObject(ELEMENTS.configuration.preview.board, ELEMENTS.configuration.preview.board, objects[i])
 						displayObject(ELEMENTS.configuration.preview.board, null, element, objects[i])
 					}
+
+				// caption
+					ELEMENTS.configuration.preview.caption.innerText = "sample"
 			} catch (error) {console.log(error)}
 		}
 

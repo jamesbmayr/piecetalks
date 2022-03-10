@@ -322,11 +322,11 @@
 						case "meta":
 							let title = getAsset("title")
 							return `<meta charset="UTF-8"/>
-									<meta name="description" content="` + title + `"/>
-									<meta name="author" content="James Mayr & Ayelet Kershenbaum"/>
+									<meta name="description" content="` + title + ` is a virtual barrier task game about communication"/>
+									<meta name="author" content="Ayelet Kershenbaum & James Mayr"/>
 									<meta property="og:title" content="` + title + `"/>
-									<meta property="og:description" content="` + title + `"/>
-									<meta property="og:image" content="https://"` + ENVIRONMENT.domain + `"/banner.png"/>
+									<meta property="og:description" content="` + title + ` is a virtual barrier task game about communication"/>
+									<meta property="og:image" content="http://` + ENVIRONMENT.domain + `/banner.png"/>
 									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
 						case "fonts":
@@ -383,27 +383,25 @@
 					// styling
 						case "colors":
 							return {
-								"light-gray": "#dddddd",
-								"medium-gray": "#555555",
-								"dark-gray": "#111111",
-								"light-red": "#ddaaaa",
-								"medium-red": "#aa5555",
-								"dark-red": "#551111",
-								"light-orange": "#ddaa77",
-								"medium-orange": "#aa7755",
-								"dark-orange": "#775511",
-								"light-yellow": "#ddddaa",
-								"medium-yellow": "#aaaa55",
-								"dark-yellow": "#555511",
-								"light-green": "#aaddaa",
-								"medium-green": "#55aa55",
-								"dark-green": "#115511",
-								"light-blue": "#aaaadd",
-								"medium-blue": "#5555aa",
-								"dark-blue": "#111155",
-								"light-purple": "#ddaadd",
-								"medium-purple": "#aa55aa",
-								"dark-purple": "#551155"
+								"dark-red": "#7a0018",
+								"red": "#e20000",
+								"orange": "#fc6404",
+								"gold": "#af9300",
+								"yellow": "#ded00b",
+								"lime-green": "#8cc43c",
+								"green": "#029632",
+								"teal": "#379494",
+								"light-blue": "#5bc0de",
+								"blue": "#2f64c1",
+								"purple": "#725dc1",
+								"lavender": "#a586c5",
+								"magenta": "#e956aa",
+								"pink": "#ff89c2",
+								"brown": "#694417",
+								"tan": "#aa824f",
+								"white": "#dddddd",
+								"gray": "#9b9ea0",
+								"black": "#111111"
 							}
 						break
 
@@ -487,7 +485,7 @@
 							return {
 								"shadow-size": "10px",
 								"border-radius": "20px",
-								"blur-size": "5px",
+								"blur-size": "3px",
 								"border-size": "2px",
 								"small-gap-size": "5px",
 								"medium-gap-size": "10px",
@@ -518,9 +516,9 @@
 								maximumPlayerNameLength: 20,
 								roomIdLength: 4,
 								rounding: 100,
-								roles: ["speaker", "actor", "viwer"],
+								roles: ["speaker", "actor", "viewer"],
 								sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
-								attempts: 100,
+								attempts: 1000,
 								borderProbability: 0.5,
 								labelProbability: 1
 							}
@@ -586,7 +584,7 @@
 											labels: true,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle-up", "square", "octagon", "cross", "8-point-star"],
-											colors: ["medium-gray", "medium-red", "medium-yellow", "medium-green", "medium-blue"]
+											colors: ["red", "yellow", "green", "blue", "gray"]
 										}
 									},
 									medium: {
@@ -600,7 +598,7 @@
 											y: 5,
 											grid: true,
 											coordinates: false,
-											background: "horizontal-color-gradient"
+											background: "blank"
 										},
 										objects: {
 											count: 10,
@@ -610,7 +608,7 @@
 											labels: false,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle-up", "square", "diamond", "rectangle-horizontal", "hexagon-horizontal", "octagon", "cross", "star-up", "8-point-star"],
-											colors: ["medium-gray", "medium-red", "medium-orange", "medium-yellow", "medium-green", "medium-blue", "medium-purple"]
+											colors: ["red", "orange", "yellow", "green", "blue", "purple", "pink", "brown", "gray"]
 										}
 									},
 									challenging: {
@@ -634,7 +632,7 @@
 											labels: false,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "star-up", "8-point-star"],
-											colors: ["medium-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											colors: ["dark-red", "red", "orange", "yellow", "lime-green", "green", "light-blue", "blue", "purple", "magenta", "pink", "brown", "gray"]
 										}
 									},
 									difficult: {
@@ -648,7 +646,7 @@
 											y: 8,
 											grid: false,
 											coordinates: true,
-											background: "vertical-color-gradient"
+											background: "radial-grayscale-gradient"
 										},
 										objects: {
 											count: 10,
@@ -658,7 +656,7 @@
 											labels: false,
 											sizes: ["1x1", "3x3"],
 											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "star-up", "8-point-star"],
-											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "light-orange", "medium-orange", "light-yellow", "medium-yellow", "light-green", "medium-green", "light-blue", "medium-blue", "light-purple", "medium-purple"]
+											colors: ["dark-red", "red", "orange", "gold", "yellow", "lime-green", "green", "teal", "light-blue", "blue", "purple", "lavender", "magenta", "pink", "brown", "tan", "white", "gray", "black"]
 										}
 									},
 									insane: {
@@ -682,7 +680,7 @@
 											labels: false,
 											sizes: ["1x1", "3x3", "5x5"],
 											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "star-up", "star-down", "8-point-star"],
-											colors: ["light-gray", "medium-gray", "dark-gray", "light-red", "medium-red", "dark-red", "light-orange", "medium-orange", "dark-orange", "light-yellow", "medium-yellow", "dark-yellow", "light-green", "medium-green", "dark-green", "light-blue", "medium-blue", "dark-blue", "light-purple", "medium-purple", "dark-purple"]
+											colors: ["dark-red", "red", "orange", "gold", "yellow", "lime-green", "green", "teal", "light-blue", "blue", "purple", "lavender", "magenta", "pink", "brown", "tan", "white", "gray", "black"]
 										}
 									}
 								}

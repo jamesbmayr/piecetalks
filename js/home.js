@@ -11,15 +11,18 @@
 			maximumPlayerNameLength: 20,
 			roomIdLength: 4,
 			backgroundLoop: null,
-			loopTime: 5000,
-			neutralBackground: "gray.png",
-			backgroundImages: ["easy_light.png", "easy_dark.png", "medium_light.png", "medium_dark.png", "challenging_light.png", "challenging_dark.png", "difficult_light.png", "difficult_dark.png", "insane_light.png", "insane_dark.png"],
+			loopTime: 2000,
+			loopIndex: 0,
+			loopCount: 6,
+			backgroundImages: ["easy-light.png", "easy-dark.png", "medium-light.png", "medium-dark.png", "challenging-light.png", "challenging-dark.png", "difficult-light.png", "difficult-dark.png", "insane-light.png", "insane-dark.png"],
 			backgroundIndex: -1
 		}
 
 	/* elements */
 		const ELEMENTS = {
 			body: document.body,
+			background: document.querySelector("#background"),
+			logo: document.querySelector("#logo"),
 			newRoomForm: document.querySelector("#new-room-form"),
 			joinRoomForm: document.querySelector("#join-room-form"),
 			roomIdInput: document.querySelector("#room-id-input"),
@@ -131,7 +134,7 @@
 
 				// name
 					if (get.name) {
-						ELEMENTS.nameInput.value = get.name
+						ELEMENTS.nameInput.value = get.name.replace(/%20/g, " ")
 					}
 
 				// both
@@ -150,8 +153,8 @@
 			try {
 				// name
 					let name = (ELEMENTS.nameInput.value || "").trim()
-					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength || !isNumLet(name)) {
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " letters and numbers"})
+					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
 
@@ -176,8 +179,8 @@
 
 				// name
 					let name = (ELEMENTS.nameInput.value || "").trim()
-					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength || !isNumLet(name)) {
-						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " letters and numbers"})
+					if (!name || CONSTANTS.minimumPlayerNameLength > name.length || name.length > CONSTANTS.maximumPlayerNameLength) {
+						showToast({success: false, message: "name must be " + CONSTANTS.minimumPlayerNameLength + " to " + CONSTANTS.maximumPlayerNameLength + " characters"})
 						return
 					}
 
@@ -201,21 +204,71 @@
 /*** background ***/
 	/* changeBackground */
 		changeBackground()
-		CONSTANTS.backgroundLoop = setInterval(changeBackground, CONSTANTS.loopTime * 2)
+		CONSTANTS.backgroundLoop = setInterval(changeBackground, CONSTANTS.loopTime)
 		function changeBackground() {
 			try {
-				// update index
-					CONSTANTS.backgroundIndex++
-					if (CONSTANTS.backgroundIndex >= CONSTANTS.backgroundImages.length) {
-						CONSTANTS.backgroundIndex = 0
+				// phase 0 --> fade out image
+					if (CONSTANTS.loopIndex == 0) {
+						CONSTANTS.loopIndex++
+
+						ELEMENTS.background.setAttribute("fade", true)
+						ELEMENTS.background.style.opacity = 0
+						return
 					}
 
-				// to neutral
-					ELEMENTS.body.style.backgroundImage = "url(" + CONSTANTS.neutralBackground + ")"
+				// phase 1 --> fade background color & swap images
+					if (CONSTANTS.loopIndex == 1) {
+						CONSTANTS.loopIndex++
 
-				// update background
+						CONSTANTS.backgroundIndex++
+						if (CONSTANTS.backgroundIndex >= CONSTANTS.backgroundImages.length) {
+							CONSTANTS.backgroundIndex = 0
+						}
+
+						ELEMENTS.background.removeAttribute("fade")
+						ELEMENTS.background.style.backgroundImage = "url(" + CONSTANTS.backgroundImages[CONSTANTS.backgroundIndex] + ")"
+						
+						if (CONSTANTS.backgroundImages[CONSTANTS.backgroundIndex].includes("dark")) {
+							ELEMENTS.body.setAttribute("darkness", true)
+						}
+						else {
+							ELEMENTS.body.removeAttribute("darkness")
+						}
+						return
+					}
+
+				// phase 2 --> fade in image
+					if (CONSTANTS.loopIndex == 2) {
+						CONSTANTS.loopIndex++
+
+						ELEMENTS.background.setAttribute("fade", true)
+						ELEMENTS.background.style.opacity = 1
+						return
+					}
+
+				// phase 3+ --> hold
+					CONSTANTS.loopIndex++
+					if (CONSTANTS.loopIndex == CONSTANTS.loopCount) {
+						CONSTANTS.loopIndex = 0
+					}
+			} catch (error) {console.log(error)}
+		}
+
+	/* spinLogo */
+		ELEMENTS.logo.addEventListener(TRIGGERS.click, spinLogo)
+		function spinLogo() {
+			try {
+				// already spinning?
+					if (ELEMENTS.logo.getAttribute("spin")) {
+						return
+					}
+
+				// add status
+					ELEMENTS.logo.setAttribute("spin", String(Math.floor(Math.random() * 2)))
+
+				// remove
 					setTimeout(function() {
-						ELEMENTS.body.style.backgroundImage = "url(" + CONSTANTS.backgroundImages[CONSTANTS.backgroundIndex] + ")"
+						ELEMENTS.logo.removeAttribute("spin")
 					}, CONSTANTS.loopTime)
 			} catch (error) {console.log(error)}
 		}

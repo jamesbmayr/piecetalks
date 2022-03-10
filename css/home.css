@@ -1,12 +1,34 @@
-/*** container ***/
+/*** background ***/
 	body {
-		background-image: url("gray.png");
+		transition: calc(var(--transition-time) * 2);
+		background-color: var(--white);
+	}
+
+	body[darkness] {
+		background-color: var(--black);
+	}
+
+	#background {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-50%);
+		height: 100vw;
+		width: 100vw;
+		max-height: 100vh;
+		max-width: 100vh;
 		background-size: cover;
-		background-repeat: no-repeat;
 		background-position: center;
+		background-repeat: no-repeat;
+		pointer-events: none;
+		filter: blur(var(--blur-size));
+	}
+
+	#background[fade] {
 		transition: calc(var(--transition-time) * 2);
 	}
 
+/*** container ***/
 	#container {
 		position: absolute;
 		top: 50%;
@@ -17,14 +39,80 @@
 		background: rgba(17, 17, 17, 0.5);
 		text-align: center;
 		width: calc(((var(--medium-font-size) * 10 + 2 * var(--medium-gap-size)) * 2 + 3 * var(--medium-gap-size)) * var(--multiplier));
-		box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+		box-shadow: 0 0 var(--shadow-size) var(--gray);
 		transition: 0s;
 	}
 
 	/* heading */
 		#heading {
 			text-transform: uppercase;
-			color: var(--light-gray);
+			color: var(--white);
+			line-height: 1;
+			margin-bottom: calc(var(--medium-gap-size) + var(--small-gap-size));
+		}
+
+		#logo {
+			height: var(--large-font-size);
+			width: var(--large-font-size);
+			margin-right: var(--medium-gap-size);
+			background-color: transparent;
+			background-image: url(logo.png);
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+			display: inline-block;
+			vertical-align: bottom;
+			cursor: pointer;
+		}
+
+		@media screen and (max-width: 800px) {
+			#logo {
+				height: calc(2 * var(--large-font-size));
+				width: calc(2 * var(--large-font-size));
+				margin: auto;
+				margin-bottom: var(--medium-gap-size);
+				display: block;
+			}
+		}
+
+		#logo[spin="1"] {
+			animation-name: spin;
+			animation-duration: calc(var(--transition-time) * 2);
+			animation-timing-function: linear;
+			pointer-events: none;
+			cursor: default;
+		}
+
+		#logo[spin="0"] {
+			animation-name: spin-reverse;
+			animation-duration: calc(var(--transition-time) * 2);
+			animation-timing-function: linear;
+			pointer-events: none;
+			cursor: default;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			50% {
+				transform: rotate(180deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		@keyframes spin-reverse {
+			0% {
+				transform: rotate(0deg);
+			}
+			50% {
+				transform: rotate(-180deg);
+			}
+			100% {
+				transform: rotate(-360deg);
+			}
 		}
 
 	/* form */
@@ -47,7 +135,7 @@
 		#new-room-button {
 			width: 100%;
 			height: calc(var(--medium-font-size) * 2 + 4 * var(--medium-gap-size));
-			background: var(--medium-green);
+			background: var(--green);
 		}
 
 		#room-id-input {
@@ -62,20 +150,21 @@
 		#join-room-button {
 			width: 100%;
 			height: calc(var(--medium-font-size) + 2 * var(--medium-gap-size));
-			background: var(--medium-blue);
+			background: var(--blue);
 			border-radius: 0 0 var(--border-radius) var(--border-radius);
 		}
 
 	/* about */
 		#about {
 			width: auto;
+			display: none; /* ??? */
 		}
 
 		#about-button {
 			position: absolute;
 			top: var(--medium-gap-size);
 			left: var(--medium-gap-size);
-			background: var(--dark-orange);
+			background: var(--purple);
 		}
 
 		#about-overlay {
@@ -85,8 +174,8 @@
 			left: 0;
 			overflow-x: hidden;
 			overflow-y: scroll;
-			background: var(--light-gray);
-			color: var(--dark-gray);
+			background: var(--white);
+			color: var(--black);
 			font-size: var(--medium-font-size);
 			font-family: var(--font-0);
 			height: 100%;
@@ -94,7 +183,7 @@
 			box-sizing: border-box;
 			padding: var(--medium-gap-size);
 			border: none;
-			box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+			box-shadow: 0 0 var(--shadow-size) var(--gray);
 		}
 
 		#about-close {
@@ -117,10 +206,10 @@
 		cursor: pointer;
 		z-index: 999;
 		outline: none;
-		filter: drop-shadow(0px 0px var(--shadow-size) var(--medium-gray));
+		filter: drop-shadow(0px 0px var(--shadow-size) var(--gray));
 	}
 
 	#j-logo:hover, #j-logo:focus {
 		box-shadow: none;
-		filter: drop-shadow(0px 0px var(--shadow-size) var(--dark-gray));
+		filter: drop-shadow(0px 0px var(--shadow-size) var(--black));
 	}

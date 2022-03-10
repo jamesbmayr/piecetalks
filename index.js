@@ -97,6 +97,22 @@
 									catch (error) {_404(REQUEST, RESPONSE, error)}
 								break
 
+							// banner
+								case (/\/banner[.]png$/).test(REQUEST.url):
+									try {
+										let imageName = CORE.chooseRandom(Object.keys(CORE.getAsset("configurations").presets)) + "-" + CORE.chooseRandom(["light", "dark"])
+										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
+										FS.readFile("./assets/" + imageName + ".png", function (error, file) {
+											if (error) {
+												_404(REQUEST, RESPONSE, error)
+												return
+											}
+											RESPONSE.end(file, "binary")
+										})
+									}
+									catch (error) {_404(REQUEST, RESPONSE, error)}
+								break
+
 							// css
 								case (REQUEST.fileType == "css"):
 									try {
