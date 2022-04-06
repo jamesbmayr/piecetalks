@@ -686,8 +686,8 @@
 											colors: ["dark-red", "red", "orange", "gold", "yellow", "lime-green", "green", "teal", "light-blue", "blue", "purple", "lavender", "magenta", "pink", "brown", "tan", "white", "gray", "black"]
 										}
 									},
-									insane: {
-										preset: "insane",
+									ridiculous: {
+										preset: "ridiculous",
 										timer: {
 											active: true,
 											seconds: 300

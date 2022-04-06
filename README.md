@@ -44,6 +44,6 @@ Piece Talks
 	|- challenging-dark.png
 	|- difficult-light.png
 	|- difficult-dark.png
-	|- insane-light.png
-	|- insane-dark.png
+	|- ridiculous-light.png
+	|- ridiculous-dark.png
 </pre>

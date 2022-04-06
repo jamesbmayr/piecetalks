@@ -14,7 +14,7 @@
 			loopTime: 2000,
 			loopIndex: 0,
 			loopCount: 6,
-			backgroundImages: ["easy-light.png", "easy-dark.png", "medium-light.png", "medium-dark.png", "challenging-light.png", "challenging-dark.png", "difficult-light.png", "difficult-dark.png", "insane-light.png", "insane-dark.png"],
+			backgroundImages: ["easy-light.png", "easy-dark.png", "medium-light.png", "medium-dark.png", "challenging-light.png", "challenging-dark.png", "difficult-light.png", "difficult-dark.png", "ridiculous-light.png", "ridiculous-dark.png"],
 			backgroundIndex: -1
 		}
 
