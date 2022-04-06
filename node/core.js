@@ -241,7 +241,8 @@
 									endTime: null,
 									timeRemaining: null,
 									play: false,
-									darkness: false
+									darkness: false,
+									message: ""
 								},
 								configuration: {
 									preset: "custom",
@@ -262,6 +263,7 @@
 										overlap: false,
 										borders: false,
 										labels: false,
+										variety: false,
 										sizes: [],
 										shapes: [],
 										colors: []
@@ -417,6 +419,15 @@
 							}
 						break
 
+						case "paths":
+							return {
+								"heart-up": "M 0.0,0.25 A 0.25,0.25 0,0,1 0.50,0.25 A 0.25,0.25 0,0,1 1.00,0.25 Q 1.00,0.50 0.50,1.00 Q 0.0,0.50 0.0,0.25 z",
+								"heart-down": "M 1.00,0.75 A 0.25,0.25 0,0,1 0.50,0.75 A 0.25,0.25 0,0,1 0.0,0.75 Q 0.0,0.50 0.50,0.0 Q 1.00,0.50 1.00,0.75 z",
+								"clover": "M 0.25,0.50 A 0.25,0.25 0,1,1, 0.50,0.25 A 0.25,0.25 0,1,1 0.75,0.50 A 0.25,0.25 0,1,1 0.50,0.75 A 0.25,0.25 0,1,1 0.25,0.50 z",
+								"flower": "M 0.25,0.40 A 0.14,0.14 0,1,1, 0.40,0.25 A 0.14,0.14 0,1,1 0.60,0.25 A 0.14,0.14 0,1,1 0.75,0.40 A 0.14,0.14 0,1,1 0.75,0.60 A 0.14,0.14 0,1,1 0.60,0.75 A 0.14,0.14 0,1,1 0.40,0.75 A 0.14,0.14 0,1,1 0.25,0.60 A 0.14,0.14 0,1,1 0.25,0.40 z",
+							}
+						break
+
 						case "shapes":
 							return {
 								"circle": "circle(50%)",
@@ -445,7 +456,11 @@
 								"x": "polygon(20% 0%, 50% 30%, 80% 0%, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0% 80%, 30% 50%, 0% 20%)",
 								"star-up": "polygon(50% 0%, 63% 38%, 100% 38%, 70% 62%, 80% 100%, 50% 77%, 20% 100%, 30% 62%, 0% 38%, 37% 38%)",
 								"star-down": "polygon(50% 100%, 63% 62%, 100% 62%, 70% 38%, 80% 0%, 50% 23%, 20% 0%, 30% 38%, 0% 62%, 37% 62%)",
-								"8-point-star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)"
+								"8-point-star": "polygon(10% 10%, 40% 25%, 50% 0%, 60% 25%, 90% 10%, 75% 40%, 100% 50%, 75% 60%, 90% 90%, 60% 75%, 50% 100%, 40% 75%, 10% 90%, 25% 60%, 0% 50%, 25% 40%)",
+								"heart-up": "url(#path-heart-up)",
+								"heart-down": "url(#path-heart-down)",
+								"clover": "url(#path-clover)",
+								"flower": "url(#path-flower)",
 							}
 						break
 						
@@ -582,6 +597,7 @@
 											overlap: false,
 											borders: false,
 											labels: true,
+											variety: true,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle-up", "square", "octagon", "cross", "8-point-star"],
 											colors: ["red", "yellow", "green", "blue", "gray"]
@@ -606,6 +622,7 @@
 											overlap: false,
 											borders: true,
 											labels: false,
+											variety: true,
 											sizes: ["1x1"],
 											shapes: ["circle", "triangle-up", "square", "diamond", "rectangle-horizontal", "hexagon-horizontal", "octagon", "cross", "star-up", "8-point-star"],
 											colors: ["red", "orange", "yellow", "green", "blue", "purple", "pink", "brown", "gray"]
@@ -630,8 +647,9 @@
 											overlap: false,
 											borders: true,
 											labels: false,
+											variety: false,
 											sizes: ["1x1"],
-											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "star-up", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "hexagon-horizontal", "hexagon-vertical", "octagon", "cross", "x", "star-up", "8-point-star", "heart-up", "flower"],
 											colors: ["dark-red", "red", "orange", "yellow", "lime-green", "green", "light-blue", "blue", "purple", "magenta", "pink", "brown", "gray"]
 										}
 									},
@@ -645,7 +663,7 @@
 											x: 8,
 											y: 8,
 											grid: false,
-											coordinates: true,
+											coordinates: false,
 											background: "radial-grayscale-gradient"
 										},
 										objects: {
@@ -654,8 +672,9 @@
 											overlap: false,
 											borders: true,
 											labels: false,
+											variety: false,
 											sizes: ["1x1", "3x3"],
-											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "star-up", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "hexagon-horizontal", "hexagon-vertical", "hourglass-vertical", "octagon", "octagon-diagonal", "cross", "x", "star-up", "8-point-star", "heart-up", "clover", "flower"],
 											colors: ["dark-red", "red", "orange", "gold", "yellow", "lime-green", "green", "teal", "light-blue", "blue", "purple", "lavender", "magenta", "pink", "brown", "tan", "white", "gray", "black"]
 										}
 									},
@@ -678,8 +697,9 @@
 											overlap: true,
 											borders: true,
 											labels: false,
+											variety: false,
 											sizes: ["1x1", "3x3", "5x5"],
-											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "star-up", "star-down", "8-point-star"],
+											shapes: ["circle", "triangle-up", "triangle-down", "triangle-left", "triangle-right", "square", "diamond", "rectangle-horizontal", "rectangle-vertical", "rhombus-positive", "rhombus-negative", "chevron-up", "chevron-down", "chevron-left", "chevron-right", "hexagon-horizontal", "hexagon-vertical", "hourglass-horizontal", "hourglass-vertical", "octagon", "octagon-diagonal", "4-point-star", "cross", "x", "star-up", "star-down", "8-point-star", "heart-up", "heart-down", "clover", "flower"],
 											colors: ["dark-red", "red", "orange", "gold", "yellow", "lime-green", "green", "teal", "light-blue", "blue", "purple", "lavender", "magenta", "pink", "brown", "tan", "white", "gray", "black"]
 										}
 									}

@@ -89,7 +89,8 @@
 				room: {
 					id: document.querySelector("#configuration-room-id"),
 					leave: document.querySelector("#configuration-room-leave"),
-					darkness: document.querySelector("#configuration-room-darkness")
+					darkness: document.querySelector("#configuration-room-darkness"),
+					message: document.querySelector("#configuration-room-message")
 				},
 				players: {
 					list: document.querySelector("#configuration-players-list"),
@@ -126,6 +127,7 @@
 						overlap: document.querySelector("#configuration-game-objects-overlap"),
 						borders: document.querySelector("#configuration-game-objects-borders"),
 						labels: document.querySelector("#configuration-game-objects-labels"),
+						variety: document.querySelector("#configuration-game-objects-variety"),
 						sizes: Array.from(document.querySelectorAll("input[property='objects-sizes']")),
 						shapes: Array.from(document.querySelectorAll("input[property='objects-shapes']")),
 						colors: Array.from(document.querySelectorAll("input[property='objects-colors']"))
@@ -139,6 +141,7 @@
 				backToTop: document.querySelector("#configuration-back-to-top")
 			},
 			container: {
+				message: document.querySelector("#message"),
 				timer: document.querySelector("#timer"),
 				screensContainer: document.querySelector("#screens"),
 				screens: {}
@@ -161,6 +164,14 @@
 				}
 
 				return options[Math.floor(Math.random() * options.length)]
+			}
+			catch (error) {console.log(error)}
+		}
+
+	/* duplicateObject */
+		function duplicateObject(object) {
+			try {
+				return JSON.parse(JSON.stringify(object))
 			}
 			catch (error) {console.log(error)}
 		}
@@ -420,6 +431,29 @@
 			} catch (error) {console.log(error)}
 		}
 
+	/* updateRoomMessage */
+		ELEMENTS.configuration.room.message.addEventListener(TRIGGERS.change, updateRoomMessage)
+		function updateRoomMessage(event) {
+			try {
+				// not the host
+					if (!STATE.isHost) {
+						showToast({success: false, message: "not the host"})
+						return
+					}
+
+				// get value
+					let value = ELEMENTS.configuration.room.message.value.trim() || ""
+
+				// update
+					STATE.socket.send(JSON.stringify({
+						action: "updateRoom",
+						playerId: STATE.playerId,
+						roomId: STATE.roomId,
+						message: value
+					}))
+			} catch (error) {console.log(error)}
+		}
+
 	/* leaveRoom */
 		ELEMENTS.configuration.room.leave.addEventListener(TRIGGERS.click, leaveRoom)
 		function leaveRoom(event) {
@@ -458,6 +492,12 @@
 						ELEMENTS.configuration.room.darkness.checked = status.darkness
 					}
 
+				// message
+					if (document.activeElement !== ELEMENTS.configuration.room.message) {
+						ELEMENTS.configuration.room.message.value = status.message
+						ELEMENTS.container.message.innerText = status.message || ""
+					}
+
 				// status
 					if (status.play) {
 						ELEMENTS.configuration.game.status.current.value = "in play"
@@ -481,11 +521,13 @@
 							ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
 						}
 						ELEMENTS.configuration.room.darkness.removeAttribute("disabled")
+						ELEMENTS.configuration.room.message.removeAttribute("disabled")
 					}
 					else {
 						ELEMENTS.configuration.game.status.start.setAttribute("disabled", true)
 						ELEMENTS.configuration.game.status.end.setAttribute("disabled", true)
 						ELEMENTS.configuration.room.darkness.setAttribute("disabled", true)
+						ELEMENTS.configuration.room.message.setAttribute("disabled", true)
 					}
 
 				// timer
@@ -986,6 +1028,9 @@
 					if (document.activeElement !== ELEMENTS.configuration.game.objects.labels) {
 						ELEMENTS.configuration.game.objects.labels.checked = configuration.objects.labels || false
 					}
+					if (document.activeElement !== ELEMENTS.configuration.game.objects.variety) {
+						ELEMENTS.configuration.game.objects.variety.checked = configuration.objects.variety || false
+					}
 
 				// sizes
 					for (let i in ELEMENTS.configuration.game.objects.sizes) {
@@ -1255,26 +1300,18 @@
 					board.style.background = "var(--" + (configuration.board.background || "blank") + ")"
 
 				// grid
-					if (configuration.board.grid) {
-						let count = configuration.board.x * configuration.board.y
-						if (Array.from(board.querySelectorAll(".board-grid-cell")).length !== count) {
-							displayGrid(board.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
-						}
+					let gridCount = configuration.board.x * configuration.board.y
+					if (Array.from(board.querySelectorAll(".board-grid-cell")).length !== gridCount) {
+						displayGrid(board.querySelector(".board-grid"), configuration.board.x, configuration.board.y)
 					}
-					else {
-						board.querySelector(".board-grid").innerHTML = ""
-					}
+					board.setAttribute("grid", configuration.board.grid || false)
 
 				// coordinates
-					if (configuration.board.coordinates) {
-						let count = configuration.board.x + configuration.board.y
-						if (Array.from(board.querySelectorAll(".board-coordinate")).length !== count) {
-							displayCoordinates(board.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
-						}
+					let coordinateCount = configuration.board.x + configuration.board.y
+					if (Array.from(board.querySelectorAll(".board-coordinate")).length !== coordinateCount) {
+						displayCoordinates(board.querySelector(".board-coordinates"), configuration.board.x, configuration.board.y)
 					}
-					else {
-						board.querySelector(".board-coordinates").innerHTML = ""
-					}
+					board.setAttribute("coordinates", configuration.board.coordinates || false)
 			} catch (error) {console.log(error)}
 		}
 
@@ -1352,6 +1389,24 @@
 	/* displayPreviewObjects */
 		function displayPreviewObjects(board, configuration) {
 			try {
+				// weighted sizes
+					let weightedSizes = []
+					for (let i in configuration.objects.sizes) {
+						let size = configuration.objects.sizes[i]
+						for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
+							weightedSizes.push(size)
+						}
+					}
+
+				// available
+					let availableOptions = {
+						sizes: [],
+						colors: [],
+						borders: [],
+						shapes: [],
+						labels: []
+					}
+
 				// build objects
 					let objects = []
 					for (let i = 0; i < configuration.objects.count; i++) {
@@ -1362,26 +1417,46 @@
 								preview: true
 							}
 
-						// weighted sizes
-							let weightedSizes = []
-							for (let i in configuration.objects.sizes) {
-								let size = configuration.objects.sizes[i]
-								for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
-									weightedSizes.push(size)
-								}
+						// reset availableOptions as necessary
+							if (!availableOptions.sizes.length) {
+								availableOptions.sizes = duplicateObject(weightedSizes)
+							}
+							if (!availableOptions.colors.length) {
+								availableOptions.colors = duplicateObject(configuration.objects.colors)
+							}
+							if (!availableOptions.borders.length) {
+								availableOptions.borders = duplicateObject(configuration.objects.colors)
+							}
+							if (!availableOptions.shapes.length) {
+								availableOptions.shapes = duplicateObject(configuration.objects.shapes)
+							}
+							if (!availableOptions.labels.length) {
+								availableOptions.labels = duplicateObject(CONSTANTS.alphabet.split(""))
 							}
 
 						// random parameters
 							do {
-								object.shape = chooseRandom(configuration.objects.shapes)
-								object.color = chooseRandom(configuration.objects.colors)
-								object.size = chooseRandom(weightedSizes)
-								object.label = configuration.objects.labels ? CONSTANTS.alphabet[i] : null
-								object.border = configuration.objects.borders ? chooseRandom(configuration.objects.colors) : null
+								object.shape = chooseRandom(availableOptions.shapes)
+								object.color = chooseRandom(availableOptions.colors)
+								object.size = chooseRandom(availableOptions.sizes)
+								object.label = configuration.objects.labels ? chooseRandom(availableOptions.labels) : null
+								object.border = configuration.objects.borders ? chooseRandom(availableOptions.borders) : null
 								attempts--
 							} while (attempts && objects.find(function(o) {
 								return o.shape == object.shape && o.color == object.color && o.size == object.size && o.label == object.label && o.border == object.border
 							}))
+
+						// remove options from available
+							if (configuration.objects.variety) {
+								availableOptions.shapes.splice(availableOptions.shapes.indexOf(object.shape), 1)
+								availableOptions.colors.splice(availableOptions.colors.indexOf(object.color), 1)
+								if (object.border) {
+									availableOptions.borders.splice(availableOptions.borders.indexOf(object.border), 1)
+								}
+								if (object.label) {
+									availableOptions.labels.splice(availableOptions.labels.indexOf(object.label), 1)
+								}
+							}
 
 						// escape
 							if (!attempts) {

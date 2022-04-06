@@ -16,6 +16,7 @@
 	</head>
 	<body>
 		<div id="container">
+			<div id="message"></div>
 			<div id="timer" visibility="false"></div>
 			<div id="screens" count="0"></div>
 		</div>
@@ -43,6 +44,15 @@
 						</label>
 						<button id="configuration-room-leave">&#x1f6aa; <span>leave</span></button>
 					</div>
+					<div class="form-row">
+						<label id="configuration-room-message-label">
+							<span>banner text</span>
+							<details class="help-text">
+								<summary class="help-text-button pseudo-button" title="learn more">?</summary>
+								<div class="help-text-description">appears above game board</div>
+							</details>
+							<input id="configuration-room-message" type="text" title="banner message" placeholder="banner message">
+						</label>
 				</section>
 				<section id="configuration-game-status">
 					<h2>
@@ -235,6 +245,16 @@
 						</div>
 						<div class="form-row">
 							<label>
+								<input type="checkbox" id="configuration-game-objects-variety" configuration="true" disabled title="object letter labels toggle">
+								<span>maximize variety</span>
+								<details class="help-text">
+									<summary class="help-text-button pseudo-button" title="learn more">?</summary>
+									<div class="help-text-description">use as many of the selected colors and shapes as possible</div>
+								</details>
+							</label>
+						</div>
+						<div class="form-row">
+							<label>
 								<input type="number" id="configuration-game-objects-count" step="1" min="<script node>CONFIGURATIONS.objects.count.minimum</script>node>" max="<script node>CONFIGURATIONS.objects.count.maximum</script>node>" placeholder="count" configuration="true" autocomplete="off" readonly title="number of used objects input">
 								<span>used</span>
 								<details class="help-text">
@@ -290,5 +310,15 @@
 				</div>
 			</div>
 		</details>
+		<div id="hidden-svg">
+			<script node>
+				let svg = ""
+				let paths = getAsset("paths")
+				for (let i in paths) {
+					svg += "<svg><clipPath clipPathUnits='objectBoundingBox' id='path-" + i + "'><path d='" + paths[i] + "'></path></clipPath></svg>\n" 
+				}
+				svg
+			</script>node>
+		</div>
 	</body>
 </html>

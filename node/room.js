@@ -362,7 +362,7 @@
 					}
 
 				// no parameters
-					if (REQUEST.post.darkness == undefined) {
+					if (REQUEST.post.darkness == undefined && REQUEST.post.message == undefined) {
 						callback({roomId: room.id, success: false, message: "nothing changed", recipients: [REQUEST.session.id]})
 						return
 					}
@@ -370,6 +370,11 @@
 				// darkness
 					if (REQUEST.post.darkness !== undefined) {
 						room.status.darkness = Boolean(REQUEST.post.darkness)
+					}
+
+				// message
+					if (REQUEST.post.message !== undefined) {
+						room.status.message = REQUEST.post.message.trim()
 					}
 
 				// query
@@ -490,6 +495,7 @@
 							case "objects-overlap":
 							case "objects-borders":
 							case "objects-labels":
+							case "objects-variety":
 								room.configuration.objects[REQUEST.post.configuration] = Boolean(REQUEST.post.value)
 							break
 							case "objects-sizes":
@@ -861,11 +867,6 @@
 					room.status.endTime = new Date().getTime()
 					room.status.play = false
 
-				// activate grid
-					room.configuration.board.grid = true
-					room.configuration.board.coordinates = true
-					room.configuration.preset = "custom"
-
 				// set roles
 					for (let i in room.players) {
 						room.players[i].role = "viewer"
@@ -1085,22 +1086,71 @@
 		module.exports.generateBoard = generateBoard
 		function generateBoard(room) {
 			try {
+				// sizes
+					let weightedSizes = []
+					for (let i in room.configuration.objects.sizes) {
+						let size = room.configuration.objects.sizes[i]
+						for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
+							weightedSizes.push(size)
+						}
+					}
+
+				// available
+					let availableOptions = {
+						sizes: [],
+						colors: [],
+						borders: [],
+						shapes: [],
+						labels: []
+					}
+
 				// generate objects
 					let objects = []
 					while (objects.length < room.configuration.objects.count + room.configuration.objects.unused) {
 						let attempts = CONSTANTS.attempts
 						let object = null
+
+						// reset availableOptions as necessary
+							if (!availableOptions.sizes.length) {
+								availableOptions.sizes = CORE.duplicateObject(weightedSizes)
+							}
+							if (!availableOptions.colors.length) {
+								availableOptions.colors = CORE.duplicateObject(room.configuration.objects.colors)
+							}
+							if (!availableOptions.borders.length) {
+								availableOptions.borders = CORE.duplicateObject(room.configuration.objects.colors)
+							}
+							if (!availableOptions.shapes.length) {
+								availableOptions.shapes = CORE.duplicateObject(room.configuration.objects.shapes)
+							}
+							if (!availableOptions.labels.length) {
+								availableOptions.labels = CORE.duplicateObject(CONSTANTS.alphabet.split(""))
+							}
 						
-						do {
-							object = generateObject(room.configuration)
-							attempts--
-						} while (hasExactCopy(object, objects) && attempts)
+						// make the object, avoiding duplicates
+							do {
+								object = generateObject(room.configuration, availableOptions)
+								attempts--
+							} while (hasExactCopy(object, objects) && attempts)
 
-						if (!attempts) {
-							return false
-						}
+							if (!attempts) {
+								return false
+							}
 
-						objects.push(object)
+						// remove from available
+							if (room.configuration.objects.variety) {
+								availableOptions.shapes.splice(availableOptions.shapes.indexOf(object.shape), 1)
+								availableOptions.colors.splice(availableOptions.colors.indexOf(object.color), 1)
+								if (object.border) {
+									availableOptions.borders.splice(availableOptions.borders.indexOf(object.border), 1)
+								}
+								if (object.label) {
+									availableOptions.labels.splice(availableOptions.labels.indexOf(object.label), 1)
+								}
+							}
+
+						// add to objects list
+							objects.push(object)
 					}
 
 				// set z
@@ -1168,35 +1218,28 @@
 
 	/* generateObject */
 		module.exports.generateObject = generateObject
-		function generateObject(configuration) {
+		function generateObject(configuration, availableOptions) {
 			try {
 				// shell
 					let object = CORE.getSchema("object")
 
 				// size
-					let weightedSizes = []
-					for (let i in configuration.objects.sizes) {
-						let size = configuration.objects.sizes[i]
-						for (let j = 0; j < CONSTANTS.sizeWeights[size]; j++) {
-							weightedSizes.push(size)
-						}
-					}
-					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(weightedSizes)]
+					object.size = CONFIGURATIONS.objects.sizes[CORE.chooseRandom(availableOptions.sizes)]
 
 				// shape
-					object.shape = CORE.chooseRandom(configuration.objects.shapes)
+					object.shape = CORE.chooseRandom(availableOptions.shapes)
 
 				// color
-					object.color = CORE.chooseRandom(configuration.objects.colors)
+					object.color = CORE.chooseRandom(availableOptions.colors)
 
 				// border
 					if (configuration.objects.borders && Math.random() < CONSTANTS.borderProbability) {
-						object.border = CORE.chooseRandom(configuration.objects.colors)
+						object.border = CORE.chooseRandom(availableOptions.borders)
 					}
 
 				// label
 					if (configuration.objects.labels && Math.random() < CONSTANTS.labelProbability) {
-						object.label = CORE.generateRandom(null, 1)
+						object.label = CORE.chooseRandom(availableOptions.labels)
 					}
 
 				// return

@@ -379,7 +379,7 @@
 		left: calc(var(--small-font-size) + 2 * var(--small-gap-size));
 		padding: var(--small-gap-size) var(--medium-gap-size) var(--small-gap-size) var(--small-gap-size);
 		display: inline;
-		height: var(--small-font-size);
+		min-height: var(--small-font-size);
 		width: auto;
 		font-size: var(--small-font-size);
 		font-weight: normal;

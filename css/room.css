@@ -86,6 +86,15 @@
 			background: var(--dark-red);
 		}
 
+		#configuration-room-message-label {
+			margin: 0;
+			width: 100%;
+		}
+
+		#configuration-room-message {
+			width: 100% !important;
+		}
+
 	/* overlay status */
 		#configuration-game-status-start {
 			width: 100%;
@@ -215,6 +224,10 @@
 			width: calc(var(--cell-size) * var(--board-size-x) / 2);
 		}
 
+		#configuration-preview-board:not([grid="true"]) .board-grid {
+			opacity: 0;
+		}
+
 		#configuration-preview-board .board-grid {
 			height: 100%;
 			width: 100%;
@@ -223,6 +236,11 @@
 			flex-wrap: wrap;
 			box-shadow: 0 0 0 calc(var(--border-size) * 2) var(--gray);
 		}
+
+		#configuration-preview-board:not([coordinates="true"]) .board-coordinates {
+			opacity: 0;
+		}
+
 
 		#configuration-preview-board .board-coordinates {
 			width: 100%;
@@ -429,6 +447,40 @@
 		background: var(--black);
 		color: var(--white);
 	}
+
+	/* paths */
+		#hidden-svg {
+			position: absolute;
+			top: -100vh;
+			left: -100vw;
+			pointer-events: none;
+			height: 0;
+			width: 0;
+			opacity: 0;
+			padding: 0;
+			margin: 0;
+			border: 0;
+			outline: none;
+			user-select: none;
+		}
+
+	/* message */
+		#message {
+			position: fixed;
+			top: var(--medium-gap-size);
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: var(--large-font-size);
+			font-family: var(--font-0);
+			pointer-events: none;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			z-index: 994;
+			text-align: center;
+		}
 
 	/* timer */
 		#timer {
@@ -649,6 +701,10 @@
 				-o-user-select: none;
 			}
 
+			#screens[count="1"] .board:not([grid="true"]) .board-grid {
+				opacity: 0;
+			}
+
 			#screens .board-grid {
 				display: flex;
 				flex-direction: row;
@@ -668,6 +724,10 @@
 				-ms-user-select: none;
 				-o-user-select: none;
 				flex-shrink: 0;
+			}
+
+			#screens[count="1"] .board:not([coordinates="true"]) .board-coordinates {
+				opacity: 0;
 			}
 
 			#screens .board-coordinate {
