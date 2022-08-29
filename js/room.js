@@ -52,7 +52,8 @@
 			sizeWeights: {"1x1": 7, "3x3": 2, "5x5": 1},
 			objectOffset: 0.5,
 			attempts: 1000,
-			drawerExtra: 25
+			drawerExtra: 25,
+			pingLoop: 1000 * 60
 		}
 
 	/* state */
@@ -328,6 +329,15 @@
 					}
 					catch (error) {console.log(error)}
 				}
+
+				if (STATE.socket.pingLoop) {
+					clearInterval(STATE.socket.pingLoop)
+				}
+				STATE.socket.pingLoop = setInterval(function() {
+					fetch("/ping", {method: "GET"})
+						.then(function(response){ return response.json() })
+						.then(function(data) {})
+				}, CONSTANTS.pingLoop)
 			}
 			catch (error) {console.log(error)}
 		}

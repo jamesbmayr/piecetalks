@@ -328,7 +328,7 @@
 									<meta name="author" content="Ayelet Kershenbaum & James Mayr"/>
 									<meta property="og:title" content="` + title + `"/>
 									<meta property="og:description" content="` + title + ` is a virtual barrier task game about communication"/>
-									<meta property="og:image" content="http://` + ENVIRONMENT.domain + `/banner.png"/>
+									<meta property="og:image" content="https://jamesmayr.com/piecetalks/banner.png"/>
 									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
 						case "fonts":

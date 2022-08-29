@@ -1,7 +1,7 @@
 # Piece Talks
 ## a virtual barrier task game about communication
 
-http://piecetalksthegame.com
+https://jamesmayr.com/piecetalks
 
 ---
 <pre>
