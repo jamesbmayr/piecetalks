@@ -309,6 +309,7 @@
 				let url = location.href.replace("http","ws")
 					url = url.slice(0, url.includes("#") ? url.indexOf("#") : url.length)
 				STATE.socket = new WebSocket(url)
+				STATE.socket.keepPinging = false
 				STATE.socket.onopen = function() {
 					STATE.socket.send(null)
 				}
@@ -322,6 +323,7 @@
 				}
 				STATE.socket.onmessage = function(message) {
 					try {
+						STATE.socket.keepPinging = true
 						let post = JSON.parse(message.data)
 						if (post && (typeof post == "object")) {
 							receiveSocket(post)
@@ -334,9 +336,12 @@
 					clearInterval(STATE.socket.pingLoop)
 				}
 				STATE.socket.pingLoop = setInterval(function() {
-					fetch("/ping", {method: "GET"})
-						.then(function(response){ return response.json() })
-						.then(function(data) {})
+					if (STATE.socket.keepPinging) {
+						STATE.socket.keepPinging = false
+						fetch("/ping", {method: "GET"})
+							.then(function(response){ return response.json() })
+							.then(function(data) {})
+					}
 				}, CONSTANTS.pingLoop)
 			}
 			catch (error) {console.log(error)}
